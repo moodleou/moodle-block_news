@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="blocks/news/db" VERSION="20110719" COMMENT="XMLDB file for Moodle blocks/news"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="block_news" COMMENT="main settings for each block instance" NEXT="block_news_feeds">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="blockinstanceid"/>
+        <FIELD NAME="blockinstanceid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" COMMENT="ID of block that these settings are for" PREVIOUS="id" NEXT="title"/>
+        <FIELD NAME="title" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false" COMMENT="Name of block" PREVIOUS="blockinstanceid" NEXT="nummessages"/>
+        <FIELD NAME="nummessages" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Number of messages to show" PREVIOUS="title" NEXT="summarylength"/>
+        <FIELD NAME="summarylength" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Length of summary in characters, or 0 if turned off" PREVIOUS="nummessages" NEXT="hidetitles"/>
+        <FIELD NAME="hidetitles" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to hide message titles, 0 to show" PREVIOUS="summarylength" NEXT="hidelinks"/>
+        <FIELD NAME="hidelinks" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to hide message links, 0 to show" PREVIOUS="hidetitles" NEXT="groupingsupport"/>
+        <FIELD NAME="groupingsupport" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to enable grouping support" PREVIOUS="hidelinks"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="blockinstanceid_uix" UNIQUE="true" FIELDS="blockinstanceid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_news_feeds" COMMENT="Lists all feeds used for each block instance" PREVIOUS="block_news" NEXT="block_news_messages">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="blockinstanceid"/>
+        <FIELD NAME="blockinstanceid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="ID of block that this feed is for" PREVIOUS="id" NEXT="feedurl"/>
+        <FIELD NAME="feedurl" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="URL of Atom or RSS feed" PREVIOUS="blockinstanceid" NEXT="currenthash"/>
+        <FIELD NAME="currenthash" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" COMMENT="Hash of current data (null if no data yet)" PREVIOUS="feedurl" NEXT="feedupdated"/>
+        <FIELD NAME="feedupdated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Time (seconds since epoch) at which the system last tried to update this feed" PREVIOUS="currenthash" NEXT="feederror"/>
+        <FIELD NAME="feederror" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Error message last time the system tried to update the feed, or null if no error" PREVIOUS="feedupdated"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="blockinstanceid_ix" UNIQUE="false" FIELDS="blockinstanceid" NEXT="feedurl_ix"/>
+        <INDEX NAME="feedurl_ix" UNIQUE="false" FIELDS="feedurl" PREVIOUS="blockinstanceid_ix"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_news_messages" COMMENT="Includes all message content" PREVIOUS="block_news_feeds">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="blockinstanceid"/>
+        <FIELD NAME="blockinstanceid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="ID of block that contains this message" PREVIOUS="id" NEXT="newsfeedid"/>
+        <FIELD NAME="newsfeedid" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" COMMENT="ID of row in block_news_feeds that this message is related to, or null if it was manually entered and is not from a feed" PREVIOUS="blockinstanceid" NEXT="title"/>
+        <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Message title (plain text)" PREVIOUS="newsfeedid" NEXT="link"/>
+        <FIELD NAME="link" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" COMMENT="Message URL (only for messages from feeds; null if none)" PREVIOUS="title" NEXT="message"/>
+        <FIELD NAME="message" TYPE="text" LENGTH="medium" NOTNULL="true" SEQUENCE="false" COMMENT="Message contents" PREVIOUS="link" NEXT="messageformat"/>
+        <FIELD NAME="messageformat" TYPE="int" LENGTH="5" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Format of message" PREVIOUS="message" NEXT="messagedate"/>
+        <FIELD NAME="messagedate" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Date of message (seconds since epoch)" PREVIOUS="messageformat" NEXT="messagevisible"/>
+        <FIELD NAME="messagevisible" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="1 if message is visible, 0 if it’s hidden" PREVIOUS="messagedate" NEXT="messagerepeat"/>
+        <FIELD NAME="messagerepeat" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="1 if Repeat this message is visible, 0 if it’s hidden" PREVIOUS="messagevisible" NEXT="hideauthor"/>
+        <FIELD NAME="hideauthor" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="1 if Hide author name is chosen" PREVIOUS="messagerepeat" NEXT="timemodified"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Time at which message was edited" PREVIOUS="hideauthor" NEXT="userid"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" COMMENT="ID of person who last edited the message, null for messages from feeds." PREVIOUS="timemodified" NEXT="groupingid"/>
+        <FIELD NAME="groupingid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" UNSIGNED="true" SEQUENCE="false" COMMENT="= id of a grouping containing this news item.  0 indicates all groupings." PREVIOUS="userid"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="newsfeedid_fk"/>
+        <KEY NAME="newsfeedid_fk" TYPE="foreign" FIELDS="newsfeedid" REFTABLE="block_news_feed" REFFIELDS="id" PREVIOUS="primary"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="blockinstanceid_ix" UNIQUE="false" FIELDS="blockinstanceid"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

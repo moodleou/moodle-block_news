@@ -1,0 +1,120 @@
+/*
+ * @package    blocks
+ * @subpackage news
+ * @copyright 2011 The Open University
+ * @author Jon Sharp <jonathans@catalyst-eu.net>
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+*/
+
+/* news block */
+.block_news_msg .block_news_msg_h3 {
+    font-size:110%;
+    margin: 10px 0 0 0;
+}
+
+.block_news_msg .block_news_msg_h3 .block_news_msg_messagedate {
+    float: left;
+    font-weight: normal;
+    margin-right: 10px;
+}
+
+.block_news_msg .block_news_msg_h3 .block_news_msg_title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.block_news_msg .block_news_msg_author {
+    clear: both;
+    font-style: italic;
+    margin-bottom: 5px;
+}
+
+.block_news_msg .link {
+    text-align: right;
+}
+
+.block_news .content .footer {
+    margin: 10px 0 5px 0;
+}
+
+.block_news #block_news_addmsg,
+.block_news #block_news_viewall,
+.block_news #block_news_rss {
+    margin: 0 10px;
+    display: inline;
+    font-weight: bold;
+}
+
+
+/* add/edit message */
+#page-blocks-news-edit #mform1 .daterepeat_off {
+    color: gray;
+}
+
+
+/* view full message */
+.block_news_message, .block_news_top, .block_news_nonews {
+    max-width: 500px;
+    border: solid black 1px;
+    margin: 10px auto 10px auto;
+    padding: 10px;
+}
+
+.block_news_top{
+    height: 23px;
+}
+
+.block_news_top .singlebutton {
+    /* force reduced height (which doesnt actually affect button height)
+    to avoid RSS button being artifically displaced */
+    height: 5px;
+    width: 200px;
+    margin: 0;
+}
+
+.block_news_top #block_news_rss_all {
+    float: right;
+}
+
+.block_news_message .msghide {
+    color: gray;
+}
+
+.block_news_message .title, .block_news_message .messagedate {
+    float: left;
+}
+
+.block_news_message .link {
+    clear: left;
+}
+
+.block_news_message .title {
+    font-weight: bold;
+    margin-left: 10px
+}
+
+.block_news_message .author {
+    clear: left;
+    padding-top: 5px;
+}
+
+.block_news_message .message {
+    padding-top: 5px;
+}
+
+.block_news_message #prevnextlinks {
+    margin: 20px 0 0 0;
+    position: relative;
+}
+
+.block_news_message #prevnextlinks #prevlink {
+    position: absolute;
+    right:0px;
+}
+
+.block_news_message #editicons #hideurl,
+.block_news_message #editicons #editurl,
+.block_news_message #editicons #deleteurl {
+    display: inline;
+    margin: 0 5px 0 0;
+}

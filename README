@@ -1,0 +1,74 @@
+News block
+==========
+
+Copyright 2012 The Open University
+
+
+This is a news block that you can install into standard Moodle. 
+
+It does not replace the existing 'Latest news' feature. To use this block, you
+should simply add it to the course and remove the existing course.
+
+This block has the following features:
+
+* Independent: not linked to a forum, has its own interface.
+* You can have multiple blocks per page.
+* Add posts manually, or use RSS/Atom feeds to include posts from elsewhere,
+  or both.
+* Provides RSS/Atom format feed output - you can chain blocks together to
+  repeat the same news on multiple sites. 
+* Add posts that only appear at specific date. If restoring to a new course
+  to create a 'new presentation' of the same course for next year, these dated
+  posts (only) will be automatically updated so you can repeat the standard
+  messages next time.
+* Set posts that only appear to specific groupings.
+
+
+Branch:
+
+This is the development branch including latest, untested code. If you would
+like a tested version equivalent to an OU live release, please switch to a
+branch that matches your Moodle version (e.g. MOODLE_22_STABLE) using the
+above dropdown.
+
+This branch is designed to run against the Moodle version that we (the OU) are
+currently using on our development servers. This is not always the latest
+Moodle version: typically, our development servers are updated about four
+months after a Moodle release. 
+
+Support:
+
+We cannot offer direct support. Please do not contact me directly. If you
+need assistance, try an appropriate forum on moodle.org.
+
+Documentation:
+
+We don't provide any documentation. Please feel free to contribute
+documentation to the relevant areas of the MoodleDocs wiki.
+
+Bug reports:
+
+Please report bugs using the GitHub 'Issues' tab (experimental). Before
+reporting a bug, please try the latest version to verify that the problem
+hasn't already been fixed. In each bug, please remember to give:
+
+1. Exact steps to reproduce your problem, starting from creating a new wiki
+   with default or specified settings.
+2. The news block version you are using (from version.php or Blocks admin
+   screen).
+
+Reliability:
+
+Please note that this code is tested on OU systems but we rely on the
+community for testing on other systems.
+
+Requires:
+
+Moodle 2.2+
+Postgres / MySQL
+
+Install:
+
+Place the contents of this source tree into your Moodle installation so that
+within your Moodle root, this file is blocks/news/README. Then visit the
+Moodle notifications page to install.
