@@ -26,15 +26,11 @@ This block has the following features:
 
 Branch:
 
-This is the development branch including latest, untested code. If you would
-like a tested version equivalent to an OU live release, please switch to a
-branch that matches your Moodle version (e.g. MOODLE_22_STABLE) using the
-above dropdown.
+This is the MOODLE_21_STABLE branch. This branch is configured to match the latest
+stable branch at the Open University that uses Moodle 2.1.
 
-This branch is designed to run against the Moodle version that we (the OU) are
-currently using on our development servers. This is not always the latest
-Moodle version: typically, our development servers are updated about four
-months after a Moodle release. 
+We have stopped using Moodle 2.1, there will be no more fixes in this branch
+(but of course anyone can fork the reposistory and make a fixed version).
 
 Support:
 
