@@ -61,8 +61,7 @@ $string['configsummarylength'] = 'Summary';
 $string['confighidetitles'] = 'Hide titles';
 $string['confighidelinks'] = 'Hide links';
 $string['configfeedurls'] = 'Include messages from the listed feeds (URLs)';
-$string['configgroupingsupport'] = 'Grouping support';
-$string['configgroupingsupport_help'] = 'Allows news items to be displayed only to members of a specified grouping.  Please note that this is to help in managing news items and is not a security feature (users can access the news items if determined to do so).';
+
 // block
 $string['msgblocknonews'] = 'There is no news yet';
 $string['msgblockadd'] = 'Add';
@@ -85,7 +84,6 @@ $string['msgeditmessage'] = 'Text';
 $string['msgeditformat'] = 'Format';
 $string['msgeditmessagedate'] = 'Release date';
 $string['msgeditvisible'] = 'Visible';
-$string['msgeditgrouping'] = 'Grouping';
 $string['msgeditpublish'] = 'Publish';
 $string['msgeditrepeat'] = 'Repeated after roll-forward';
 $string['msgedithideauthor'] = 'Hide author';

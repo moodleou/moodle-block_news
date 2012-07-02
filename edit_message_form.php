@@ -38,7 +38,6 @@ require_once($CFG->libdir.'/formslib.php');
   */
 class block_news_edit_message_form extends moodleform {
     protected $publishstate='';
-    protected $groupingsupport = 0;
 
     /**
      * Overide constructor to pass in publish radio button state before
@@ -46,15 +45,13 @@ class block_news_edit_message_form extends moodleform {
      *
      * @param $publishstate
      */
-    public function __construct($customdata) {
-        $this->publishstate = $customdata['publishstate'];
-        $this->groupingsupport = $customdata['groupingsupport'];
+    public function __construct($publishstate) {
+        $this->publishstate=$publishstate;
         parent::__construct();
     }
 
 
     public function definition() {
-        global $COURSE;
 
         $mform =& $this->_form;
 
@@ -77,7 +74,7 @@ class block_news_edit_message_form extends moodleform {
         $mform->addElement('text', 'title', get_string('msgedittitle', 'block_news'),
             array('size'=>'40'));
         $mform->addRule('title', null, 'required', null, 'client');
-        $mform->addRule('title', null, 'maxlength', 80, 'server');
+        $mform->addRule('title', null, 'maxlength', 40, 'server');
 
         $mform->addElement('editor', 'message', get_string('msgeditmessage', 'block_news'),
             array('cols' => 50, 'rows' => 30), array('maxfiles' => EDITOR_UNLIMITED_FILES));
@@ -89,19 +86,6 @@ class block_news_edit_message_form extends moodleform {
         $mform->addElement('selectyesno', 'messagevisible',
                                                  get_string('msgeditvisible', 'block_news'));
         $mform->setDefault('messagevisible', 1);
-
-        if ($this->groupingsupport) {
-            $groupingsdata = groups_get_all_groupings($COURSE->id);
-            if ($groupingsdata != false) {
-                $groupings["0"] = get_string('allparticipants');
-                foreach ($groupingsdata as $grouping) {
-                    $groupings[$grouping->id] = $grouping->name;
-                }
-                $mform->addElement('select', 'groupingid',
-                    get_string('msgeditgrouping', 'block_news'), $groupings);
-                $mform->setDefault('groupingid', 0);
-            }
-        }
 
         // publish radio buttons - content determined by value passed in constructor
         $attributes=array('class'=>'publish_radioopt');

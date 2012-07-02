@@ -12,8 +12,7 @@
         <FIELD NAME="nummessages" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Number of messages to show" PREVIOUS="title" NEXT="summarylength"/>
         <FIELD NAME="summarylength" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Length of summary in characters, or 0 if turned off" PREVIOUS="nummessages" NEXT="hidetitles"/>
         <FIELD NAME="hidetitles" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to hide message titles, 0 to show" PREVIOUS="summarylength" NEXT="hidelinks"/>
-        <FIELD NAME="hidelinks" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to hide message links, 0 to show" PREVIOUS="hidetitles" NEXT="groupingsupport"/>
-        <FIELD NAME="groupingsupport" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to enable grouping support" PREVIOUS="hidelinks"/>
+        <FIELD NAME="hidelinks" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to hide message links, 0 to show" PREVIOUS="hidetitles"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -53,8 +52,7 @@
         <FIELD NAME="messagerepeat" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="1 if Repeat this message is visible, 0 if it’s hidden" PREVIOUS="messagevisible" NEXT="hideauthor"/>
         <FIELD NAME="hideauthor" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="1 if Hide author name is chosen" PREVIOUS="messagerepeat" NEXT="timemodified"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Time at which message was edited" PREVIOUS="hideauthor" NEXT="userid"/>
-        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" COMMENT="ID of person who last edited the message, null for messages from feeds." PREVIOUS="timemodified" NEXT="groupingid"/>
-        <FIELD NAME="groupingid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" UNSIGNED="true" SEQUENCE="false" COMMENT="= id of a grouping containing this news item.  0 indicates all groupings." PREVIOUS="userid"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" COMMENT="ID of person who last edited the message, null for messages from feeds." PREVIOUS="timemodified"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="newsfeedid_fk"/>

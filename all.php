@@ -62,7 +62,7 @@ if (has_capability('block/news:add', $blockcontext)) {
 if (isset($CFG->enablerssfeeds) && $CFG->enablerssfeeds) {
     $pi = new pix_icon('i/rss', 'RSS');
     echo $OUTPUT->container_start('', 'block_news_rss_all');
-    echo $OUTPUT->action_icon($bns->get_feed_url(), $pi);
+    echo $OUTPUT->action_icon($CFG->wwwroot . '/blocks/news/feed.php?bi=' . $blockinstanceid, $pi);
     echo $OUTPUT->container_end();
 }
 echo $OUTPUT->container_end(); // \block_news_top

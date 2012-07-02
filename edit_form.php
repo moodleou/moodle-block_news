@@ -99,10 +99,6 @@ class block_news_edit_form extends block_edit_form {
             get_string('confighidelinks', 'block_news'));
         $mform->setDefault('config_hidelinks', $bns->get_hidelinks());
 
-        $mform->addElement('selectyesno', 'config_groupingsupport',
-            get_string('configgroupingsupport', 'block_news'));
-        $mform->setDefault('config_groupingsupport', $bns->get_groupingsupport());
-        $mform->addHelpButton('config_groupingsupport', 'configgroupingsupport', 'block_news');
     }
 
 

@@ -204,20 +204,6 @@ class block_news_message_short implements renderable {
 class block_news_renderer extends plugin_renderer_base {
 
     /**
-     * Wrapper hook for news messages start
-     */
-    public function open_news_block_custom_wrapper() {
-        return '';
-    }
-
-    /**
-     * Wrapper hook for news messages end
-     */
-    public function close_news_block_custom_wrapper() {
-        return '';
-    }
-
-    /**
      * Generate HTML for full message
      * @param block_news_message_full $nmsg Renderable data
      * @return string HTML

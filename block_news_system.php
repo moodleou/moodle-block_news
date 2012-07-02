@@ -57,8 +57,6 @@ class block_news_system {
     protected $summarylength;
     protected $hidetitles;
     protected $hidelinks;
-    protected $groupingsupport;
-    protected $usergroupingids;
 
     /**
      * Construct object
@@ -66,6 +64,7 @@ class block_news_system {
      * @param StdClass $bn Block details (typically called internally @see get_block_settings )
      */
     public function __construct($bn) {
+
         $this->id = $bn->id;
         $this->blockinstanceid = $bn->blockinstanceid;
         $this->title = $bn->title;
@@ -73,7 +72,7 @@ class block_news_system {
         $this->summarylength = $bn->summarylength;
         $this->hidetitles = $bn->hidetitles;
         $this->hidelinks = $bn->hidelinks;
-        $this->groupingsupport = $bn->groupingsupport;
+
     }
 
     /**
@@ -98,7 +97,6 @@ class block_news_system {
             $bn->summarylength = 100;
             $bn->hidetitles = 0;
             $bn->hidelinks = 0;
-            $bn->groupingsupport = 0;
             $rid = $DB->insert_record('block_news', $bn, true);
             $bn->id = $rid;
         }
@@ -147,105 +145,6 @@ class block_news_system {
      */
     public function get_hidelinks() {
         return $this->hidelinks;
-    }
-
-    /**
-     * @return boolean Whether grouping support is enabled in block
-     */
-    public function get_groupingsupport() {
-        return $this->groupingsupport;
-    }
-
-    /**
-     * Get a list of the groupsings that apply in the current context for use when working
-     * out which messages to display.  This will be because the user is a member of particular
-     * groupings and groupings support is enabled or some groupings have been specified in a
-     * querystring and specified using set_user_groupingids().
-     * @return array - array of the groupingids (empty if none).
-     */
-    public function get_groupingids() {
-        global $SESSION, $COURSE, $USER, $DB;
-
-        if (!empty($this->usergroupingids)) {
-            return $this->usergroupingids;
-        }
-
-        if (!empty($SESSION->block_news_user_groupings[$COURSE->id])) {
-            return $SESSION->block_news_user_groupings[$COURSE->id];
-        }
-
-        $context = get_context_instance(CONTEXT_COURSE, $COURSE->id);
-        if (has_capability('moodle/site:accessallgroups', $context)) {
-            //if the user has the allgroups capability they can see everything.
-            $g = groups_get_all_groupings($COURSE->id);
-            $groupings = array();
-            foreach ($g as $grouping) {
-                $groupings[] = $grouping->id;
-            }
-            $SESSION->block_news_user_groupings[$COURSE->id] = $groupings;
-            return $groupings;
-        }
-
-        $sql = 'SELECT DISTINCT({groupings}.id)
-                FROM {user}
-                INNER JOIN {groups_members}
-                ON {user}.id = {groups_members}.userid
-                INNER JOIN {groupings_groups}
-                ON {groups_members}.groupid = {groupings_groups}.groupid
-                INNER JOIN {groupings}
-                ON {groupings_groups}.groupingid = {groupings}.id
-                WHERE {user}.id = ?
-                AND {groupings}.courseid = ?';
-        $results = $DB->get_records_sql($sql, array($USER->id, $COURSE->id));
-
-        $groupings = array();
-        foreach ($results as $result) {
-            $groupings[] = $result->id;
-        }
-        $SESSION->block_news_user_groupings[$COURSE->id] = $groupings;
-        return $groupings;
-    }
-
-    /**
-     * Sets the value of the user groupings ids class variable.
-     * @param array $groupingsids
-     */
-    public function set_user_groupingids($groupingids) {
-        $this->usergroupingids = $groupingids;
-    }
-
-    /**
-     * Return SQL WHERE and clause and params to append to queries when grouping support
-     * is enabled.
-     * @return array - 'sql' (empty string if nothing to return)
-     * and 'params' (empty array if nothing).
-     */
-    public function get_grouping_sql() {
-        global $COURSE, $DB;
-
-        $output = array();
-        $output['sql'] = '';
-        $output['params'] = array();
-
-        if (!$this->get_groupingsupport()) {
-            return $output;
-        }
-
-        $context = get_context_instance(CONTEXT_COURSE, $COURSE->id);
-        if (has_capability('moodle/site:accessallgroups', $context)) {
-            return $output;
-        }
-
-        $groupings = $this->get_groupingids();
-
-        $groupings[] = 0;
-
-        list($sql, $groupings) = $DB->get_in_or_equal($groupings);
-
-        $output['sql'] = ' AND groupingid ' . $sql .' ';
-        $output['params'] = $groupings;
-
-        return $output;
     }
 
     /**
@@ -322,18 +221,14 @@ class block_news_system {
         global $DB;
         $bnms = array();
 
-        $groupings = $this->get_grouping_sql();
         $sql = self::MSGSQLHDR .
                 'WHERE blockinstanceid=?
                  AND messagevisible=1
-                 AND messagedate <= ?'
-                .$groupings['sql'].
-                 'ORDER BY messagedate DESC
+                 AND messagedate <= ?
+                 ORDER BY messagedate DESC
                  LIMIT '.$max;
 
-        $params = array($this->blockinstanceid, time());
-        $params = array_merge($params, $groupings['params']);
-        $mrecs = $DB->get_records_sql($sql, $params);
+        $mrecs = $DB->get_records_sql($sql, array($this->blockinstanceid, time()));
         foreach ($mrecs as $mrec) {
             $bnms[] = new block_news_message($mrec);
         }
@@ -353,25 +248,18 @@ class block_news_system {
         global $DB;
         $bnms = array();
 
-        $groupings = $this->get_grouping_sql();
         if ($viewhidden) { // see all dates, all visibilty
             $sql =  self::MSGSQLHDR .
-                    'WHERE blockinstanceid = ?'
-                    .$groupings['sql'].
-                    'ORDER BY messagedate DESC';
-            $params = array($this->blockinstanceid);
-            $params = array_merge($params, $groupings['params']);
-            $mrecs = $DB->get_records_sql($sql, $params);
+                    'WHERE blockinstanceid = ?
+                     ORDER BY messagedate DESC';
+            $mrecs = $DB->get_records_sql($sql, array($this->blockinstanceid));
         } else {  // see past/present only and visible
             $sql =  self::MSGSQLHDR .
                     'WHERE blockinstanceid = ?
                      AND messagevisible = 1
-                     AND messagedate <= ?'
-                    .$groupings['sql'].
-                    'ORDER BY messagedate DESC';
-            $params = array($this->blockinstanceid, time());
-            $params = array_merge($params, $groupings['params']);
-            $mrecs = $DB->get_records_sql($sql, $params);
+                     AND messagedate <= ?
+                     ORDER BY messagedate DESC';
+            $mrecs = $DB->get_records_sql($sql, array($this->blockinstanceid, time()));
         }
 
         foreach ($mrecs as $mrec) {
@@ -393,27 +281,20 @@ class block_news_system {
     public function get_message($id, $viewhidden) {
         global $DB;
 
-        $groupings = $this->get_grouping_sql();
         if ($viewhidden) {  // see any date, any visibilty
             $sql = self::MSGSQLHDR .
                   'WHERE blockinstanceid = ?
-                   AND {block_news_messages}.id = ?'
-                  .$groupings['sql'];
+                      AND {block_news_messages}.id = ? ';
 
-            $params = array($this->blockinstanceid, $id);
-            $params = array_merge($params, $groupings['params']);
-            $mrec = $DB->get_record_sql($sql, $params);
+            $mrec=$DB->get_record_sql($sql, array($this->blockinstanceid, $id));
         } else {  // see past & present only and visible
             $sql = self::MSGSQLHDR .
                   'WHERE blockinstanceid = ?
-                   AND {block_news_messages}.id = ?
-                   AND messagevisible = 1
-                   AND messagedate <= ?'
-                  .$groupings['sql'];
+                      AND {block_news_messages}.id = ?
+                      AND messagevisible = 1
+                      AND messagedate <= ? ';
 
-            $params = array($this->blockinstanceid, $id , time());
-            $params = array_merge($params, $groupings['params']);
-            $mrec = $DB->get_record_sql($sql, $params);
+            $mrec = $DB->get_record_sql($sql, array($this->blockinstanceid, $id , time()));
         }
 
         if (!empty($mrec)) {
@@ -486,37 +367,6 @@ class block_news_system {
 
     }
 
-
-    /**
-     * @return string - the url of the current news feed including grouping support
-     */
-    public function get_feed_url() {
-        global $CFG, $OUTPUT;
-
-        $feedurl = $CFG->wwwroot . '/blocks/news/feed.php?bi='.$this->blockinstanceid;
-
-        if (!$this->get_groupingsupport()) {
-            return $feedurl;
-        }
-
-        $groupings = $this->get_groupingids();
-        if (empty($groupings)) {
-            return $feedurl;
-        }
-
-        $feedurl .= '&groupingsids=';
-
-        $firstgrouping = true;
-        foreach ($groupings as $grouping) {
-            if (!$firstgrouping) {
-                $feedurl .= ',';
-            }
-            $feedurl .= $grouping;
-            $firstgrouping = false;
-        }
-
-        return $feedurl;
-    }
 
     /**
      * Create feed record for this instance
@@ -754,14 +604,11 @@ class block_news_system {
      *
      * @param integer $blockinstanceid
      * @param integer $ifmodifiedsince If feed file generated less than n secs ago, no processing
-     * @param array $groupingids Ids of groupings to be included in output.  null = all groupings.
      * @return mixed boolean false or string feed xml
      */
-    public static function get_block_feed($blockinstanceid,
-                                          $ifmodifiedsince=0,
-                                          $groupingids = null) {
+    public static function get_block_feed($blockinstanceid, $ifmodifiedsince=0) {
 
-        $fn =  self::get_feed_filename($blockinstanceid, $groupingids);
+        $fn =  self::get_feed_filename($blockinstanceid);
 
         // if a cached file is present and its internal cache expire marker
         // is within ifmodified time from client - return false (nothing)
@@ -794,8 +641,6 @@ class block_news_system {
         if (!$bns = self::get_block_settings($blockinstanceid)) {
             return false;
         }
-
-        $bns->set_user_groupingids($groupingids);
 
         $feedxml = $bns->generate_block_feed();
 
@@ -864,8 +709,8 @@ class block_news_system {
         }
 
         // do header
-        $uniqueid = $this->get_feed_url();
-        $linkself = $this->get_feed_url();
+        $uniqueid = $CFG->wwwroot.'/blocks/news/feed.php?bi='.$this->blockinstanceid;
+        $linkself = $CFG->wwwroot.'/blocks/news/feed.php?bi='.$this->blockinstanceid;
         $linkalt = $CFG->wwwroot.$altpath;
         $header = atom_standard_header($nsi, $uniqueid, $linkself, $linkalt, time(),
         $feedtitle, null);
@@ -947,20 +792,11 @@ class block_news_system {
      * @param integer $blockinstanceid
      * @return string filename
      */
-    private function get_feed_filename($blockinstanceid, $groupingids = null) {
+    private function get_feed_filename($blockinstanceid) {
         global $CFG;
 
-        if (empty($groupingids)) {
-            $filename = $blockinstanceid.'.atom';
-        } else {
-            $filename = $blockinstanceid;
-            foreach ($groupingids as $grouping) {
-                $filename .= '-'.$grouping;
-            }
-            $filename .= '.atom';
-        }
         $ttnum = floor($blockinstanceid/10000);
-        $fn = $CFG->dataroot.'/cache/block_news/'.$ttnum.'/'.$filename;
+        $fn = $CFG->dataroot.'/cache/block_news/'.$ttnum.'/'.$blockinstanceid.'.atom';
 
         return $fn;
     }

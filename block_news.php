@@ -86,9 +86,6 @@ class block_news extends block_base {
                         get_string('msgblockadd', 'block_news'),
                         null, array('alt'=>get_string('msgblockaddalt', 'block_news')));
             $this->content->footer .= $output->container_end();
-            $canaddnews = 'blocknewscanadd';// Extra class added on some links if edit permission.
-        } else {
-            $canaddnews = null;
         }
         $nummsgs=$this->bns->get_nummessages();
         $msgs=$this->bns->get_messages_limited($nummsgs);
@@ -96,7 +93,6 @@ class block_news extends block_base {
         $sumlen=$this->bns->get_summarylength();
         if ($msgs) {
             $c=1;
-            $this->content->text .= $output->open_news_block_custom_wrapper();
             $this->content->text .= $output->container_start('block_news_msglist');
 
             $newmsg = false;
@@ -129,9 +125,9 @@ class block_news extends block_base {
             }
 
             $this->content->text .= $output->container_end();
-            $this->content->text .= $output->close_news_block_custom_wrapper();
+
             // main footer
-            $this->content->footer .= $output->container_start($canaddnews, 'block_news_viewall');
+            $this->content->footer .= $output->container_start(null, 'block_news_viewall');
             $this->content->footer .= $output->action_link(
                         $CFG->wwwroot.'/blocks/news/all.php?bi='.$blockinstanceid,
                         get_string('msgblockviewall', 'block_news'),
@@ -152,10 +148,11 @@ class block_news extends block_base {
 
         // if feeds allowed on site, display icon
         if (isset($CFG->enablerssfeeds) && $CFG->enablerssfeeds) {
-            $this->content->footer .= $output->container_start($canaddnews, 'block_news_rss');
+            $this->content->footer .= $output->container_start(null, 'block_news_rss');
             $pi = new pix_icon('i/rss', 'RSS');
             $this->content->footer .= $output->action_icon(
-                $this->bns->get_feed_url(), $pi, null, array('alt'=>'RSS'));
+                $CFG->wwwroot.'/blocks/news/feed.php?bi='.$blockinstanceid,
+                $pi, null, array('alt'=>'RSS'));
             $this->content->footer .= $output->container_end();
         }
 

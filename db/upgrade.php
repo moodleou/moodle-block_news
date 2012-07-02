@@ -81,36 +81,6 @@ function xmldb_block_news_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2011071800, 'news');
     }
 
-    if ($result && $oldversion < 2012031400) {
-        // Changing precision of field title on table block_news_feeds to (80)
-        $table = new xmldb_table('block_news');
-        $field = new xmldb_field('title', XMLDB_TYPE_CHAR, '80', null, null, null, null,
-                        'blockinstanceid');
-
-        // Launch change of precision for field title
-        $dbman->change_field_precision($table, $field);
-
-        // news savepoint reached
-        upgrade_block_savepoint(true, 2012031400, 'news');
-    }
-
-    if ($oldversion < 2012033000) {
-        // Define and add the groupingsupport field.
-        $table = new xmldb_table('block_news');
-        $field = new xmldb_field('groupingsupport');
-        $type = XMLDB_TYPE_INTEGER;
-        $field->set_attributes($type, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'hidelinks');
-        $dbman->add_field($table, $field);
-
-        // Define and add the message groupingid field.
-        $table = new xmldb_table('block_news_messages');
-        $field = new xmldb_field('groupingid');
-        $field->set_attributes($type, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'userid');
-        $dbman->add_field($table, $field);
-
-        // news savepoint reached
-        upgrade_block_savepoint(true, 2012033000, 'news');
-    }
     return $result;
 
 }

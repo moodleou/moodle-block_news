@@ -74,7 +74,6 @@ class news_message_test extends UnitTestCaseUsingDatabase {
      * public function get_hideauthor()
      * public function get_userid()
      * public function get_user()
-     * public function get_groupingid()
      * public function set_visible($visible)
      * public function is_visible_to_students()
      *
@@ -98,7 +97,6 @@ class news_message_test extends UnitTestCaseUsingDatabase {
         $this->assertEqual($this->message->get_messagevisible(), 1);
         $this->assertEqual($this->message->get_hideauthor(), 0);
         $this->assertEqual($this->message->get_userid(), 1);
-        $this->assertEqual($this->message->get_groupingid(), 0);
 
         // get user
         $getuser = $this->message->get_user();
@@ -207,7 +205,6 @@ class news_message_test extends UnitTestCaseUsingDatabase {
         $data->timemodified = time();
         $data->attachments = null;
         $data->userid = $this->user->id;
-        $data->groupingid= 0;
         $data->u_id=$this->user->id;
         $data->u_firstname='Stu';
         $data->u_lastname='Dent';

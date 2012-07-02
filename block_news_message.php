@@ -52,7 +52,6 @@ class block_news_message {
     protected $publish;
     protected $timemodified;
     protected $userid;
-    protected $groupingid;
     // properties filled in from user object in constructor for efficiency
     protected $u_id;
     protected $u_firstname;
@@ -163,13 +162,6 @@ class block_news_message {
      */
     public function get_userid() {
         return $this->userid;
-    }
-
-    /**
-     * @return integer grouping id of the message
-     */
-    public function get_groupingid() {
-        return $this->groupingid;
     }
 
     /**

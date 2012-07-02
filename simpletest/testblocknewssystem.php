@@ -73,7 +73,6 @@ class news_system_test extends UnitTestCaseUsingDatabase {
      *   public function get_summarylengths()
      *   public function get_hidetitles()
      *   public function get_hidelinks()
-     *   public function get_groupingsupport()
      *   public static function get_block_settings($blockinstanceid)
      *   public function save()
      *   public function delete()
@@ -109,7 +108,6 @@ class news_system_test extends UnitTestCaseUsingDatabase {
         $this->assertEqual($this->defaultnewsitem->get_summarylength(), 100);
         $this->assertEqual($this->defaultnewsitem->get_hidetitles(), 0);
         $this->assertEqual($this->defaultnewsitem->get_hidelinks(), 0);
-        $this->assertEqual($this->defaultnewsitem->get_groupingsupport(), 0);
         $defaultid = $this->defaultnewsitem->get_id();
 
         // some vars needed for feed testing
@@ -133,7 +131,6 @@ class news_system_test extends UnitTestCaseUsingDatabase {
         $this->assertEqual($this->defaultnewsitem->get_summarylength(), 100); // not this
         $this->assertEqual($this->defaultnewsitem->get_hidetitles(), 0); // not this
         $this->assertEqual($this->defaultnewsitem->get_hidelinks(), 0); // not this
-        $this->assertEqual($this->defaultnewsitem->get_groupingsupport(), 0); // not this
 
         // test specific feed functions
         $feeds = block_news_system::get_feeds_to_update();
@@ -154,7 +151,6 @@ class news_system_test extends UnitTestCaseUsingDatabase {
         $this->assertEqual($this->news->get_summarylength(), 100);
         $this->assertEqual($this->news->get_hidetitles(), 0);
         $this->assertEqual($this->news->get_hidelinks(), 0);
-        $this->assertEqual($this->news->get_groupingsupport(), 0);
 
         // limited number of visibile messages
         $limitedmessages = $this->news->get_messages_limited(3);
@@ -251,7 +247,6 @@ class news_system_test extends UnitTestCaseUsingDatabase {
         $news->summarylength = 100;
         $news->hidetitles = 0;
         $news->hidelinks = 0;
-        $news->groupingsupport = 0;
         $news->feedurls = '';
         $this->testdb->insert_record('block_news', $news);
     }

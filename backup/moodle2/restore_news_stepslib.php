@@ -104,7 +104,6 @@ class restore_news_block_structure_step extends restore_structure_step {
                     }
 
                     $message->userid = $this->get_mappingid('user', $message->userid);
-                    $message->groupingid = $this->get_mappingid('grouping', $message->groupingid);
                     if ($message->newsfeedid) {
                         $message->newsfeedid = $this->get_mappingid('block_news_feed', $message->newsfeedid);
                     }

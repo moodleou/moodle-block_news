@@ -28,7 +28,6 @@ require_once(dirname(__FILE__) . '/../../config.php');
 require_once('block_news_system.php');
 
 $blockinstanceid = required_param('bi', PARAM_INT);
-$groupingids = optional_param('groupingsids', 0, PARAM_SEQUENCE);
 
 $murl = new moodle_url($CFG->wwwroot.'/blocks/news/feed.php',
                              array('blockinstanceid'=>$blockinstanceid));
@@ -48,10 +47,8 @@ $ifmodifiedsince=0;
 if (array_key_exists('HTTP_IF_MODIFIED_SINCE', $_SERVER)) {
     $ifmodifiedsince=strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
 }
-$groupingids = explode(',', $groupingids);
-// Remove any empty elements from clean param if non ints sent.
-$groupingids = array_filter($groupingids);
-$atomxml=block_news_system::get_block_feed($blockinstanceid, $ifmodifiedsince, $groupingids);
+
+$atomxml=block_news_system::get_block_feed($blockinstanceid, $ifmodifiedsince);
 
 if ($atomxml == false) {
     header("HTTP/1.0 304 Not Modified");
