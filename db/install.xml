@@ -58,7 +58,7 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="newsfeedid_fk"/>
-        <KEY NAME="newsfeedid_fk" TYPE="foreign" FIELDS="newsfeedid" REFTABLE="block_news_feed" REFFIELDS="id" PREVIOUS="primary"/>
+        <KEY NAME="newsfeedid_fk" TYPE="foreign" FIELDS="newsfeedid" REFTABLE="block_news_feeds" REFFIELDS="id" PREVIOUS="primary"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="blockinstanceid_ix" UNIQUE="false" FIELDS="blockinstanceid"/>
