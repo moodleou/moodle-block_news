@@ -334,14 +334,13 @@ class block_news_renderer extends plugin_renderer_base {
         $out = '';
         $out .= $this->output->container_start('block_news_msg');
 
-        $date = $this->output->container($nmsg->messagedate, 'block_news_msg_messagedate');
-        $title = $this->output->container(format_string($nmsg->title), 'block_news_msg_title ');
+        $date = html_writer::tag('span', $nmsg->messagedate, array('class' => 'block_news_msg_messagedate'));
+        $title = html_writer::tag('span', format_string($nmsg->title), array('class' => 'block_news_msg_title'));
         if (!empty($nmsg->link)) {
-            $title= $this->output->action_link($nmsg->link, $title);
+            $title = $this->output->action_link($nmsg->link, $title);
         }
 
-        $date .= $this->output->container($title, 'block_news_msg_title ');
-        $out .= $this->output->heading($date, 3, 'block_news_msg_h3');
+        $out .= $this->output->heading($date . $title, 3);
 
         if (!empty($nmsg->author)) {
             $out .= $this->output->container(format_string($nmsg->author),

@@ -7,18 +7,17 @@
 */
 
 /* news block */
-.block_news_msg .block_news_msg_h3 {
-    font-size:110%;
+.block_news_msg h3 {
+    font-size: 1.0em;
     margin: 10px 0 0 0;
 }
 
-.block_news_msg .block_news_msg_h3 .block_news_msg_messagedate {
-    float: left;
+.block_news_msg .block_news_msg_messagedate {
     font-weight: normal;
     margin-right: 10px;
 }
 
-.block_news_msg .block_news_msg_h3 .block_news_msg_title {
+.block_news_msg .block_news_msg_title {
     font-weight: bold;
     margin-bottom: 5px;
 }

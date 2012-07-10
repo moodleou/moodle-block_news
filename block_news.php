@@ -187,7 +187,7 @@ class block_news extends block_base {
     /*
      *  store config data for instance
      */
-    public function instance_config_save($data) {
+    public function instance_config_save($data, $nolongerused = false) {
         global $DB;
 
         $this->bns->save($data);
