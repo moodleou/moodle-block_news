@@ -84,7 +84,7 @@ class block_news extends block_base {
             $this->content->footer .= $output->action_link(
                 $CFG->wwwroot.'/blocks/news/edit.php?bi='.$blockinstanceid,
                         get_string('msgblockadd', 'block_news'),
-                        null, array('alt'=>get_string('msgblockaddalt', 'block_news')));
+                        null, array('title' => get_string('msgblockaddalt', 'block_news')));
             $this->content->footer .= $output->container_end();
             $canaddnews = 'blocknewscanadd';// Extra class added on some links if edit permission.
         } else {
@@ -135,7 +135,7 @@ class block_news extends block_base {
             $this->content->footer .= $output->action_link(
                         $CFG->wwwroot.'/blocks/news/all.php?bi='.$blockinstanceid,
                         get_string('msgblockviewall', 'block_news'),
-                        null, array('alt'=>get_string('msgblockviewallalt', 'block_news')));
+                        null, array('title' => get_string('msgblockviewallalt', 'block_news')));
             $this->content->footer .= $output->container_end();
         } else {
             $this->content->text .= $output->container(get_string('msgblocknonews', 'block_news')
@@ -145,7 +145,7 @@ class block_news extends block_base {
                 $this->content->footer .= $output->action_link(
                     $CFG->wwwroot.'/blocks/news/all.php?bi='.$blockinstanceid,
                     get_string('msgblockviewall', 'block_news'),
-                    null, array('alt'=>get_string('msgblockviewallalt', 'block_news')));
+                    null, array('title' => get_string('msgblockviewallalt', 'block_news')));
                 $this->content->footer .= $output->container_end();
             }
         }

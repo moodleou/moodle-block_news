@@ -23,7 +23,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version =  2012033000;
-// Moodle version - copy from $version in the top-level version.php file.
+$plugin->version =  2012081300;
 $plugin->requires = 2011033003.00;
 $plugin->cron = 3600; // Set min time between cron executions to 3600 secs (1 hr)
