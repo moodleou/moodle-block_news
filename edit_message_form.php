@@ -108,14 +108,14 @@ class block_news_edit_message_form extends moodleform {
         $radioarray=array();
         if ($this->publishstate == "ap") { // already publsihed
             // leave out 'immediately'
-            $radioarray[] = &MoodleQuickForm::createElement('radio', 'publish', '',
+            $radioarray[] = $mform->createElement('radio', 'publish', '',
                 get_string('msgeditatspecdate', 'block_news'), 1, $attributes);
-            $radioarray[] = &MoodleQuickForm::createElement('radio', 'publish', '',
+            $radioarray[] = $mform->createElement('radio', 'publish', '',
                 get_string('msgeditalreadypub', 'block_news'), 2, $attributes);
         } else {
-            $radioarray[] = &MoodleQuickForm::createElement('radio', 'publish', '',
+            $radioarray[] = $mform->createElement('radio', 'publish', '',
                 get_string('msgeditimmediately', 'block_news'), 0, $attributes);
-            $radioarray[] = &MoodleQuickForm::createElement('radio', 'publish', '',
+            $radioarray[] = $mform->createElement('radio', 'publish', '',
                 get_string('msgeditatspecdate', 'block_news'), 1, $attributes);
             // leave out 'already published'
         }
