@@ -13,16 +13,17 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * News version file
+ * Version details.
  *
- * @package    blocks
- * @subpackage news
- * @copyright 2011 The Open University
+ * @package block_news
+ * @copyright 2012 The Open University
  * @author Jon Sharp <jonathans@catalyst-eu.net>
+ * @author OU developers
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version =  2012081300;
+$plugin->version = 2012081300;
 $plugin->requires = 2011033003.00;
-$plugin->cron = 3600; // Set min time between cron executions to 3600 secs (1 hr)
+$plugin->cron = 60;

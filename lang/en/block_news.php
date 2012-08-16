@@ -75,6 +75,8 @@ $string['settingsupdatetime'] = 'Minimum feed delay';
 $string['settingsupdatetime_info'] = 'Minimum time between updates of a feed (eg 1 hour means feed will be updated every hour)';
 $string['settingsmaxpercron'] = 'Cron feed limit';
 $string['settingsmaxpercron_info'] = 'Maximum time spent per cron run on updating feeds';
+$string['verbosecron'] = 'List each feed as retrieved in cron';
+$string['verbosecron_info'] = 'If you turn this option on, all feeds being retrieved are shown in cron. Otherwise it only shows feeds which take longer than 5 seconds.';
 
 // edit
 $string['msgeditpghdr'] = 'News';
