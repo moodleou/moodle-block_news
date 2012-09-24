@@ -106,7 +106,7 @@ class block_news_edit_form extends block_edit_form {
     }
 
 
-    public function validation($data) {
+    public function validation($data, $files) {
         $errors= array();
 
         // now do feeds

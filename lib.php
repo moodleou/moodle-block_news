@@ -96,7 +96,7 @@ function block_news_init_page($blockinstanceid, $title) {
     if (empty($title)) {
         $title = get_string('pluginname', 'block_news');
     }
-    $PAGE->navbar->add(format_text($title),
+    $PAGE->navbar->add($title,
             new moodle_url('/blocks/news/all.php', array('bi' => $blockinstanceid)));
 
     return $csemod;
