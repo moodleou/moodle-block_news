@@ -56,8 +56,7 @@ if ($ADMIN->fulltree) {
                      '30'=>'30 seconds',
                      '60'=>'1 minute'
                     );
-
-    for ($i=2; $i <= 10; $i++) {
+    for ($i=2; $i <= 5; $i++) {
         $choices_m[(string)$i*60] = $i.' minutes';
     }
 
@@ -67,5 +66,9 @@ if ($ADMIN->fulltree) {
                                                '60',
                                                $choices_m)
                                               );
+
+    $settings->add(new admin_setting_configcheckbox('block_news/verbosecron',
+           get_string('verbosecron', 'block_news'),
+           get_string('verbosecron_info', 'block_news'), 0));
 }
 

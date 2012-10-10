@@ -14,28 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die;
+
+require_once($CFG->dirroot . '/blocks/news/block_news_system.php');
+require_once($CFG->dirroot . '/blocks/news/block_news_message.php');
+
 /**
- * News Block page.
+ * News block main class.
  *
- * @package    blocks
- * @subpackage news
- * @copyright 2011 The Open University
+ * @package block_news
+ * @copyright 2012 The Open University
  * @author Jon Sharp <jonathans@catalyst-eu.net>
+ * @author OU developers
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-if (!defined('MOODLE_INTERNAL')) {
-    die('Direct access to this script is forbidden.');
-    // It must be included from a Moodle page
-}
-
-require_once('block_news_system.php');
-require_once('block_news_message.php');
-
-/**
- * The news block class. Form is in edit_form.php
- * @package    blocks
- * @subpackage news
  */
 class block_news extends block_base {
 
@@ -84,7 +75,7 @@ class block_news extends block_base {
             $this->content->footer .= $output->action_link(
                 $CFG->wwwroot.'/blocks/news/edit.php?bi='.$blockinstanceid,
                         get_string('msgblockadd', 'block_news'),
-                        null, array('alt'=>get_string('msgblockaddalt', 'block_news')));
+                        null, array('title' => get_string('msgblockaddalt', 'block_news')));
             $this->content->footer .= $output->container_end();
             $canaddnews = 'blocknewscanadd';// Extra class added on some links if edit permission.
         } else {
@@ -135,7 +126,7 @@ class block_news extends block_base {
             $this->content->footer .= $output->action_link(
                         $CFG->wwwroot.'/blocks/news/all.php?bi='.$blockinstanceid,
                         get_string('msgblockviewall', 'block_news'),
-                        null, array('alt'=>get_string('msgblockviewallalt', 'block_news')));
+                        null, array('title' => get_string('msgblockviewallalt', 'block_news')));
             $this->content->footer .= $output->container_end();
         } else {
             $this->content->text .= $output->container(get_string('msgblocknonews', 'block_news')
@@ -145,7 +136,7 @@ class block_news extends block_base {
                 $this->content->footer .= $output->action_link(
                     $CFG->wwwroot.'/blocks/news/all.php?bi='.$blockinstanceid,
                     get_string('msgblockviewall', 'block_news'),
-                    null, array('alt'=>get_string('msgblockviewallalt', 'block_news')));
+                    null, array('title' => get_string('msgblockviewallalt', 'block_news')));
                 $this->content->footer .= $output->container_end();
             }
         }
@@ -220,60 +211,59 @@ class block_news extends block_base {
     }
 
     /**
-     *  standard cron function
-     *  (to activate: $plugin->cron = 3600; must be in version.php)
+     * Standard blocks api cron function, called every time cron runs.
      */
     public function cron() {
         global $DB, $CFG;
 
-        $eol="\n"; // change depending on output viewing agent
+        // System config.
+        $config = get_config('block_news');
 
-        mtrace('', $eol);
-        mtrace('Listing news feeds for update...', ''); // no eol
-
-        $starttime = microtime(true); // get as float
-
-        // get list of feeds
-        $fbrecs=block_news_system::get_feeds_to_update();
-
+        // Get list of feeds.
+        mtrace("\n" . 'Listing news feeds for update...', '');
+        $starttime = microtime(true);
+        $fbrecs = block_news_system::get_feeds_to_update();
         $endtime = microtime(true);
-        $difftime = (float) $endtime - $starttime;
-        mtrace(sprintf(' done (%.3fs), %d feed(s) to process', $difftime, count($fbrecs)), $eol);
+        mtrace(' done (' . round($endtime - $starttime, 1) . 's), ' . count($fbrecs) . ' feed(s) to process');
 
-        if (count($fbrecs) != 0) {
-            mtrace('Processing feeds ...', $eol);
+        if (!count($fbrecs)) {
+            return;
         }
 
-        // get maxpercron value from system config_plugins table
-        if (!$maxpercron = get_config('block_news', 'block_news_maxpercron') ) {
-            print_error('errornomaxpercron', 'block_news');
-        }
-        @set_time_limit($maxpercron);
-
-        $c=1;
-        $tottime=0;
+        mtrace('Processing feeds...');
+        $beginning = microtime(true);
+        $done = 0;
         foreach ($fbrecs as $fbrec) {
+            $bns = block_news_system::get_block_settings($fbrec->blockinstanceid);
 
-            $bns=block_news_system::get_block_settings($fbrec->blockinstanceid);
+            // When verbose mode is enabled, show every feed while being retrieved.
+            $feedinfo = $bns->get_title() . ' (' . $fbrec->blockinstanceid . '): ' .
+                    $fbrec->feedurl.' - previous ' .
+                    userdate($fbrec->feedupdated, get_string('dateformatlong', 'block_news')) ;
+            if ($config->verbosecron) {
+                mtrace($feedinfo, '');
+            }
 
+            // Update feed.
             $starttime = microtime(true);
-
-            mtrace($c.'.  block: '.$bns->get_title().' ('.$fbrec->blockinstanceid.'), feed: '
-                .$fbrec->feedurl.' - last updated '
-                .userdate($fbrec->feedupdated, get_string('dateformatlong', 'block_news')), $eol);
-
             $bns->update_feed($fbrec);
+            $now = microtime(true);
+            $done++;
 
-            $endtime = microtime(true);
-            $difftime = (float) $endtime - $starttime;
-            $tottime += $difftime;
-            mtrace(sprintf(' (%.3fs)', $difftime), $eol);
+            // Show time if verbose mode is enabled or if it took over 5 seconds.
+            if ($config->verbosecron) {
+                mtrace(' (' . round($now - $starttime, 1) . 's)');
+            } else if ($now - $starttime > 5) {
+                mtrace($feedinfo . ' (' . round($now - $starttime, 1) . 's)');
+            }
 
-            $bns=null; // to be sure we're destroying in the loop
-
-            $c++;
+            // See if time limit has expired.
+            if ($now - $beginning > $config->block_news_maxpercron) {
+                break;
+            }
         }
 
+        mtrace($done . ' processed in ' . round($now - $beginning) . 's');
     }
 
 }
