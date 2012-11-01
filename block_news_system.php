@@ -30,7 +30,6 @@ if (!defined('MOODLE_INTERNAL')) {
 require_once('block_news_message.php');
 require_once('atomlib.php');
 require_once('lib.php');
-require_once($CFG->libdir . '/textlib.class.php');
 
 
 /**
@@ -597,13 +596,11 @@ class block_news_system {
         $bnf->feedupdated = time();
         $DB->update_record('block_news_feeds', $bnf);
 
-        $tl = textlib_get_instance(); //textlib instance
-
         // get the feed items
         $fia = @$this->get_simplepie($fbrec->feedurl);
 
         if (isset($fia[0]->errortext)) {
-            $bnf->feederror = $tl->substr($fia[0]->errortext, 0, 255);
+            $bnf->feederror = textlib::substr($fia[0]->errortext, 0, 255);
             $DB->update_record('block_news_feeds', $bnf);
             $transaction->allow_commit();
             return;
@@ -627,7 +624,7 @@ class block_news_system {
                 $fi->newsfeedid = $bnf->id;
                 // title, message, link already set
                 // constrict title
-                $fi->title = $tl->substr($fi->title, 0, 255);
+                $fi->title = textlib::substr($fi->title, 0, 255);
                 // put author at at start of message text, allow an empty element if no author
                 $fi->message = '<div class=author>'.$fi->author.' </div>'.$fi->message;
                 unset($fi->author);
