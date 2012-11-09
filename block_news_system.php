@@ -944,7 +944,7 @@ class block_news_system {
      * @param integer $blockinstanceid
      * @return string filename
      */
-    private function get_feed_filename($blockinstanceid, $groupingids = null) {
+    private static function get_feed_filename($blockinstanceid, $groupingids = null) {
         global $CFG;
 
         if (empty($groupingids)) {
@@ -969,7 +969,7 @@ class block_news_system {
      * @throws moodle_exception if error
      */
     public function uncache_block_feed() {
-        $fn = $this->get_feed_filename($this->blockinstanceid);
+        $fn = self::get_feed_filename($this->blockinstanceid);
         // check if exists as its possible it was never created
         if (file_exists($fn)) {
             if (unlink($fn) == false) {
