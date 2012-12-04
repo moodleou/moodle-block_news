@@ -26,15 +26,10 @@ This block has the following features:
 
 Branch:
 
-This is the development branch including latest, untested code. If you would
-like a tested version equivalent to an OU live release, please switch to a
-branch that matches your Moodle version (e.g. MOODLE_22_STABLE) using the
-above dropdown.
+Tested, live code based on our Moodle 2.3 release.
 
-This branch is designed to run against the Moodle version that we (the OU) are
-currently using on our development servers. This is not always the latest
-Moodle version: typically, our development servers are updated about four
-months after a Moodle release. 
+Please note that this code is tested on OU systems but we rely on the
+community for testing on other systems.
 
 Support:
 
@@ -48,14 +43,15 @@ documentation to the relevant areas of the MoodleDocs wiki.
 
 Bug reports:
 
-Please report bugs using the GitHub 'Issues' tab (experimental). Before
-reporting a bug, please try the latest version to verify that the problem
-hasn't already been fixed. In each bug, please remember to give:
+Please report bugs using the GitHub 'Issues' tab. Before reporting a bug,
+please try the latest version to verify that the problem hasn't already been
+fixed. In each bug, please remember to give:
 
 1. Exact steps to reproduce your problem, starting from creating a new wiki
    with default or specified settings.
 2. The news block version you are using (from version.php or Blocks admin
    screen).
+3. The Moodle version you are using.
 
 Reliability:
 
@@ -64,7 +60,7 @@ community for testing on other systems.
 
 Requires:
 
-Moodle 2.2+
+Moodle 2.3+
 Postgres / MySQL
 
 Install:
