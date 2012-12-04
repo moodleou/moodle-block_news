@@ -48,14 +48,15 @@ documentation to the relevant areas of the MoodleDocs wiki.
 
 Bug reports:
 
-Please report bugs using the GitHub 'Issues' tab (experimental). Before
-reporting a bug, please try the latest version to verify that the problem
-hasn't already been fixed. In each bug, please remember to give:
+Please report bugs using the GitHub 'Issues' tab. Before reporting a bug,
+please try the latest version to verify that the problem hasn't already been
+fixed. In each bug, please remember to give:
 
 1. Exact steps to reproduce your problem, starting from creating a new wiki
    with default or specified settings.
 2. The news block version you are using (from version.php or Blocks admin
    screen).
+3. The Moodle version you are using.
 
 Reliability:
 
@@ -64,7 +65,7 @@ community for testing on other systems.
 
 Requires:
 
-Moodle 2.2+
+Moodle 2.3+
 Postgres / MySQL
 
 Install:
