@@ -18,12 +18,10 @@
  * Version details.
  *
  * @package block_news
- * @copyright 2012 The Open University
- * @author Jon Sharp <jonathans@catalyst-eu.net>
- * @author OU developers
+ * @copyright 2013 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version = 2012130900;
+$plugin->version = 2013012200;
 $plugin->requires = 2011033003.00;
 $plugin->cron = 60;

@@ -1,12 +1,3 @@
-/*
- * @package    blocks
- * @subpackage news
- * @copyright 2011 The Open University
- * @author Jon Sharp <jonathans@catalyst-eu.net>
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
-
-/* news block */
 .block_news_msg h3 {
     font-size: 1.0em;
     margin: 10px 0 0 0;
@@ -52,10 +43,10 @@
 
 
 /* view full message */
-.block_news_message, .block_news_top, .block_news_nonews {
+.block_news_message .main, .block_news_top, .block_news_nonews {
     max-width: 500px;
     border: solid black 1px;
-    margin: 10px auto 10px auto;
+    margin: 10px 0;
     padding: 10px;
 }
 
@@ -99,16 +90,6 @@
 
 .block_news_message .message {
     padding-top: 5px;
-}
-
-.block_news_message #prevnextlinks {
-    margin: 20px 0 0 0;
-    position: relative;
-}
-
-.block_news_message #prevnextlinks #prevlink {
-    position: absolute;
-    right:0px;
 }
 
 .block_news_message #editicons #hideurl,

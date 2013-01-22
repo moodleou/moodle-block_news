@@ -15,12 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Renderer code for messages in full and short (block) layouts
+ * Renderer code for messages in full and short (block) layouts.
  *
- * @package    blocks
- * @subpackage news
- * @copyright 2011 The Open University
- * @author Jon Sharp <jonathans@catalyst-eu.net>
+ * @package block_news
+ * @copyright 2013 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,9 +27,9 @@ if (!defined('MOODLE_INTERNAL')) {
 }
 
 /**
- * Full message class (for display in the single message or all messages pages)
- * @package    blocks
- * @subpackage news
+ * Full message class (for display in the single message or all messages pages).
+ *
+ * @package block_news
  */
 class block_news_message_full implements renderable {
 
@@ -143,9 +141,9 @@ class block_news_message_full implements renderable {
 
 
 /**
- * Short message class (for display in the block)
- * @package    blocks
- * @subpackage news
+ * Short message class (for display in the block).
+ *
+ * @package block_news
  */
 class block_news_message_short implements renderable {
 
@@ -197,9 +195,9 @@ class block_news_message_short implements renderable {
 
 
 /**
- * block_news renderer
- * @package    blocks
- * @subpackage news
+ * Main renderer.
+ *
+ * @package block_news
  */
 class block_news_renderer extends plugin_renderer_base {
 
@@ -231,6 +229,17 @@ class block_news_renderer extends plugin_renderer_base {
             $blockcontext->id, 'block_news', 'message', $nmsg->id);
 
         $out = '';
+
+        // Link to previous message (outside box).
+        if ($nmsg->prevurl && $nmsg->prevurl !== 'end') {
+            $out .= $this->output->container_start('prevlink');
+            $out .= link_arrow_left(get_string('rendermsgprev', 'block_news'),
+                    $nmsg->prevurl);
+            $out .= $this->output->container_end();
+        }
+
+        // Start main message box.
+        $out .= $this->output->container_start('main');
         $out .= $this->output->box($nmsg->messagedate, 'messagedate ' . $nmsg->classes);
         $out .= $this->output->box(format_string($nmsg->title), 'title ' . $nmsg->classes);
 
@@ -244,32 +253,6 @@ class block_news_renderer extends plugin_renderer_base {
 
         $out .= $this->output->container(format_text($nmsg->message, $nmsg->messageformat),
             'message ' . $nmsg->classes);
-
-        $out .= $this->output->box_start(null, 'prevnextlinks');
-        if ($nmsg->nexturl) {
-            if ($nmsg->nexturl == 'end') {
-                $out .= html_writer::tag('span', '&nbsp;', // At latest message
-                    array('id' => 'nextlink', 'class' => 'endlist'));
-            } else {
-                $out .= html_writer::tag('a', $this->output->larrow(). ' ' .
-                    get_string('rendermsgnext', 'block_news'),
-                    array('href' => $nmsg->nexturl, 'id' => 'nextlink'));
-            }
-        }
-
-        if ($nmsg->prevurl) {
-            if ($nmsg->prevurl == 'end') {
-                $out .= html_writer::tag('span', '&nbsp;', // At earliest message
-                    array('id' => 'prevlink', 'class' => 'endlist'));
-            } else {
-                $out .= html_writer::tag('a',
-                    get_string('rendermsgprev', 'block_news') .
-                    ' ' . $this->output->rarrow(),
-                    array('href' => $nmsg->prevurl, 'id' => 'prevlink'));
-            }
-        }
-
-        $out .= $this->output->box_end('prevnextlinks');
 
         // attached files
         $fs = get_file_storage();
@@ -320,6 +303,14 @@ class block_news_renderer extends plugin_renderer_base {
             $out .= $this->output->container($note, 'note ');
         }
         $out .= $this->output->box_end(null, 'notes');
+
+        $out .= $this->output->container_end();
+        if ($nmsg->nexturl && $nmsg->nexturl !== 'end') {
+            $out .= $this->output->container_start('nextlink');
+            $out .= link_arrow_right(get_string('rendermsgnext', 'block_news'),
+                    $nmsg->nexturl);
+            $out .= $this->output->container_end();
+        }
 
         return $this->output->container($out, 'block_news_message ' . $nmsg->classes);
     }
