@@ -316,6 +316,22 @@ class block_news_renderer extends plugin_renderer_base {
     }
 
     /**
+     * @param string $date News date
+     * @param string $title News title
+     * @return string HTML code for displaying the news heading.
+     */
+    protected function render_block_news_message_heading($date, $title) {
+        return $this->output->heading($date . $title, 3);
+    }
+
+    /**
+     * @param moodle_url $url URL of the view link
+     * @return string HTML code for displaying the view link.
+     */
+    protected function render_block_news_message_link($url) {
+        return $this->output->action_link($url, get_string('rendermsgview', 'block_news'));
+    }
+    /**
      * @param block_news_message_short $nmsg Renderable data
      * @return string HTML
      */
@@ -325,14 +341,15 @@ class block_news_renderer extends plugin_renderer_base {
         $out = '';
         $out .= $this->output->container_start('block_news_msg');
 
-        $date = html_writer::tag('span', $nmsg->messagedate, array('class' => 'block_news_msg_messagedate'));
-        $title = html_writer::tag('span', format_string($nmsg->title), array('class' => 'block_news_msg_title'));
+        $date = html_writer::tag('span', $nmsg->messagedate,
+                array('class' => 'block_news_msg_messagedate'));
+        $title = html_writer::tag('span', format_string($nmsg->title),
+                array('class' => 'block_news_msg_title'));
         if (!empty($nmsg->link)) {
             $title = $this->output->action_link($nmsg->link, $title);
         }
 
-        $out .= $this->output->heading($date . $title, 3);
-
+        $out .= $this->render_block_news_message_heading($date, $title);
         if (!empty($nmsg->author)) {
             $out .= $this->output->container(format_string($nmsg->author),
                 'block_news_msg_author');
@@ -342,8 +359,7 @@ class block_news_renderer extends plugin_renderer_base {
 
         // (View)
         $out .= $this->output->container_start('link');
-        $out .= $this->output->action_link($nmsg->viewlink,
-            get_string('rendermsgview', 'block_news'));
+        $out .= $this->render_block_news_message_link($nmsg->viewlink);
         $out .= $this->output->container_end();
         $out .= $this->output->container($nmsg->accesshide, 'accesshide');
         $out .= $this->output->container_end();
