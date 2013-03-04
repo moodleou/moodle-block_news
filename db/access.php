@@ -19,7 +19,7 @@
  *
  * @package    blocks
  * @subpackage news
- * @copyright 2011 The Open University
+ * @copyright 2013 The Open University
  * @author Jon Sharp <jonathans@catalyst-eu.net>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,6 +29,19 @@ if (!defined('MOODLE_INTERNAL')) {
 }
 
 $capabilities = array(
+
+    'block/news:addinstance' => array(
+        'riskbitmask' => RISK_SPAM | RISK_XSS,
+
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_BLOCK,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        ),
+
+        'clonepermissionsfrom' => 'moodle/site:manageblocks'
+    ),
 
     'block/news:add' => array(
         'captype' => 'write',
