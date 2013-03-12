@@ -77,6 +77,8 @@ $string['settingsmaxpercron'] = 'Cron feed limit';
 $string['settingsmaxpercron_info'] = 'Maximum time spent per cron run on updating feeds';
 $string['verbosecron'] = 'List each feed as retrieved in cron';
 $string['verbosecron_info'] = 'If you turn this option on, all feeds being retrieved are shown in cron. Otherwise it only shows feeds which take longer than 5 seconds.';
+$string['settingshideauthor'] = 'Hide author';
+$string['settingshideauthor_info'] = 'Set default value for the hide author option when posting news.';
 
 // edit
 $string['msgeditpghdr'] = 'News';

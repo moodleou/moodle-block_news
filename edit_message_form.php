@@ -136,7 +136,7 @@ class block_news_edit_message_form extends moodleform {
 
         $mform->addElement('selectyesno', 'hideauthor',
             get_string('msgedithideauthor', 'block_news'));
-        $mform->setDefault('hideauthor', 0);
+        $mform->setDefault('hideauthor', (int) get_config('block_news', 'block_news_hideauthor'));
 
         $mform->addElement('static', 'lastupdated',
                     get_string('msgeditlastupdated', 'block_news'));

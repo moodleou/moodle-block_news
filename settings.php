@@ -70,5 +70,9 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('block_news/verbosecron',
            get_string('verbosecron', 'block_news'),
            get_string('verbosecron_info', 'block_news'), 0));
+
+    $settings->add(new admin_setting_configcheckbox('block_news/block_news_hideauthor',
+           get_string('settingshideauthor', 'block_news'),
+           get_string('settingshideauthor_info', 'block_news'), 0));
 }
 
