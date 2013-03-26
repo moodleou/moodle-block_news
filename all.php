@@ -15,11 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Display all messages
+ * Displays all messages from news block.
  *
- * @package    blocks
- * @subpackage news
- * @copyright 2011 The Open University
+ * @package block_news
+ * @copyright 2013 The Open University
  * @author Jon Sharp <jonathans@catalyst-eu.net>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -44,7 +43,6 @@ $title = empty($title) ? get_string('pluginname', 'block_news') : $title;
 $title .= ': ' . get_string('allmessages', 'block_news');
 $PAGE->set_title($csemod->cseshortname . ': ' . $title);
 $PAGE->set_heading($csemod->csefullname);
-$PAGE->navbar->add(get_string('allmessages', 'block_news'));
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading($title);
