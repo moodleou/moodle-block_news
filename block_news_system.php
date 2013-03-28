@@ -893,11 +893,7 @@ class block_news_system {
         $footer=atom_standard_footer();
 
         $feedxml=$header.$body.$footer;
-        if (! empty($items)) {
-            return $feedxml;
-        } else {
-            return false;
-        }
+        return $feedxml;
     }
 
 
