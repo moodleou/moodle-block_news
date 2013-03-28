@@ -30,6 +30,7 @@ if (!defined('MOODLE_INTERNAL')) {
 }
 
 // general
+$string['news:addinstance'] = 'Add a new news block';
 $string['pluginname'] = 'News';
 $string['defaultblocktitle'] = '(new News block)';
 $string['addnewmessage'] = 'Add new message';
