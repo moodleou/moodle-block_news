@@ -107,7 +107,7 @@ $string['rendermsgfuture'] = 'This message does not display to students until {$
 $string['rendermsgnext'] = 'Next (newer) message';
 $string['rendermsgprev'] = 'Previous (older) message';
 $string['rendermsgview'] = '(View)';
-$string['rendermsgaccesshide'] = 'View news {$a}';
+$string['rendermsgaccesshide'] = 'View {$a}';
 
 // message class
 $string['msgclassconfdel'] = 'Are you sure you want to delete the message \'{$a}\'? This action cannot be undone';

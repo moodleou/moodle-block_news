@@ -116,7 +116,7 @@ class block_news extends block_base {
             }
 
             if ($newmsg) {
-                $this->title .= ' ('.get_string('new', 'block_news').')';
+                $this->title = $output->render_block_news_new_messages($this->title);
             }
 
             $this->content->text .= $output->container_end();

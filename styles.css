@@ -20,7 +20,11 @@
 }
 
 .block_news_msg .link {
-    text-align: right;
+    font-weight: bold;
+}
+
+.block_news_msg h3.main {
+    margin-bottom: 5px;
 }
 
 .block_news .content .footer {

@@ -182,7 +182,7 @@ class block_news_message_short implements renderable {
                                                 get_string('dateformat', 'block_news'));
         $this->messagevisible = $bnm->get_messagevisible();
         $this->messageformat = $bnm->get_messageformat();
-        $this->accesshide = get_string('rendermsgaccesshide', 'block_news', $count); //View news 2
+        $this->accesshide = get_string('rendermsgaccesshide', 'block_news', $this->title);
 
         $usr = $bnm->get_user();
         if ($bnm->get_hideauthor() || $usr == null) {
@@ -328,8 +328,9 @@ class block_news_renderer extends plugin_renderer_base {
      * @param moodle_url $url URL of the view link
      * @return string HTML code for displaying the view link.
      */
-    protected function render_block_news_message_link($url) {
-        return $this->output->action_link($url, get_string('rendermsgview', 'block_news'));
+    protected function render_block_news_message_link($url, $extralinktext = '') {
+        return $this->output->action_link($url,
+                get_string('rendermsgview', 'block_news') . $extralinktext);
     }
     /**
      * @param block_news_message_short $nmsg Renderable data
@@ -359,11 +360,20 @@ class block_news_renderer extends plugin_renderer_base {
 
         // (View)
         $out .= $this->output->container_start('link');
-        $out .= $this->render_block_news_message_link($nmsg->viewlink);
+        $accesshidetxt = html_writer::tag('span', $nmsg->accesshide, array('class' => 'accesshide'));
+        $out .= $this->render_block_news_message_link($nmsg->viewlink, $accesshidetxt);
         $out .= $this->output->container_end();
-        $out .= $this->output->container($nmsg->accesshide, 'accesshide');
         $out .= $this->output->container_end();
 
         return $this->output->container($out, 'block_news '.$nmsg->classes);
+    }
+
+    /**
+     * Adds (new) to the News block title if there are new messages
+     * @param string $newstitle News block title
+     * @return string text
+     */
+    public function render_block_news_new_messages($newstitle) {
+        return $newstitle . ' ('.get_string('new', 'block_news') . ')';
     }
 }
