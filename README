@@ -1,7 +1,7 @@
 News block
 ==========
 
-Copyright 2012 The Open University
+Copyright 2013 The Open University
 
 
 This is a news block that you can install into standard Moodle. 
@@ -26,15 +26,10 @@ This block has the following features:
 
 Branch:
 
-This is the development branch including latest, untested code. If you would
-like a tested version equivalent to an OU live release, please switch to a
-branch that matches your Moodle version (e.g. MOODLE_22_STABLE) using the
-above dropdown.
+Tested, live code based on our Moodle 2.4 release.
 
-This branch is designed to run against the Moodle version that we (the OU) are
-currently using on our development servers. This is not always the latest
-Moodle version: typically, our development servers are updated about four
-months after a Moodle release. 
+Please note that this code is tested on OU systems but we rely on the
+community for testing on other systems.
 
 Support:
 
@@ -65,7 +60,7 @@ community for testing on other systems.
 
 Requires:
 
-Moodle 2.3+
+Moodle 2.4+
 Postgres / MySQL
 
 Install:
