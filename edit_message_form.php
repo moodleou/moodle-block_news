@@ -76,6 +76,7 @@ class block_news_edit_message_form extends moodleform {
 
         $mform->addElement('text', 'title', get_string('msgedittitle', 'block_news'),
             array('size'=>'40'));
+        $mform->setType('title', PARAM_TEXT);
         $mform->addRule('title', null, 'required', null, 'client');
         $mform->addRule('title', null, 'maxlength', 80, 'server');
 
