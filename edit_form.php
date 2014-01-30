@@ -135,6 +135,6 @@ $blockinstanceid    = optional_param('bi', 0, PARAM_INTEGER);
 
 require_login(); // redirect to login page if not logged in
 
-$context = get_context_instance(CONTEXT_SYSTEM);
+$context = context_system::instance();
 
 $mform =& $this->_form;

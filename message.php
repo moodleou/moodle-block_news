@@ -73,7 +73,7 @@ $output = $PAGE->get_renderer('block_news');
 
 // stop display to students of hidden/future msgs
 // shouldnt need following check unless hand crafted URL
-$blockcontext = get_context_instance(CONTEXT_BLOCK, $blockinstanceid);
+$blockcontext = context_block::instance($blockinstanceid);
 if (!$bnm->is_visible_to_students()) {
     require_capability('block/news:viewhidden', $blockcontext); // if-not: exit with error
 }

@@ -271,7 +271,7 @@ class block_news_message {
         $id = $DB->insert_record('block_news_messages', $data, true);
 
         // save files
-        $context = get_context_instance(CONTEXT_BLOCK, $data->blockinstanceid);
+        $context = context_block::instance($data->blockinstanceid);
         if ($data->attachments) {
             file_save_draft_area_files($data->attachments, $context->id,
                 'block_news', 'attachment', $id, array('subdirs' => 0));
@@ -304,7 +304,7 @@ class block_news_message {
         $DB->update_record('block_news_messages', $data);
 
         // save files.
-        $context = get_context_instance(CONTEXT_BLOCK, $data->blockinstanceid);
+        $context = context_block::instance($data->blockinstanceid);
         if ($data->attachments) {
             file_save_draft_area_files($data->attachments, $context->id, 'block_news',
              'attachment', $data->id, array('subdirs' => 0));
@@ -324,7 +324,7 @@ class block_news_message {
      */
     public function delete() {
         global $DB, $USER, $COURSE;
-        $context = get_context_instance(CONTEXT_BLOCK, $this->blockinstanceid);
+        $context = context_block::instance($this->blockinstanceid);
         $DB->delete_records('block_news_messages', array('id' => $this->id));
 
         // delete files

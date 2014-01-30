@@ -36,7 +36,7 @@ $PAGE->set_url($murl);
 
 // no login required
 
-$context = get_context_instance(CONTEXT_BLOCK, $blockinstanceid);
+$context = context_block::instance($blockinstanceid);
 $PAGE->set_context($context);
 
 if (!isset($CFG->enablerssfeeds) || !$CFG->enablerssfeeds) {

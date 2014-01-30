@@ -49,7 +49,7 @@ echo $OUTPUT->heading($title);
 
 echo $OUTPUT->container_start('block_news_top', null);
 // show Add if permittted
-$blockcontext = get_context_instance(CONTEXT_BLOCK, $blockinstanceid);
+$blockcontext = context_block::instance($blockinstanceid);
 if (has_capability('block/news:add', $blockcontext)) {
     echo $OUTPUT->single_button($CFG->wwwroot . '/blocks/news/edit.php?bi=' .
         $blockinstanceid . '&mode=all', 'Add a new message', 'Add news', null,

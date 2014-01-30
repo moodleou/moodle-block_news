@@ -59,7 +59,7 @@ function block_news_pluginfile($course, $birecord_or_cm, $context, $filearea, $a
         send_file_not_found();
     }
 
-    if ($parentcontext = get_context_instance_by_id($birecord_or_cm->parentcontextid)) {
+    if ($parentcontext = context::instance_by_id($birecord_or_cm->parentcontextid)) {
         if ($parentcontext->contextlevel == CONTEXT_USER) {
             // force download on all personal pages including /my/
             //because we do not have reliable way to find out from where this is used
@@ -89,7 +89,7 @@ function block_news_init_page($blockinstanceid, $title) {
     }
     $PAGE->set_pagelayout('incourse');
     // coursecontext set_context should have been set to block context, but this causes problems
-    $coursecontext = get_context_instance(CONTEXT_COURSE, $csemod->course->id);
+    $coursecontext = context_course::instance($csemod->course->id);
     $PAGE->set_context($coursecontext);
     require_course_login($csemod->course);
 
@@ -115,7 +115,7 @@ function block_news_get_course_mod_info($blockinstanceid) {
     $csemod = new StdClass();
 
     // context instance
-    $cibi = get_context_instance(CONTEXT_BLOCK, $blockinstanceid);
+    $cibi = context_block::instance($blockinstanceid);
     if (!$cibi) {
         return null;
     }

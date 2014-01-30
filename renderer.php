@@ -110,7 +110,7 @@ class block_news_message_full implements renderable {
         // if a feed message (newsfeedid != 0) dont show edit etc icons
         if ($bnm->get_newsfeedid() == 0) {
             // context for access checks
-            $blockcontext = get_context_instance(CONTEXT_BLOCK, $bnm->get_blockinstanceid());
+            $blockcontext = context_block::instance($bnm->get_blockinstanceid());
             if (has_capability('block/news:hide', $blockcontext)) {
                 $this->hideicon = new pix_icon('t/' . $this->showhideact, $this->showhideact);
                     // eg 't/hide', 'hide'
@@ -224,7 +224,7 @@ class block_news_renderer extends plugin_renderer_base {
         global $CFG;
 
         require_once($CFG->libdir . '/filelib.php');
-        $blockcontext = get_context_instance(CONTEXT_BLOCK, $nmsg->blockinstanceid);
+        $blockcontext = context_block::instance($nmsg->blockinstanceid);
         $nmsg->message = file_rewrite_pluginfile_urls($nmsg->message, 'pluginfile.php',
             $blockcontext->id, 'block_news', 'message', $nmsg->id);
 

@@ -173,7 +173,7 @@ class block_news_system {
             return $SESSION->block_news_user_groupings[$COURSE->id];
         }
 
-        $context = get_context_instance(CONTEXT_COURSE, $COURSE->id);
+        $context = context_course::instance($COURSE->id);
         if (has_capability('moodle/site:accessallgroups', $context)) {
             //if the user has the allgroups capability they can see everything.
             $g = groups_get_all_groupings($COURSE->id);
@@ -230,7 +230,7 @@ class block_news_system {
             return $output;
         }
 
-        $context = get_context_instance(CONTEXT_COURSE, $COURSE->id);
+        $context = context_course::instance($COURSE->id);
         if (has_capability('moodle/site:accessallgroups', $context)) {
             return $output;
         }
@@ -926,7 +926,7 @@ class block_news_system {
         $it->author = $author;
 
         // convert any @@PLUGINFILE@@ links to real URLs
-        $context = get_context_instance(CONTEXT_BLOCK, $bnm->get_blockinstanceid());
+        $context = context_block::instance($bnm->get_blockinstanceid());
         $it->content = file_rewrite_pluginfile_urls($bnm->get_message(), 'pluginfile.php',
                              $context->id, 'block_news', 'message', $bnm->get_id(), null);
 

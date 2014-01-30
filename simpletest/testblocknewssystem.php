@@ -229,7 +229,7 @@ class news_system_test extends UnitTestCaseUsingDatabase {
 
     public function load_instance($id = 1) {
         // standard block_instance table
-        $coursecontext = get_context_instance(CONTEXT_COURSE, $this->course->id);
+        $coursecontext = context_course::instance($this->course->id);
         $instance = new stdClass;
         $instance->id = $id;
         $instance->parentcontextid = $coursecontext->id;

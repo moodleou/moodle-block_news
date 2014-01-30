@@ -62,7 +62,7 @@ class block_news extends block_base {
         }
 
         $blockinstanceid=$this->instance->id;
-        $blockcontext = get_context_instance(CONTEXT_BLOCK, $blockinstanceid);
+        $blockcontext = context_block::instance($blockinstanceid);
 
         $this->content = new stdClass;
 

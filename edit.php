@@ -63,10 +63,10 @@ if (empty($blockinstanceid)) {
 }
 $bns = block_news_system::get_block_settings($blockinstanceid);
 
-$context = get_context_instance(CONTEXT_SYSTEM);
+$context = context_system::instance();
 
 // Ensure user can edit/add
-$blockcontext = get_context_instance(CONTEXT_BLOCK, $blockinstanceid);
+$blockcontext = context_block::instance($blockinstanceid);
 require_capability('block/news:add', $blockcontext);
 
 $PAGE->set_context($context);
