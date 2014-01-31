@@ -15,12 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * News Block Message class
+ * News block message.
  *
- * @package    blocks
- * @subpackage news
- * @copyright 2011 The Open University
- * @author Jon Sharp <jonathans@catalyst-eu.net>
+ * @package block_news
+ * @copyright 2014 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -53,10 +51,8 @@ class block_news_message {
     protected $timemodified;
     protected $userid;
     protected $groupingid;
-    // properties filled in from user object in constructor for efficiency
-    protected $u_id;
-    protected $u_firstname;
-    protected $u_lastname;
+
+    protected $user;
 
     /**
      * Constructor
@@ -66,9 +62,13 @@ class block_news_message {
      */
     public function __construct($mrec) {
         // assign the properties
+        $this->user = new stdClass;
         foreach ((array)$mrec as $field => $value) {
             if (property_exists($this, $field)) {
                 $this->{$field} = $value;
+            } else if (strpos($field, 'u_') === 0) {
+                $subfield = substr($field, 2);
+                $this->user->{$subfield} = $value;
             }
         }
     }
@@ -185,16 +185,11 @@ class block_news_message {
      * @return StdClass Author user details
      */
     public function get_user() {
-        if ($this->u_id == null) {
+        if (empty($this->user->id)) {
             return null;
         } else {
-            $user= new StdClass();
-            $user->id=$this->u_id;
-            $user->firstname=$this->u_firstname;
-            $user->lastname=$this->u_lastname;
+            return clone($this->user);
         }
-
-        return $user;
     }
 
     /**

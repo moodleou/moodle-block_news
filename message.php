@@ -17,10 +17,8 @@
 /**
  * Display single message
  *
- * @package    blocks
- * @subpackage news
- * @copyright 2011 The Open University
- * @author Jon Sharp <jonathans@catalyst-eu.net>
+ * @package block_news
+ * @copyright 2014 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 require_once(dirname(__FILE__) . '/../../config.php');
@@ -33,7 +31,7 @@ $mode            = optional_param('mode', '', PARAM_TEXT);
 $action          = optional_param('action', '', PARAM_TEXT);
 $confirm         = optional_param('confirm', '', PARAM_TEXT);
 
-$sql=block_news_system::MSGSQLHDR .
+$sql = block_news_system::get_message_sql_start() .
     'WHERE {block_news_messages}.id = ?';
 $mrec = $DB->get_record_sql($sql, array('id' => $id));
 

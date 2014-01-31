@@ -15,12 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Message edit
+ * Message edit.
  *
- * @package    blocks
- * @subpackage news
- * @copyright 2011 The Open University
- * @author Jon Sharp <jonathans@catalyst-eu.net>
+ * @package block_news
+ * @copyright 2014 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -40,7 +38,7 @@ $mode            = optional_param('mode', '', PARAM_TEXT); // where from: all|on
 
 if ($id) {
     $action = EDIT;
-    $sql=block_news_system::MSGSQLHDR .
+    $sql = block_news_system::get_message_sql_start() .
         'WHERE {block_news_messages}.id = ?';
     $mrec = $DB->get_record_sql($sql, array('id' => $id));
 
