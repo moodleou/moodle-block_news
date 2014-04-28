@@ -1,0 +1,175 @@
+This file contains a sequence of test cases for the modified news feed
+feature that now allows the user of a course short name in the URL
+instead of the news feed block instance id.
+
+Each single section is independent so that tests can be completed
+without the need to do all of them. The exception is the first section;
+you need to complete the first section in order to have the news feeds
+in place that other parts of the test require.
+
+Each section has a unique (within this test case) three letter code and
+the steps are numbered so that the location where a failure occurs can
+be reported.
+
+Steps are shown in the following format:
+
+XXX01 / U.S1 [change]
+  Do something
+  - Check something
+
+If you are required to be logged in the unique step number is followed
+by the user that you should be logged in as for that step. If the user
+changes from the previous step, the word [Change] will be noted.
+
+Some steps don't have specific items to check. In that case, the check
+'passes' if there are no errors or warnings while completing the task.
+
+
+Initial setup
+=============
+
+Please set up a standard test course with a course short name of
+FEEDTEST
+
+Create two users with a username of user1 and user2. Enrol them both onto
+the FEEDTEST course.
+
+Note: The testing of the news feed itself needs to be carried out in a
+browser that is not logged in to your Moodle test server. Therefore it will
+probaly be best to have two browsers open, one logged in to the test
+server as admin and the other not logged in to the test server at all.
+
+
+CRG Creating groups
+===================
+
+CRG01 / admin
+  From the FEEDTEST course page create a new group. Set the group name to
+  Group1 and leave the the other setting as default.
+  Add user1 to this group.
+
+CRG02 / admin
+  Create a new grouping. Set the grouping name to Grouping1 and leave the
+  other settings as default.
+  Add the group Group1 to this grouping.
+
+
+CRN Creating News blocks
+========================
+
+CRN01 / admin
+  Create a News block with a Block title of NFeed1. Set Grouping
+  support to 'Yes' and leave all other settings as default.
+  Move NFeed1 to the right hand column.
+
+CRN02 / admin
+  Add a news item to news feed NFeed1 with the title NItem1.1 and 'News'
+  in the Text field.
+  Set Grouping to 'Grouping1' and leave all other settings as default.
+
+CRN03 / admin
+  Create a second News block with a Block title of NFeed2. Leave all
+  other settings as default.
+  Move NFeed2 to the right hand column.
+
+CRN04 / admin
+  Add a news item to news feed NFeed2 with the title NItem2.1 and 'News'
+  in the Text field.
+
+
+Feeds
+=====
+
+The following are the different feeds that will be displayed in your
+browser when performing the following tests. They are listed here for
+clarity and will be referred to in the tests. There are no tasks to
+actually perform in this section.
+
+FDS01
+  This is a complete and correct feed, it has one news item.
+
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <id>https://www.someserver.org/blocks/news/feed.php?bi=32</id>
+  <updated>2014-02-27T09:35:39+00:00</updated>
+  <title>FEEDTEST - NFeed1</title>
+  <link href="https://www.someserver.org/blocks/news/feed.php?bi=32" rel="self"></link>
+  <link href="https://www.someserver.org/course/view.php?id=11" rel="alternate"></link>
+  <generator>Moodle</generator>
+  <rights>&#169; 2014 dev1</rights>
+  <logo>https://www.someserver.org/theme/image.php/ou/core/1393258695/i/rsssitelogo</logo>
+  <entry>
+    <title>NItem1.1</title>
+    <link href="https://www.someserver.org/blocks/news/message.php?m=44" rel="alternate"></link>
+    <updated>2014-02-27T09:30:00+00:00</updated>
+    <author>
+      <name>Admin User</name>
+    </author>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>News</p></div></content>
+    <id>https://www.someserver.org/blocks/news/message.php?m=44</id>
+  </entry>
+</feed>
+
+FDS02
+  This shows a feed the sanme as in FDS01 except that there are no news
+  items. This means the user is prevented from seeing the news items.
+
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <id>https://www.someserver.org/blocks/news/feed.php?bi=32</id>
+  <updated>2014-02-27T09:35:39+00:00</updated>
+  <title>FEEDTEST - NFeed1</title>
+  <link href="https://www.someserver.org/blocks/news/feed.php?bi=32" rel="self"></link>
+  <link href="https://www.someserver.org/course/view.php?id=11" rel="alternate"></link>
+  <generator>Moodle</generator>
+  <rights>&#169; 2014 dev1</rights>
+  <logo>https://www.someserver.org/theme/image.php/ou/core/1393258695/i/rsssitelogo</logo>
+</feed>
+
+
+Feed test with grouping support
+===============================
+
+FGY01 / admin [change]
+  Set news block NFeed1 is the uppermost news block.
+
+FGY02 / Not signed in
+  Copy and past the following URL into a browser, substituting www.someserver.org
+  with the base URL of your Moodle installation.
+
+  https://www.someserver.org/blocks/news/feed.php?shortname=FEEDTEST&username=user1
+
+  - Verify that you see a news feed as shown in FDS01.
+
+FGY03 / Not signed in
+  Copy and past the following URL into a browser, substituting www.someserver.org
+  with the base URL of your Moodle installation.
+
+  https://www.someserver.org/blocks/news/feed.php?shortname=FEEDTEST&username=user2
+
+  - Verify that you see a news feed as shown in FDS02.
+
+
+Feed test without grouping support
+==================================
+
+FGN01 / admin [change]
+  Make sure news block NFeed2 is the uppermost news block.
+
+FGN02 / Not signed in
+  Copy and past the following URL into a browser, substituting www.someserver.org
+  with the base URL of your Moodle installation.
+
+  https://www.someserver.org/blocks/news/feed.php?shortname=FEEDTEST&username=user1
+
+  - Verify that you see a news feed as shown in FDS01 except that the title and news
+  item refer to NFeed2 and NItem1.1 respectively.
+
+FGN03 / Not signed in
+  Copy and past the following URL into a browser, substituting www.someserver.org
+  with the base URL of your Moodle installation.
+
+  https://www.someserver.org/blocks/news/feed.php?shortname=FEEDTEST&username=user2
+
+  - Verify that you see a news feed as shown in FDS02 except that the title and news
+  item refer to NFeed2

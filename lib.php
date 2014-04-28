@@ -209,3 +209,74 @@ function block_news_get_new_time($oldtime, $offset) {
         return $b;
     }
 }
+
+/**
+ * Obtain the top news block given the course short name.
+ *
+ * @param integer $courseid
+ * @param string $shortname Course shortname.
+ * @return integer News block instance id, or zero if no news blocks found.
+ */
+function block_news_get_top_news_block($courseid) {
+    global $DB;
+
+    $context = context_course::instance($courseid);
+
+    // Get a list of news blocks sorted by weight, i.e. which one is at the top.
+    $sql = "SELECT bp.blockinstanceid
+              FROM {block_positions} bp
+              JOIN {block_instances} bi ON bi.id = bp.blockinstanceid
+             WHERE bi.parentcontextid = :parentcontextid AND bi.blockname = 'news'
+          ORDER BY bp.weight ASC";
+    $params = array('parentcontextid' => $context->id);
+    $newsblocks = $DB->get_records_sql($sql, $params, 0, 1);
+
+    if (empty($newsblocks)) {
+        return 0;
+    }
+
+    return key($newsblocks);
+}
+
+/**
+ * Get a list of the groupsings that apply in the current context for use when working
+ * out which messages to display.  This will be because the user is a member of particular
+ * groupings and groupings support is enabled or some groupings have been specified in a
+ * querystring and specified using set_user_groupingids().
+ * @return string - Comma delimited string of groupingids, empty if none.
+ */
+function block_news_get_groupingids($courseid, $userid) {
+    global $DB;
+
+    $context = context_course::instance($courseid);
+    if (has_capability('moodle/site:accessallgroups', $context, $userid)) {
+        // If the user has the allgroups capability they can see everything.
+        $allgroupings = groups_get_all_groupings($courseid);
+        $groupings = array();
+        foreach ($allgroupings as $grouping) {
+            $groupings[] = $grouping->id;
+        }
+
+        return $groupings;
+    }
+
+    $sql = 'SELECT DISTINCT({groupings}.id)
+              FROM {user}
+              JOIN {groups_members} ON {user}.id = {groups_members}.userid
+              JOIN {groupings_groups} ON {groups_members}.groupid = {groupings_groups}.groupid
+              JOIN {groupings} ON {groupings_groups}.groupingid = {groupings}.id
+             WHERE {user}.id = ? AND {groupings}.courseid = ?
+          ORDER BY {groupings}.id ASC';
+    $results = $DB->get_records_sql($sql, array($userid, $courseid));
+
+    $groupings = '';
+    foreach ($results as $result) {
+        // Add a comma delimiter if $groupings already has a value.
+        if ($groupings !== '') {
+            $groupings .= ',';
+        }
+        $groupings .= $result->id;
+    }
+
+    return $groupings;
+}

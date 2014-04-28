@@ -1,0 +1,34 @@
+= News Block =
+
+== Introduction ==
+
+This document currently only contains functionality information about
+the news feed feature of the news block at present, not the
+functionality of the whole news block feature.
+
+
+== News block feed ==
+
+=== Description ===
+
+A URL may be used to obtain the Atom feed of a single news block. This
+can be the feed of either a specific news block or the uppermost news
+block on a course page for a specific user.
+
+To obtain the feed of a specific news block you add a URL parameter for
+the block instance id, and optionally a URL parameter for any grouping
+ids. Multiple grouping ids are separated by commas.
+
+Examples
+http://www.someserver.org/blocks/news/feed.php?bi=32
+http://www.someserver.org/blocks/news/feed.php?bi=32&groupingsids=85
+http://www.someserver.org/blocks/news/feed.php?bi=32&groupingsids=85,125
+
+To obtain the feed of the uppermost news block on a course page for a
+specific user, you add a URL parameter for the username and one for the
+course short name.
+
+Example
+http://www.someserver.org/blocks/news/feed.php?shortname=NEWSBLOCK&username=fred1
+
+- End -

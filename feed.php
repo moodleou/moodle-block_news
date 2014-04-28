@@ -27,8 +27,30 @@
 require_once(dirname(__FILE__) . '/../../config.php');
 require_once('block_news_system.php');
 
-$blockinstanceid = required_param('bi', PARAM_INT);
+$blockinstanceid = optional_param('bi', 0, PARAM_INT);
+$shortname = optional_param('shortname', '', PARAM_ALPHANUMEXT);
 $groupingids = optional_param('groupingsids', 0, PARAM_SEQUENCE);
+
+// Decide which block instance to use. The bi parameter takes precedence if both
+// are provided.
+if ($blockinstanceid == 0 && $shortname === '') {
+    // One of the params is required.
+    throw new moodle_exception(get_string('missingparam', 'error', 'bi/shortname'));
+} else if ($shortname && $blockinstanceid == 0) {
+    global $DB;
+    // Get the required username param and the userid.
+    $username = required_param('username', PARAM_ALPHANUM);
+    $userid = $DB->get_field('user', 'id', array('username' => $username), MUST_EXIST);
+
+    // Get the course id from the course short name.
+    $courseid = $DB->get_field('course', 'id', array('shortname' => $shortname), MUST_EXIST);
+
+    // Get the top news block instance id.
+    $blockinstanceid = block_news_get_top_news_block($courseid);
+
+    // Get the grouping ids.
+    $groupingids = block_news_get_groupingids($courseid, $userid);
+}
 
 $murl = new moodle_url($CFG->wwwroot.'/blocks/news/feed.php',
                              array('blockinstanceid'=>$blockinstanceid));
