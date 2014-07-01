@@ -18,7 +18,7 @@
  * Renderer code for messages in full and short (block) layouts.
  *
  * @package block_news
- * @copyright 2013 The Open University
+ * @copyright 2014 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -182,7 +182,6 @@ class block_news_message_short implements renderable {
                                                 get_string('dateformat', 'block_news'));
         $this->messagevisible = $bnm->get_messagevisible();
         $this->messageformat = $bnm->get_messageformat();
-        $this->accesshide = get_string('rendermsgaccesshide', 'block_news', $this->title);
 
         $usr = $bnm->get_user();
         if ($bnm->get_hideauthor() || $usr == null) {
@@ -321,7 +320,7 @@ class block_news_renderer extends plugin_renderer_base {
      * @return string HTML code for displaying the news heading.
      */
     protected function render_block_news_message_heading($date, $title) {
-        return $this->output->heading($date . $title, 3);
+        return $this->output->heading($date . ' ' . $title, 3);
     }
 
     /**
@@ -360,7 +359,7 @@ class block_news_renderer extends plugin_renderer_base {
 
         // (View)
         $out .= $this->output->container_start('link');
-        $accesshidetxt = html_writer::tag('span', $nmsg->accesshide, array('class' => 'accesshide'));
+        $accesshidetxt = html_writer::tag('span', ' ' . $nmsg->title, array('class' => 'accesshide'));
         $out .= $this->render_block_news_message_link($nmsg->viewlink, $accesshidetxt);
         $out .= $this->output->container_end();
         $out .= $this->output->container_end();
