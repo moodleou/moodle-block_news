@@ -110,10 +110,11 @@ class restore_news_block_structure_step extends restore_structure_step {
                     }
                     $message->blockinstanceid = $this->task->get_blockid();
                     $newid = $DB->insert_record('block_news_messages', $message);
+                    $this->set_mapping('block_news_message', $oldid, $newid);
 
-                    $this->add_related_files('block_news', 'attachment', 'news_message',
+                    $this->add_related_files('block_news', 'attachment', 'block_news_message',
                             null, $oldid);
-                    $this->add_related_files('block_news', 'message', 'news_message', null, $oldid);
+                    $this->add_related_files('block_news', 'message', 'block_news_message', null, $oldid);
                 }
             }
         }
