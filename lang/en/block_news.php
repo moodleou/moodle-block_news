@@ -115,3 +115,7 @@ $string['news:edit'] = 'Edit a message';
 $string['news:hide'] = 'Hide or show a message';
 $string['news:delete'] = 'Delete a message';
 $string['news:viewhidden'] = 'View hidden and future messages';
+
+$string['eventmessage_created'] = 'Added news message';
+$string['eventmessage_updated'] = 'Edited news message';
+$string['eventmessage_deleted'] = 'Deleted news message';

@@ -256,7 +256,7 @@ class block_news_message {
         // no extra handling/conversion for feed messages (->message is not an array)
         if ($data->newsfeedid != 0 ) {
             $id = $DB->insert_record('block_news_messages', $data, true);
-            // no add_to_log() for feed messages
+            // No logging for feed messages.
             return $id;
         }
 
@@ -281,8 +281,11 @@ class block_news_message {
             $DB->set_field('block_news_messages', 'message', $rw_message_text, array('id' => $id));
         }
 
-        add_to_log($COURSE->id, 'block_news', 'insert message', '',
-                $data->blockinstanceid . ' ' . $id, 0, $USER->id);
+        $event = \block_news\event\message_created::create(array(
+            'objectid' => $id,
+            'context' => context_block::instance($data->blockinstanceid)
+        ));
+        $event->trigger();
 
         return $id;
     }
@@ -308,8 +311,11 @@ class block_news_message {
              'block_news', 'message', $data->id, array('subdirs' => 0), $data->message['text']);
         $DB->set_field('block_news_messages', 'message', $data->message, array('id' => $data->id));
 
-        add_to_log($COURSE->id, 'block_news', 'update message', '',
-                $data->blockinstanceid . ' ' . $data->id, 0, $USER->id);
+        $event = \block_news\event\message_updated::create(array(
+            'objectid' => $data->id,
+            'context' => context_block::instance($data->blockinstanceid)
+        ));
+        $event->trigger();
 
         return true;
     }
@@ -320,13 +326,19 @@ class block_news_message {
     public function delete() {
         global $DB, $USER, $COURSE;
         $context = context_block::instance($this->blockinstanceid);
+
+        $event = \block_news\event\message_deleted::create(array(
+            'objectid' => $this->id,
+            'context' => $context
+        ));
+        $event->add_record_snapshot('block_news_messages',
+                $DB->get_record('block_news_messages', array('id' => $this->id)));
+        $event->trigger();
+
         $DB->delete_records('block_news_messages', array('id' => $this->id));
 
-        // delete files
+        // Delete files.
         $fs = get_file_storage();
         $fs->delete_area_files($context->id, 'block_news');
-
-        add_to_log($COURSE->id, 'block_news', 'delete message', '',
-                $this->blockinstanceid . ' ' . $this->id, 0, $USER->id);
     }
 }

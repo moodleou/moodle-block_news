@@ -87,7 +87,7 @@ class block_news extends block_base {
         $sumlen=$this->bns->get_summarylength();
         if ($msgs) {
             $c=1;
-            $this->content->text .= $output->open_news_block_custom_wrapper();
+            $this->content->text = $output->open_news_block_custom_wrapper();
             $this->content->text .= $output->container_start('block_news_msglist');
 
             $newmsg = false;
@@ -129,8 +129,8 @@ class block_news extends block_base {
                         null, array('title' => get_string('msgblockviewallalt', 'block_news')));
             $this->content->footer .= $output->container_end();
         } else {
-            $this->content->text .= $output->container(get_string('msgblocknonews', 'block_news')
-                                                        , null, 'msgblocknonews');
+            $this->content->text = $output->container(
+                    get_string('msgblocknonews', 'block_news'), null, 'msgblocknonews');
             if (has_capability('block/news:viewhidden', $blockcontext)) {
                 $this->content->footer .= $output->container_start(null, 'block_news_viewall');
                 $this->content->footer .= $output->action_link(
