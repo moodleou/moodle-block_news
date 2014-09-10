@@ -33,7 +33,7 @@ $confirm         = optional_param('confirm', '', PARAM_TEXT);
 
 $sql = block_news_system::get_message_sql_start() .
     'WHERE {block_news_messages}.id = ?';
-$mrec = $DB->get_record_sql($sql, array('id' => $id));
+$mrec = $DB->get_record_sql($sql, array('id' => $id), MUST_EXIST);
 
 $blockinstanceid = $mrec->blockinstanceid;
 $bnm = new block_news_message($mrec);
