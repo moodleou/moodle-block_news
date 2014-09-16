@@ -17,10 +17,8 @@
 /**
  * Strings for component
  *
- * @package    blocks
- * @subpackage news
- * @copyright 2011 The Open University
- * @author Jon Sharp <jonathans@catalyst-eu.net>
+ * @package block_news
+ * @copyright 2014 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -107,7 +105,6 @@ $string['rendermsgfuture'] = 'This message does not display to students until {$
 $string['rendermsgnext'] = 'Next (newer) message';
 $string['rendermsgprev'] = 'Previous (older) message';
 $string['rendermsgview'] = '(View)';
-$string['rendermsgaccesshide'] = 'View {$a}';
 
 // message class
 $string['msgclassconfdel'] = 'Are you sure you want to delete the message \'{$a}\'? This action cannot be undone';

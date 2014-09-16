@@ -15,15 +15,27 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details.
+ * Strings for component
  *
- * @package block_news
- * @copyright 2014 The Open University
+ * @package    blocks
+ * @subpackage news
+ * @copyright 2011 The Open University
+ * @author Jon Sharp <jonathans@catalyst-eu.net>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+if (!defined('MOODLE_INTERNAL')) {
+    die('Direct access to this script is forbidden.');
+    // It must be included from a Moodle page
+}
 
-$plugin->version = 2014070100;
-$plugin->requires = 2013111801.00;
-$plugin->cron = 60;
+// general
+$string['pluginname'] = 'Newyddion';
+$string['allmessages'] = 'Pob neges';
+$string['new'] = 'newydd';
+
+// message render
+$string['rendermsgnext'] = 'Neges nesaf (newyddach)';
+$string['rendermsgprev'] = 'Neges blaenorol (h&#x00177;n)';
+$string['rendermsgview'] = '(Gweld)';
+$string['rendermsgaccesshide'] = 'Gweld {$a}';
