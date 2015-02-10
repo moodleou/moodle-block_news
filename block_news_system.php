@@ -599,7 +599,7 @@ class block_news_system {
         $fia = @$this->get_simplepie($fbrec->feedurl);
 
         if (isset($fia[0]->errortext)) {
-            $bnf->feederror = textlib::substr($fia[0]->errortext, 0, 255);
+            $bnf->feederror = core_text::substr($fia[0]->errortext, 0, 255);
             $DB->update_record('block_news_feeds', $bnf);
             $transaction->allow_commit();
             return;
@@ -623,7 +623,7 @@ class block_news_system {
                 $fi->newsfeedid = $bnf->id;
                 // title, message, link already set
                 // constrict title
-                $fi->title = textlib::substr($fi->title, 0, 255);
+                $fi->title = core_text::substr($fi->title, 0, 255);
                 // put author at at start of message text, allow an empty element if no author
                 $fi->message = '<div class=author>'.$fi->author.' </div>'.$fi->message;
                 unset($fi->author);
