@@ -111,6 +111,21 @@ function xmldb_block_news_upgrade($oldversion) {
         // news savepoint reached
         upgrade_block_savepoint(true, 2012033000, 'news');
     }
+
+    if ($result && $oldversion < 2015081300) {
+        // The title field is inconsistent in length and not-null state.
+        $table = new xmldb_table('block_news');
+        $field = new xmldb_field('title', XMLDB_TYPE_CHAR, '80', null, XMLDB_NOTNULL, null, null,
+                        'blockinstanceid');
+
+        // Set length and not null to match expected.
+        $dbman->change_field_precision($table, $field);
+        $dbman->change_field_notnull($table, $field);
+
+        // Savepoint reached.
+        upgrade_block_savepoint(true, 2015081300, 'news');
+    }
+    
     return $result;
 
 }

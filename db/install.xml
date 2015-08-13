@@ -8,7 +8,7 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="blockinstanceid"/>
         <FIELD NAME="blockinstanceid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" COMMENT="ID of block that these settings are for" PREVIOUS="id" NEXT="title"/>
-        <FIELD NAME="title" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false" COMMENT="Name of block" PREVIOUS="blockinstanceid" NEXT="nummessages"/>
+        <FIELD NAME="title" TYPE="char" LENGTH="80" NOTNULL="true" SEQUENCE="false" COMMENT="Name of block" PREVIOUS="blockinstanceid" NEXT="nummessages"/>
         <FIELD NAME="nummessages" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Number of messages to show" PREVIOUS="title" NEXT="summarylength"/>
         <FIELD NAME="summarylength" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Length of summary in characters, or 0 if turned off" PREVIOUS="nummessages" NEXT="hidetitles"/>
         <FIELD NAME="hidetitles" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to hide message titles, 0 to show" PREVIOUS="summarylength" NEXT="hidelinks"/>
