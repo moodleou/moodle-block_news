@@ -15,16 +15,24 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details.
+ * Definition of scheduled tasks.
  *
  * @package block_news
+ * @category task
  * @copyright 2015 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2015110601;
-$plugin->requires = 2013111801.00;
-
-$plugin->outestssufficient = true;
+$tasks = array(
+    array(
+        'classname' => 'block_news\task\process_feeds',
+        'blocking' => 0,
+        'minute' => '*/10',
+        'hour' => '*',
+        'day' => '*',
+        'dayofweek' => '*',
+        'month' => '*'
+    ),
+);
