@@ -31,13 +31,14 @@ if (!defined('MOODLE_INTERNAL')) {
 $string['news:addinstance'] = 'Add a new news block';
 $string['pluginname'] = 'News';
 $string['defaultblocktitle'] = '(new News block)';
-$string['addnewmessage'] = 'Add new message';
+$string['addnewmessage'] = 'Add a new message';
 $string['allmessages'] = 'All messages';
 $string['editmessage'] = 'Edit message';
 $string['confirmdeletion'] = 'Confirm deletion of \'{$a}\'?';
 $string['dateformat'] = '%d %b %Y'; // http://php.net/manual/en/function.strftime.php
 $string['dateformatlong'] = '%d %b %Y %H:%M';
 $string['new'] = 'new';
+$string['subscribe'] = 'Subscribe';
 
 // error messages
 $string['erroremptymessage'] = 'Missing entry';

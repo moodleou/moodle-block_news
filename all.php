@@ -34,6 +34,9 @@ $bns = block_news_system::get_block_settings($blockinstanceid);
 
 $csemod = block_news_init_page($blockinstanceid, $bns->get_title());
 
+$output = $PAGE->get_renderer('block_news');
+$blockcontext = context_block::instance($blockinstanceid);
+
 $urlparams = array('bi' => $blockinstanceid);
 $PAGE->set_url('/blocks/news/all.php', $urlparams);
 
@@ -45,25 +48,9 @@ $PAGE->set_title($csemod->cseshortname . ': ' . $title);
 $PAGE->set_heading($csemod->csefullname);
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading($title);
 
-echo $OUTPUT->container_start('block_news_top', null);
-// show Add if permittted
-$blockcontext = context_block::instance($blockinstanceid);
-if (has_capability('block/news:add', $blockcontext)) {
-    echo $OUTPUT->single_button($CFG->wwwroot . '/blocks/news/edit.php?bi=' .
-        $blockinstanceid . '&mode=all', 'Add a new message', 'Add news', null,
-        array('id' => 'block_news_add'));
-}
-
-// if feeds allowed on site, display icon
-if (isset($CFG->enablerssfeeds) && $CFG->enablerssfeeds) {
-    $pi = new pix_icon('i/rss', 'RSS');
-    echo $OUTPUT->container_start('', 'block_news_rss_all');
-    echo $OUTPUT->action_icon($bns->get_feed_url(), $pi);
-    echo $OUTPUT->container_end();
-}
-echo $OUTPUT->container_end(); // \block_news_top
+echo $output->render_message_page_header($bns, $title, (isset($CFG->enablerssfeeds) && $CFG->enablerssfeeds),
+        has_capability('block/news:add', $blockcontext));
 
 // get the messages
 if (has_capability('block/news:viewhidden', $blockcontext)) {
@@ -72,8 +59,7 @@ if (has_capability('block/news:viewhidden', $blockcontext)) {
     $bnms = $bns->get_messages_all(false); // see past/present only and visible
 }
 
-// display the messages
-$output = $PAGE->get_renderer('block_news'); // looks for class xxx_renderer
+// Display the messages.
 if ($bnms == null) {
     echo $OUTPUT->container(get_string('msgblocknonews', 'block_news'), 'block_news_nonews');
 } else {

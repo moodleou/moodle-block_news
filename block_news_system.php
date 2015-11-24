@@ -113,6 +113,13 @@ class block_news_system {
     }
 
     /**
+     * @return integer id
+     */
+    public function get_blockinstanceid() {
+        return $this->blockinstanceid;
+    }
+
+    /**
      * @return string title
      */
     public function get_title() {

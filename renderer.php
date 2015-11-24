@@ -215,6 +215,72 @@ class block_news_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Return HTML for the heading section of a news block page (all.php/message.php)
+     *
+     * @param block_news_system $bns Block news instance record
+     * @param string $title Page title
+     * @param boolean $showfeed Show the subscribe to RSS feed link?
+     * @param boolean $canmanage User can add message?
+     * @return string
+     */
+    public function render_message_page_header($bns, $title, $showfeed, $canmanage) {
+        $head = $this->render_message_page_title($title);
+        if ($showfeed || $canmanage) {
+            $head .= $this->output->container_start('block_news_top');
+            if ($canmanage) {
+                $head .= $this->render_message_page_add($bns);
+            }
+            if ($showfeed) {
+                $head .= $this->render_message_page_subscribe($bns);
+            }
+            $head .= $this->output->container_end();
+        }
+
+        return $head;
+    }
+
+    /**
+     * Return HTMl for news block page title
+     *
+     * @param string $title
+     * @param block_news_system $bns Block news instance record
+     * @return string
+     */
+    public function render_message_page_title($title, $bns = null) {
+        return $this->output->heading($title);
+    }
+
+    /**
+     * Subscribe to news feed link on all page
+     *
+     * @param block_news_system $bns Block news instance record
+     * @return string
+     */
+    public function render_message_page_subscribe($bns) {
+        $pi = new pix_icon('i/rss', 'RSS');
+        $feed = $this->output->container_start('', 'block_news_rss_all');
+        $feed .= $this->output->action_icon($bns->get_feed_url(), $pi);
+        $feed .= $this->output->container_end();
+        return $feed;
+    }
+
+    /**
+     * Create message link on all page
+     *
+     * @param block_news_system $bns Block news instance record
+     * @return string
+     */
+    public function render_message_page_add($bns) {
+        $params = array(
+            'bi' => $bns->get_blockinstanceid(),
+            'mode' => 'all'
+        );
+        $url = new moodle_url('/blocks/news/edit.php', $params);
+        return $this->output->single_button($url, get_string('addnewmessage', 'block_news'), 'post',
+                array('id' => 'block_news_add'));
+    }
+
+    /**
      * Generate HTML for full message
      * @param block_news_message_full $nmsg Renderable data
      * @return string HTML
@@ -279,29 +345,29 @@ class block_news_renderer extends plugin_renderer_base {
             $out .= html_writer::end_tag('div');
         }
 
-        $out .= $this->output->box_start(null, 'editicons');
+        $out .= $this->output->box_start('editicons');
         if (isset($nmsg->hideicon) && isset($nmsg->hideurl)) {
-            $out .= $this->output->container_start('', 'hideurl');
+            $out .= $this->output->container_start('hideurl');
             $out .= $this->output->action_icon($nmsg->hideurl, $nmsg->hideicon);
             $out .= $this->output->container_end();
         }
         if (isset($nmsg->editicon) && isset($nmsg->editurl)) {
-            $out .= $this->output->container_start('', 'editurl');
+            $out .= $this->output->container_start('editurl');
             $out .= $this->output->action_icon($nmsg->editurl, $nmsg->editicon);
             $out .= $this->output->container_end();
         }
         if (isset($nmsg->deleteicon) && isset($nmsg->deleteurl)) {
-            $out .= $this->output->container_start('', 'deleteurl');
+            $out .= $this->output->container_start('deleteurl');
             $out .= $this->output->action_icon($nmsg->deleteurl, $nmsg->deleteicon);
             $out .= $this->output->container_end();
         }
-        $out .= $this->output->box_end(null, 'editicons');
+        $out .= $this->output->box_end();
 
-        $out .= $this->output->box_start(null, 'notes');
+        $out .= $this->output->box_start('notes');
         foreach ($nmsg->notes as $note) {
             $out .= $this->output->container($note, 'note ');
         }
-        $out .= $this->output->box_end(null, 'notes');
+        $out .= $this->output->box_end();
 
         $out .= $this->output->container_end();
         if ($nmsg->nexturl && $nmsg->nexturl !== 'end') {

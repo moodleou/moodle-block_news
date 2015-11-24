@@ -133,7 +133,7 @@ if ($action == 'delete' && !$confirm) {
 } else {
 
     // normal display of a message
-    block_news_output_hdr($title);
+    block_news_output_hdr($title, $bns);
 
     $SESSION->news_block_views[$id] = true;
 
@@ -154,9 +154,10 @@ echo $OUTPUT->footer();
 
 ////  end main ////
 
-function block_news_output_hdr($title) {
-    global $OUTPUT;
+function block_news_output_hdr($title, $bns = null) {
+    global $OUTPUT, $PAGE;
+    $r = $PAGE->get_renderer('block_news');
     echo $OUTPUT->header();
-    echo $OUTPUT->heading($title);
+    echo $r->render_message_page_header($bns, $title, false, false);
 }
 
