@@ -26,30 +26,10 @@ defined('MOODLE_INTERNAL') || die();
 
 class block_news_generator extends testing_block_generator {
 
-    /**
-     * Create new block instance
-     *
-     * @param array|stdClass $record
-     * @param array $options
-     * @return stdClass activity record with extra cmid field
-     */
-    public function create_instance($record = null, array $options = null) {
-        global $DB;
-
-        $this->instancecount++;
-
-        $record = (object)(array)$record;
-        $options = (array)$options;
-
+    protected function preprocess_record(stdClass $record, array $options) {
         $context = context_course::instance($options['courseid']);
         $record->parentcontextid = $context->id;
-        $record = $this->prepare_record($record);
         $record->blockname = 'news';
-
-        $id = $DB->insert_record('block_instances', $record);
-        context_block::instance($id);
-
-        return $DB->get_record('block_instances', array('id' => $id), '*', MUST_EXIST);
     }
 
     /**
