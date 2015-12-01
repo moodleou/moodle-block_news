@@ -441,4 +441,29 @@ class block_news_renderer extends plugin_renderer_base {
     public function render_block_news_new_messages($newstitle) {
         return $newstitle . ' ('.get_string('new', 'block_news') . ')';
     }
+
+    /**
+     * Renders the 'view all' link at bottom of block.
+     *
+     * @param int $blockinstanceid Instance id of block
+     */
+    public function render_view_all($blockinstanceid) {
+        return $this->action_link(
+                new moodle_url('/blocks/news/all.php', array('bi' => $blockinstanceid)),
+                get_string('msgblockviewall', 'block_news'),
+                null,
+                array('title' => get_string('msgblockviewallalt', 'block_news')));
+    }
+
+    /**
+     * Renders the 'add' link at bottom of block.
+     *
+     * @param int $blockinstanceid Instance id of block
+     */
+    public function render_add($blockinstanceid) {
+        return $this->action_link(
+                new moodle_url('/blocks/news/edit.php', array('bi' => $blockinstanceid)),
+                get_string('msgblockadd', 'block_news'),
+                null, array('title' => get_string('msgblockaddalt', 'block_news')));
+    }
 }
