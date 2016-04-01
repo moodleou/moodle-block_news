@@ -47,6 +47,8 @@ $title .= ': ' . get_string('allmessages', 'block_news');
 $PAGE->set_title($csemod->cseshortname . ': ' . $title);
 $PAGE->set_heading($csemod->csefullname);
 
+$output->pre_header($bns);
+
 echo $OUTPUT->header();
 
 echo $output->render_message_page_header($bns, $title, (isset($CFG->enablerssfeeds) && $CFG->enablerssfeeds),

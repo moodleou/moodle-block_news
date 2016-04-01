@@ -68,6 +68,7 @@ if (!$hidetitle) {
 }
 
 $output = $PAGE->get_renderer('block_news');
+$output->pre_header($bns);
 
 // stop display to students of hidden/future msgs
 // shouldnt need following check unless hand crafted URL

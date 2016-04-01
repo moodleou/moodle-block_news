@@ -466,4 +466,14 @@ class block_news_renderer extends plugin_renderer_base {
                 get_string('msgblockadd', 'block_news'),
                 null, array('title' => get_string('msgblockaddalt', 'block_news')));
     }
+
+    /**
+     * Called prior to header outputs
+     * Should not return anything
+     *
+     * @param stdClass $bns
+     */
+    public function pre_header($bns) {
+        // Does nothing as standard.
+    }
 }
