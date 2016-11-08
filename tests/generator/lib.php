@@ -65,4 +65,76 @@ class block_news_generator extends testing_block_generator {
 
         return $DB->insert_record('block_positions', $record);
     }
+
+    /**
+     * Create New Block News
+     *
+     * @param stdclass $block
+     * @param stdclass $block
+     * @return bool|int
+     */
+    public function create_block_news_record($block, $record) {
+        global $DB;
+
+        $record->blockinstanceid = $block->id;
+
+        if (!isset($record->title)) {
+            $record->title = 'Block News Title';
+        }
+
+        if (!isset($record->nummessages)) {
+            $record->nummessages = 2;
+        }
+
+        if (!isset($record->summarylength)) {
+            $record->summarylength = 50;
+        }
+
+        return $DB->insert_record('block_news', $record, true);
+    }
+
+    /**
+     * Create New Block Message
+     *
+     * @param stdclass $block
+     * @param stdclass $block
+     * @return bool|int
+     */
+    public function create_block_new_message($block, $record) {
+        global $DB;
+
+        $record->blockinstanceid = $block->id;
+
+        if (!isset($record->title)) {
+            $record->title = 'Unit Test message';
+        }
+        if (!isset($record->message)) {
+            $record->message = 'Message Text';
+        }
+        if (!isset($record->messageformat)) {
+            $record->messageformat = 1;
+        }
+        if (!isset($record->newsfeedid)) {
+            $record->newsfeedid = 0;
+        }
+        if (!isset($record->messagevisable)) {
+            $record->messagevisible = 1;
+        }
+        if (!isset($record->massagedate)) {
+            $record->messagedate = time() - 3600;
+        }
+        if (!isset($record->hideauthor)) {
+            $record->hideauthor = 0;
+        }
+        if (!isset($record->messagerepeat)) {
+            $record->messagerepeat = 0;
+        }
+        if (!isset($record->timemodified)) {
+            $record->timemodified = time();
+        }
+        if (!isset($record->attachments)) {
+            $record->attachments = null;
+        }
+        return $DB->insert_record('block_news_messages', $record, true);
+    }
 }
