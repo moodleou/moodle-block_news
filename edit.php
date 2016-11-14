@@ -93,7 +93,14 @@ if ($mode == 'all') {
 }
 
 $customdata['publishstate'] = $publishstate;
-$customdata['groupingsupport'] = $bns->get_groupingsupport();
+$customdata['groupingsupportbygrouping'] = 0;
+$customdata['groupingsupportbygroup'] = 0;
+if ($bns->get_groupingsupport() == $bns::RESTRICTBYGROUPING) {
+    $customdata['groupingsupportbygrouping'] = 1;
+}
+if ($bns->get_groupingsupport() == $bns::RESTRICTBYGROUP) {
+    $customdata['groupingsupportbygroup'] = 1;
+}
 
 // edit message form
 $mform = new block_news_edit_message_form($customdata);
@@ -161,6 +168,7 @@ if ($action == EDIT) {
     $toform['messagerepeat'] = $bnm->get_messagerepeat();
     $toform['hideauthor'] = $bnm->get_hideauthor();
     $toform['groupingid'] = $bnm->get_groupingid();
+    $toform['groupid'] = $bnm->get_groupid();
     $timemodified=$bnm->get_timemodified();
     $usr=$bnm->get_user();
     if ($timemodified != 0 && $usr != null) {

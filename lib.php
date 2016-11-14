@@ -224,8 +224,8 @@ function block_news_get_top_news_block($courseid) {
 
     // Get a list of news blocks sorted by weight, i.e. which one is at the top.
     $sql = "SELECT bp.blockinstanceid
-              FROM {block_positions} bp
-              JOIN {block_instances} bi ON bi.id = bp.blockinstanceid
+              FROM {block_instances} bi
+         LEFT JOIN {block_positions} bp ON bi.id = bp.blockinstanceid
              WHERE bi.parentcontextid = :parentcontextid AND bi.blockname = 'news'
           ORDER BY bp.weight ASC";
     $params = array('parentcontextid' => $context->id);

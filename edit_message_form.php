@@ -38,7 +38,8 @@ require_once($CFG->libdir.'/formslib.php');
   */
 class block_news_edit_message_form extends moodleform {
     protected $publishstate='';
-    protected $groupingsupport = 0;
+    protected $groupingsupportbygrouping = 0;
+    protected $groupingsupportbygroup = 0;
 
     /**
      * Overide constructor to pass in publish radio button state before
@@ -48,7 +49,8 @@ class block_news_edit_message_form extends moodleform {
      */
     public function __construct($customdata) {
         $this->publishstate = $customdata['publishstate'];
-        $this->groupingsupport = $customdata['groupingsupport'];
+        $this->groupingsupportbygrouping = $customdata['groupingsupportbygrouping'];
+        $this->groupingsupportbygroup = $customdata['groupingsupportbygroup'];
         parent::__construct();
     }
 
@@ -91,7 +93,8 @@ class block_news_edit_message_form extends moodleform {
                                                  get_string('msgeditvisible', 'block_news'));
         $mform->setDefault('messagevisible', 1);
 
-        if ($this->groupingsupport) {
+        // If config_groupingsupport is grouping.
+        if ($this->groupingsupportbygrouping) {
             $groupingsdata = groups_get_all_groupings($COURSE->id);
             if ($groupingsdata != false) {
                 $groupings["0"] = get_string('allparticipants');
@@ -101,6 +104,21 @@ class block_news_edit_message_form extends moodleform {
                 $mform->addElement('select', 'groupingid',
                     get_string('msgeditgrouping', 'block_news'), $groupings);
                 $mform->setDefault('groupingid', 0);
+            }
+        }
+
+        // If config_groupingsupport is group.
+        if ($this->groupingsupportbygroup) {
+            $groupsdata = groups_get_all_groups($COURSE->id);
+            $groups = array();
+            if ($groupsdata != false) {
+                $groups[0] = get_string('allparticipants');
+                foreach ($groupsdata as $group) {
+                    $groups[$group->id] = $group->name;
+                }
+                $mform->addElement('select', 'groupid',
+                    get_string('msgeditgroup', 'block_news'), $groups);
+                $mform->setDefault('groupid', 0);
             }
         }
 

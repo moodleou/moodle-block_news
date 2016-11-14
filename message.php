@@ -46,6 +46,21 @@ $bns = block_news_system::get_block_settings($blockinstanceid);
 $newstitle = $bns->get_title();
 $csemod = block_news_init_page($blockinstanceid, $newstitle);
 
+if ($bns->get_groupingsupport() == $bns::RESTRICTBYGROUP) {
+    if ($bnm->get_groupid()) {
+        // Get the course id from the group id.
+        $courseid = $DB->get_field('groups', 'courseid', array('id' => $bnm->get_groupid()), MUST_EXIST);
+        $context = context_course::instance($courseid);
+
+        // Get the group ids.
+        $groupids = $bns->get_groupids($USER->id, $courseid);
+
+        if (!in_array($bnm->get_groupid(), $groupids)) {
+            print_error('errormessageaccessrestricted', 'block_news');
+        }
+    }
+}
+
 $urlparams = array('m' => $id);
 $PAGE->set_url('/blocks/news/message.php', $urlparams);
 

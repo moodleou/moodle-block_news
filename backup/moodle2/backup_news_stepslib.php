@@ -53,7 +53,7 @@ class backup_news_block_structure_step extends backup_block_structure_step {
         $message = new backup_nested_element('message', array('id'), array(
             'blockinstanceid', 'newsfeedid', 'title', 'link', 'message',
             'messageformat', 'messagedate', 'messagevisible', 'messagerepeat',
-            'hideauthor', 'userid', 'groupingid', 'timemodified'));
+            'hideauthor', 'userid', 'groupingid', 'groupid', 'timemodified'));
 
         $feeds = new backup_nested_element('feeds');
 
@@ -90,6 +90,7 @@ class backup_news_block_structure_step extends backup_block_structure_step {
         // Annotations
         $message->annotate_ids('user', 'userid');
         $message->annotate_ids('grouping', 'groupingid');
+        $message->annotate_ids('group', 'groupid');
 
         // Define file annotations
         $message->annotate_files('block_news', 'attachment', 'id');

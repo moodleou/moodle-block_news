@@ -131,6 +131,12 @@ class block_news_message_full implements renderable {
             }
         }
 
+        // For group indication.
+        $this->groupindication = '';
+        if (has_any_capability(array('block/news:delete', 'block/news:add', 'block/news:edit'), $blockcontext)) {
+            $this->groupindication = $bns->get_group_indication($bnm);
+        }
+
         // FOR ATTACHMENTS
         $this->blockinstanceid = $bnm->get_blockinstanceid();
         $this->messageformat = $bnm->get_messageformat();
@@ -188,6 +194,15 @@ class block_news_message_short implements renderable {
             $this->author = '';
         } else {
             $this->author = fullname($usr);
+        }
+
+        // Context for access checks.
+        $blockcontext = context_block::instance($bnm->get_blockinstanceid());
+
+        // For group indication.
+        $this->groupindication = '';
+        if (has_any_capability(array('block/news:delete', 'block/news:add', 'block/news:edit'), $blockcontext)) {
+            $this->groupindication = $bns->get_group_indication($bnm);
         }
     }
 }
@@ -368,7 +383,7 @@ class block_news_renderer extends plugin_renderer_base {
             $out .= $this->output->container($note, 'note ');
         }
         $out .= $this->output->box_end();
-
+        $out .= $this->output->container($nmsg->groupindication, 'block_news_group_indication');
         $out .= $this->output->container_end();
         if ($nmsg->nexturl && $nmsg->nexturl !== 'end') {
             $out .= $this->output->container_start('nextlink');
@@ -428,6 +443,7 @@ class block_news_renderer extends plugin_renderer_base {
         $accesshidetxt = html_writer::tag('span', ' ' . $nmsg->title, array('class' => 'accesshide'));
         $out .= $this->render_block_news_message_link($nmsg->viewlink, $accesshidetxt);
         $out .= $this->output->container_end();
+        $out .= $this->output->container($nmsg->groupindication, 'block_news_group_indication');
         $out .= $this->output->container_end();
 
         return $this->output->container($out, 'block_news '.$nmsg->classes);

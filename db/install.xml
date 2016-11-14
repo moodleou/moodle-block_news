@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/news/db" VERSION="20110719" COMMENT="XMLDB file for Moodle blocks/news"
+<XMLDB PATH="blocks/news/db" VERSION="20161110" COMMENT="XMLDB file for Moodle blocks/news"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -54,7 +54,8 @@
         <FIELD NAME="hideauthor" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="1 if Hide author name is chosen" PREVIOUS="messagerepeat" NEXT="timemodified"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Time at which message was edited" PREVIOUS="hideauthor" NEXT="userid"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" COMMENT="ID of person who last edited the message, null for messages from feeds." PREVIOUS="timemodified" NEXT="groupingid"/>
-        <FIELD NAME="groupingid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" UNSIGNED="true" SEQUENCE="false" COMMENT="= id of a grouping containing this news item.  0 indicates all groupings." PREVIOUS="userid"/>
+        <FIELD NAME="groupingid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" UNSIGNED="true" SEQUENCE="false" COMMENT="= id of a grouping containing this news item.  0 indicates all groupings." PREVIOUS="userid" NEXT="groupid"/>
+        <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" UNSIGNED="true" SEQUENCE="false" COMMENT="= id of a group can access this news item.  0 indicates all groups." PREVIOUS="groupingid"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="newsfeedid_fk"/>

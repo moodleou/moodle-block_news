@@ -101,3 +101,13 @@
     display: inline;
     margin: 0 5px 0 0;
 }
+
+/* Set text area width of feed URL list 100%. */
+.mform #id_config_feedurls {
+    width: 100%;
+}
+
+.block_news_group_indication {
+    font-size: 0.8em;
+    font-style: italic;
+}

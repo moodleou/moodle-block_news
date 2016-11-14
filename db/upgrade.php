@@ -125,7 +125,21 @@ function xmldb_block_news_upgrade($oldversion) {
         // Savepoint reached.
         upgrade_block_savepoint(true, 2015081300, 'news');
     }
-    
+
+    if ($result && $oldversion < 2016111501) {
+        // Define field groupid to be added to block_news_messages.
+        $table = new xmldb_table('block_news_messages');
+        $field = new xmldb_field('groupid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'groupingid');
+
+        // Conditionally launch add field groupid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // News savepoint reached.
+        upgrade_block_savepoint(true, 2016111501, 'news');
+    }
+
     return $result;
 
 }

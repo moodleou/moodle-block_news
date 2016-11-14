@@ -51,6 +51,7 @@ class block_news_message {
     protected $timemodified;
     protected $userid;
     protected $groupingid;
+    protected $groupid;
 
     protected $user;
 
@@ -170,6 +171,13 @@ class block_news_message {
      */
     public function get_groupingid() {
         return $this->groupingid;
+    }
+
+    /**
+     * @return integer group id of the message
+     */
+    public function get_groupid() {
+        return $this->groupid;
     }
 
     /**
