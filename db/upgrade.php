@@ -116,7 +116,7 @@ function xmldb_block_news_upgrade($oldversion) {
         // The title field is inconsistent in length and not-null state.
         $table = new xmldb_table('block_news');
         $field = new xmldb_field('title', XMLDB_TYPE_CHAR, '80', null, XMLDB_NOTNULL, null, null,
-                        'blockinstanceid');
+                'blockinstanceid');
 
         // Set length and not null to match expected.
         $dbman->change_field_precision($table, $field);
@@ -138,6 +138,35 @@ function xmldb_block_news_upgrade($oldversion) {
 
         // News savepoint reached.
         upgrade_block_savepoint(true, 2016111501, 'news');
+    }
+
+    if ($result && $oldversion < 2016122000) {
+        // Define field messagetype to be added to block_news_messages.
+        // Whether message is a 'news item' (1) or calendar event (2).
+        $table = new xmldb_table('block_news_messages');
+        $field = new xmldb_field('messagetype', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1', 'messageformat');
+
+        // Conditionally launch add field messagetype.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // News savepoint reached.
+        upgrade_block_savepoint(true, 2016122000, 'news');
+    }
+
+    if ($oldversion < 2017011100) {
+
+        // Define field displaytype to be added to block_news.
+        $table = new xmldb_table('block_news');
+        $field = new xmldb_field('displaytype', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'groupingsupport');
+
+        // Conditionally launch add field displaytype.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // News savepoint reached.
+        upgrade_block_savepoint(true, 2017011100, 'news');
     }
 
     return $result;

@@ -47,6 +47,10 @@ class block_news_system {
     // Define grouping support by group.
     const RESTRICTBYGROUP = 2;
 
+    // Define display type (default or Separate into events and news items)
+    const DISPLAY_DEFAULT = 0;
+    const DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS = 1;
+
     public static function get_message_sql_start() {
         return "SELECT {block_news_messages}.*, u.id AS u_id, " .
             get_all_user_name_fields(true, 'u', null, 'u_') .
@@ -65,6 +69,7 @@ class block_news_system {
     protected $usergroupingids;
     protected $usergroupids;
     protected $username;
+    protected $displaytype = self::DISPLAY_DEFAULT;
 
     /**
      * Construct object
@@ -80,6 +85,7 @@ class block_news_system {
         $this->hidetitles = $bn->hidetitles;
         $this->hidelinks = $bn->hidelinks;
         $this->groupingsupport = $bn->groupingsupport;
+        $this->displaytype = $bn->displaytype;
     }
 
     /**
@@ -106,6 +112,7 @@ class block_news_system {
             $bn->hidelinks = 0;
             $bn->groupingsupport = 0;
             $bn->username = '';
+            $bn->displaytype = self::DISPLAY_DEFAULT;
             $rid = $DB->insert_record('block_news', $bn, true);
             $bn->id = $rid;
         }
@@ -154,6 +161,15 @@ class block_news_system {
      */
     public function get_hidetitles() {
         return $this->hidetitles;
+    }
+
+    /**
+     * Gets display type for block (DISPLAY_xx constant).
+     *
+     * @return int Whether to display default or Separate into events and news items in block
+     */
+    public function get_displaytype() {
+        return $this->displaytype;
     }
 
     /**

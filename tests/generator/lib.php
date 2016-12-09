@@ -114,6 +114,12 @@ class block_news_generator extends testing_block_generator {
         if (!isset($record->messageformat)) {
             $record->messageformat = 1;
         }
+        if (!isset($record->messagetype)) {
+            $record->messagetype = block_news_message::MESSAGETYPE_NEWS;
+        }
+        if (!isset($record->messageimage)) {
+            $record->messageimage = null;
+        }
         if (!isset($record->newsfeedid)) {
             $record->newsfeedid = 0;
         }

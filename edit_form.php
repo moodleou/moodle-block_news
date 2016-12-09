@@ -97,8 +97,12 @@ class block_news_edit_form extends block_edit_form {
         $mform->setType('config_title', PARAM_TEXT);
         $mform->setDefault('config_feedurls', $urls_txt);
 
+        $mform->addElement('selectyesno', 'config_displaytype',
+                get_string('separateintoeventsandnewsitems', 'block_news'));
+        $mform->setDefault('config_displaytype', $bns->get_displaytype());
+
         $mform->addElement('selectyesno', 'config_hidetitles',
-            get_string('confighidetitles', 'block_news'));
+                get_string('confighidetitles', 'block_news'));
         $mform->setDefault('config_hidetitles', $bns->get_hidetitles());
 
         $mform->addElement('selectyesno', 'config_hidelinks',

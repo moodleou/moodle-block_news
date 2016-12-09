@@ -119,13 +119,15 @@ class block_news_message_full implements renderable {
             }
 
             if (has_capability('block/news:add', $blockcontext)) {
-                $this->editicon = new pix_icon('t/edit', 'edit');
+                $this->editicon = new pix_icon('t/edit',
+                        get_string('edit', 'block_news', $bnm->get_title()));
                 $this->editurl = $CFG->wwwroot . '/blocks/news/edit.php?m=' . $bnm->get_id()
                      . '&mode=' . $mode;
             }
 
             if (has_capability('block/news:delete', $blockcontext)) {
-                $this->deleteicon = new pix_icon('t/delete', 'delete');
+                $this->deleteicon = new pix_icon('t/delete',
+                        get_string('delete', 'block_news', $bnm->get_title()));
                 $this->deleteurl = $CFG->wwwroot.'/blocks/news/message.php?m=' . $bnm->get_id()
                     . '&action=delete&mode=' . $mode;
             }

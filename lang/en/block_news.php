@@ -39,6 +39,12 @@ $string['dateformat'] = '%d %b %Y'; // http://php.net/manual/en/function.strftim
 $string['dateformatlong'] = '%d %b %Y %H:%M';
 $string['new'] = 'new';
 $string['subscribe'] = 'Subscribe';
+$string['newsitem'] = 'News item';
+$string['event'] = 'Event';
+$string['messagetype'] = 'Type';
+$string['messageimage'] = 'Image';
+$string['delete'] = 'Delete {$a}';
+$string['edit'] = 'Edit {$a}';
 
 // error messages
 $string['erroremptymessage'] = 'Missing entry';
@@ -83,6 +89,7 @@ $string['verbosecron'] = 'List each feed as retrieved in cron';
 $string['verbosecron_info'] = 'If you turn this option on, all feeds being retrieved are shown in cron. Otherwise it only shows feeds which take longer than 5 seconds.';
 $string['settingshideauthor'] = 'Hide author';
 $string['settingshideauthor_info'] = 'Set default value for the hide author option when posting news.';
+$string['separateintoeventsandnewsitems'] = 'Separate into events and news items';
 
 // edit
 $string['msgeditpghdr'] = 'News';

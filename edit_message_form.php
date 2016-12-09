@@ -37,6 +37,16 @@ require_once($CFG->libdir.'/formslib.php');
   * @subpackage news
   */
 class block_news_edit_message_form extends moodleform {
+    /**
+     * Maximum width/height of thumbnail images.
+     * @var int
+     */
+    const THUMBNAIL_MAX_EDGE = 256;
+    const IMAGE_FILE_TYPES = array('.jpg', '.png');
+    const IMAGE_FILE_OPTIONS = array('subdirs' => 0, 'maxbytes' => 50 * 1024, 'areamaxbytes' => 50 * 1024,
+            'maxfiles' => 1, 'accepted_types' => self::IMAGE_FILE_TYPES);
+
+    protected $displaytype = 0;
     protected $publishstate='';
     protected $groupingsupportbygrouping = 0;
     protected $groupingsupportbygroup = 0;
@@ -48,6 +58,7 @@ class block_news_edit_message_form extends moodleform {
      * @param $publishstate
      */
     public function __construct($customdata) {
+        $this->displaytype = $customdata['displaytype'];
         $this->publishstate = $customdata['publishstate'];
         $this->groupingsupportbygrouping = $customdata['groupingsupportbygrouping'];
         $this->groupingsupportbygroup = $customdata['groupingsupportbygroup'];
@@ -89,8 +100,18 @@ class block_news_edit_message_form extends moodleform {
         $mform->addElement('filemanager', 'attachments',
             get_string('msgedithlpattach', 'block_news'), null, array('subdirs' => 0));
 
+        if( $this->displaytype == block_news_system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS ) {
+            $messagetype = array(block_news_message::MESSAGETYPE_NEWS => get_string('newsitem', 'block_news'),
+                    block_news_message::MESSAGETYPE_EVENT => get_string('event', 'block_news'));
+
+            $mform->addElement('select', 'messagetype', get_string('messagetype', 'block_news'), $messagetype);
+            $mform->setDefault('messagetype', block_news_message::MESSAGETYPE_NEWS);
+        }
+
+        $mform->addElement('filemanager', 'messageimage', get_string('messageimage', 'block_news'), null, self::IMAGE_FILE_OPTIONS);
+
         $mform->addElement('selectyesno', 'messagevisible',
-                                                 get_string('msgeditvisible', 'block_news'));
+                get_string('msgeditvisible', 'block_news'));
         $mform->setDefault('messagevisible', 1);
 
         // If config_groupingsupport is grouping.

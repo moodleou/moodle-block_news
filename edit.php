@@ -101,6 +101,8 @@ if ($bns->get_groupingsupport() == $bns::RESTRICTBYGROUPING) {
 if ($bns->get_groupingsupport() == $bns::RESTRICTBYGROUP) {
     $customdata['groupingsupportbygroup'] = 1;
 }
+$customdata['displaytype'] = $bns->get_displaytype();
+
 
 // edit message form
 $mform = new block_news_edit_message_form($customdata);
@@ -118,7 +120,6 @@ if ($formdata = $mform->get_data()) {
     if (isset($formdata->m)) {
         $formdata->id = $formdata->m;
     }
-
     // we need to set messagerepeat as the
     // database expects it
     if (!isset($formdata->messagerepeat)) {
@@ -150,6 +151,42 @@ if ($formdata = $mform->get_data()) {
         $id = block_news_message::create($formdata);
     }
 
+    // Save thumbnail version of the image file.
+    $fs = get_file_storage();
+    $dirfiles = $fs->get_directory_files($blockcontext->id, 'block_news', 'messageimage', $id, '/');
+    if ($dirfiles) {
+        $file = reset($dirfiles);
+        $filename = $file->get_filename();
+        $fext = '.' . substr($filename, strripos($filename, '.') + 1);
+        $dir = make_temp_directory('block_news');
+        $tempfile = tempnam($dir, $id . '_thumbnail_');
+        $fullpath =  $tempfile . $fext;
+        rename($tempfile, $fullpath);
+        $file->copy_content_to($fullpath);
+        $jpeg = preg_match('~\.jpe?g$~i', $fullpath);
+        $png = preg_match('~\.png$~i', $fullpath);
+        if (($jpeg || $png) && file_exists($fullpath)) {
+            // Create thumbnail, overwriting existing temp file.
+            $ok = \theme_osep\util::create_thumbnail($fullpath, $fullpath, block_news_edit_message_form::THUMBNAIL_MAX_EDGE);
+            if ($ok) {
+                $thumbnailexist = $fs->get_file($blockcontext->id, 'block_news', 'thumbnail', $id,
+                        '/', block_news_message::THUMBNAIL_JPG);
+                if ($thumbnailexist) {
+                    $thumbnailexist->delete();
+                }
+                $info = array(
+                        'contextid' => $blockcontext->id,
+                        'component' => 'block_news',
+                        'filearea' => 'thumbnail',
+                        'itemid' => $id,
+                        'filepath' => '/',
+                        'filename' => block_news_message::THUMBNAIL_JPG);
+                $fs->create_file_from_pathname($info, $fullpath);
+            }
+            unlink($fullpath);
+        }
+    }
+
     redirect($returnurl);
 }
 
@@ -164,6 +201,7 @@ if ($action == EDIT) {
     $toform['messagevisible'] = $bnm->get_messagevisible();
     // 0 => 'Immediately', 1 => 'At specified date', 2 => 'Already published'
     $toform['publish'] = ($bnm->get_messagedate() > time() ? 1 : 2);
+    $toform['messagetype'] = $bnm->get_messagetype();
     $toform['messagedate'] = $bnm->get_messagedate();
     $toform['messagerepeat'] = $bnm->get_messagerepeat();
     $toform['hideauthor'] = $bnm->get_hideauthor();
@@ -183,13 +221,20 @@ if ($action == EDIT) {
 } else {
     $messagetext = null;
     $messageformat = null;
+    $messagetype = block_news_message::MESSAGETYPE_NEWS;
     $toform['publish'] = 0;
 }
 
 // files
+$imagefileoptions = block_news_edit_message_form::IMAGE_FILE_OPTIONS;
+$imagedraftitemid = file_get_submitted_draft_itemid('messageimage');
+file_prepare_draft_area($imagedraftitemid, $blockcontext->id, 'block_news', 'messageimage',
+        empty($id) ? null : $id, $imagefileoptions);
+$toform['messageimage'] = $imagedraftitemid;
+
 $draftitemid = file_get_submitted_draft_itemid('attachments');
 file_prepare_draft_area($draftitemid, $blockcontext->id, 'block_news', 'attachment',
-    empty($id) ? null : $id);
+        empty($id) ? null : $id);
 $toform['attachments'] = $draftitemid;
 
 $draftid_editor = file_get_submitted_draft_itemid('message');
