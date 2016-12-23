@@ -75,8 +75,10 @@ class block_news_newsfeed_testcase extends advanced_testcase {
     }
 
     public function test_groupingids_function() {
+        global $USER;
 
         $this->resetAfterTest(true);
+        $this->setAdminUser();
 
         // Create a course.
         $course = $this->getDataGenerator()->create_course();
@@ -84,6 +86,9 @@ class block_news_newsfeed_testcase extends advanced_testcase {
         // We need a user enrolled on the course.
         $user = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($user->id, $course->id);
+
+        $groupingids = block_news_get_groupingids($course->id, $USER->id);
+        $this->assertEquals('', $groupingids);
 
         // The user is not yet in any groups, there should be no grouping ids.
         $groupingids = block_news_get_groupingids($course->id, $user->id);
@@ -110,6 +115,10 @@ class block_news_newsfeed_testcase extends advanced_testcase {
 
         // There should be two grouping ids, that of grouping 1 and 2, separated by a comma.
         $groupingids = block_news_get_groupingids($course->id, $user->id);
+        $this->assertEquals($grouping1->id . ',' . $grouping2->id, $groupingids);
+
+        // Check admin grouping ids.
+        $groupingids = block_news_get_groupingids($course->id, $USER->id);
         $this->assertEquals($grouping1->id . ',' . $grouping2->id, $groupingids);
     }
 }

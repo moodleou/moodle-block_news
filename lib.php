@@ -257,7 +257,7 @@ function block_news_get_groupingids($courseid, $userid) {
             $groupings[] = $grouping->id;
         }
 
-        return $groupings;
+        return implode(',', $groupings);
     }
 
     $sql = 'SELECT DISTINCT({groupings}.id)
