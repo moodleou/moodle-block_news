@@ -95,6 +95,12 @@
     padding-top: 5px;
 }
 
+.block_news_message .messageimage img,
+.block_news_msg .messageimage img {
+    max-width: 100%;
+    height: auto;
+}
+
 .block_news_message #editicons #hideurl,
 .block_news_message #editicons #editurl,
 .block_news_message #editicons #deleteurl {

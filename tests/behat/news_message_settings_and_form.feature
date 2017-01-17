@@ -6,8 +6,8 @@ Feature: Usage of settings and checking the message_form in block
 
   Background:
     Given the following "courses" exist:
-      | fullname | shortname | category | format    |
-      | Course 1 | C1        | 0        | ousubject |
+      | fullname | shortname | category | format      |
+      | Course 1 | C1        | 0        | oustudyplan |
     And I am using the OSEP theme
     And the following "users" exist:
       | username | firstname | lastname | email                |
@@ -17,11 +17,14 @@ Feature: Usage of settings and checking the message_form in block
       | student1 | C1     | student |
 
     Given I log in as "admin" (in the OSEP theme)
+    And I am on site homepage
+    And I follow "Course 1"
+    And I turn editing mode on in the OSEP theme
+    And I add the "News" block
 
   @javascript
   Scenario: Add a new message with default settings
-    And I am on site homepage
-    And I follow "Course 1"
+    Given I turn editing mode off in the OSEP theme
 
     # Add a news item
     When I click on "Add a message" "link"
@@ -35,11 +38,8 @@ Feature: Usage of settings and checking the message_form in block
 
   @javascript
   Scenario: Block setting and conditional display of elements on message type in the form
-    Given I am on site homepage
-    And I follow "Course 1"
-    And I turn editing mode on in the OSEP theme
-    When I open the "News and events" blocks action menu
-    And I follow "Configure News and events block"
+    When I open the "(new News block)" blocks action menu
+    And I follow "Configure (new News block) block"
     And I set the following fields to these values:
       | Separate into events and news items | Yes |
     And I press "Save changes"
@@ -47,18 +47,17 @@ Feature: Usage of settings and checking the message_form in block
     When I click on "View all" "link"
 
     # Add a aonther message with an image
-    When I click on "Add a message" "link"
+    When I press "Add a new message"
     And I set the field "Title" to "News item 002"
     And I set the field "Text" to "This is the text message of News item 002"
     And I set the field "Type" to "News item"
-    And I upload "blocks/news/tests/fixtures/testimage.png" file to "Image" filemanager
-    And I should see "testimage.png"
+    And I upload "blocks/news/tests/fixtures/kitten1.jpg" file to "Image" filemanager
+    And I should see "kitten1.jpg"
     Then I press "Save changes"
 
     # Modify existing message by changing the tpe and checking if the image is still there
-    When I click on "View all" "link"
-    And I click on "Edit News item 002" "link"
+    When I click on "Edit News item 002" "link"
     And I set the field "Title" to "Event 001"
     And I set the field "Type" to "Event"
-    And I should see "testimage.png"
+    And I should see "kitten1.jpg"
     Then I press "Save changes"

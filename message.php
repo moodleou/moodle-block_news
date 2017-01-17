@@ -85,24 +85,24 @@ if (!$hidetitle) {
 $output = $PAGE->get_renderer('block_news');
 $output->pre_header($bns);
 
-// stop display to students of hidden/future msgs
-// shouldnt need following check unless hand crafted URL
+// Stop display to students of hidden/future msgs
+// shouldnt need following check unless hand crafted URL.
 $blockcontext = context_block::instance($blockinstanceid);
 if (!$bnm->is_visible_to_students()) {
-    require_capability('block/news:viewhidden', $blockcontext); // if-not: exit with error
+    require_capability('block/news:viewhidden', $blockcontext); // If-not: exit with error.
 }
 
 if ($action == 'hide') {
     require_capability('block/news:hide', $blockcontext);
 
-    // toggle
+    // Toggle.
     if ($bnm->get_messagevisible()) {
         $bnm->set_messagevisible(false);
     } else {
         $bnm->set_messagevisible(true);
     }
 
-    // reset the feed cache as something has changed
+    // Reset the feed cache as something has changed.
     $bns->uncache_block_feed();
 
     if ($mode == 'all') {
@@ -117,7 +117,7 @@ if ($action == 'hide') {
 if ($action == 'delete' && !$confirm) {
      require_capability('block/news:delete', $blockcontext);
 
-    // set up cancel/delete redirects depending if from  all/single message display
+    // Set up cancel/delete redirects depending if from  all/single message display.
     if ($mode == 'all') {
         $urlc = $CFG->wwwroot . '/blocks/news/all.php?&bi=' . $blockinstanceid .
             '&mode=' . $mode;
@@ -129,7 +129,7 @@ if ($action == 'delete' && !$confirm) {
                                                                 '&action=delete&confirm=1';
     }
 
-    // confirm delete
+    // Confirm delete.
     block_news_output_hdr(get_string('confirmdeletion', 'block_news', $messagetitle));
 
     echo $OUTPUT->confirm(get_string('msgclassconfdel', 'block_news',
@@ -138,7 +138,7 @@ if ($action == 'delete' && !$confirm) {
 } else if ($action == 'delete' && $confirm) {
     require_capability('block/news:delete', $blockcontext);
 
-    // irrespective of mode - cant go back to page - so always go to list
+    // Irrespective of mode - cant go back to page - so always go to list.
     $urlh = $CFG->wwwroot.'/blocks/news/all.php?bi='.$blockinstanceid;
 
     $bnm->delete();
@@ -148,7 +148,7 @@ if ($action == 'delete' && !$confirm) {
 
 } else {
 
-    // normal display of a message
+    // Normal display of a message.
     block_news_output_hdr($title, $bns);
 
     $SESSION->news_block_views[$id] = true;
@@ -159,16 +159,17 @@ if ($action == 'delete' && !$confirm) {
         $viewhidden = false;
     }
 
-    // get next and prev message ids
+    // Get next and prev message ids.
     $pn = $bns->get_message_pn($bnm, $viewhidden);
 
-    $msgwidget = new block_news_message_full($bnm, $pn->previd, $pn->nextid, $bns, 'one');
+    $image = $bns->get_images('messageimage', $bnm->get_id());
+    $msgwidget = new block_news_message_full($bnm, $pn->previd, $pn->nextid, $bns, 'one', $image);
     echo $output->render($msgwidget);
 }
 
 echo $OUTPUT->footer();
 
-////  end main ////
+// End main.
 
 function block_news_output_hdr($title, $bns = null) {
     global $OUTPUT, $PAGE;

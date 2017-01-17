@@ -24,7 +24,7 @@
 
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
-    // It must be included from a Moodle page
+    // It must be included from a Moodle page.
 }
 
 
@@ -67,7 +67,7 @@ class block_news_message {
      * @return object block_news_message
      */
     public function __construct($mrec) {
-        // assign the properties
+        // Assign the properties.
         $this->user = new stdClass;
         foreach ((array)$mrec as $field => $value) {
             if (property_exists($this, $field)) {
@@ -246,7 +246,7 @@ class block_news_message {
     public static function create($data) {
         global $DB, $USER, $COURSE;
 
-        /* the message property, from the form editor is:
+        /* The message property, from the form editor is:
         Array (
             [text] => <p>mmmmmm</p>
             [format] => 1
@@ -270,23 +270,23 @@ class block_news_message {
 
         MySQL generates a warning on an Array being passed in as a column string.
         So set the column as its text here, and overwrite with (rewritten) text
-        later (if rewritten to accommodate embedded images)
+        later (if rewritten to accommodate embedded images).
         */
-        // no extra handling/conversion for feed messages (->message is not an array)
+        // No extra handling/conversion for feed messages (->message is not an array).
         if ($data->newsfeedid != 0 ) {
             $id = $DB->insert_record('block_news_messages', $data, true);
             // No logging for feed messages.
             return $id;
         }
 
-        $temp_message=$data->message;
+        $tempmessage = $data->message;
         $data->message = $data->message['text'];
 
         $id = $DB->insert_record('block_news_messages', $data, true);
 
-        // save files
+        // Save files.
         $context = context_block::instance($data->blockinstanceid);
-        if ($data->messageimage) {
+        if (!empty($data->messageimage)) {
             file_save_draft_area_files($data->messageimage, $context->id,
                     'block_news', 'messageimage', $id, array('subdirs' => 0));
         }
@@ -295,13 +295,13 @@ class block_news_message {
                     'block_news', 'attachment', $id, array('subdirs' => 0));
         }
 
-        // embedded images (let function check if imgs etc are present or not)
-        $rw_message_text = file_save_draft_area_files($temp_message['itemid'],
-            $context->id, 'block_news', 'message', $id, array('subdirs' => 0),
-            $temp_message['text']);
+        // Embedded images (let function check if imgs etc are present or not).
+        $rwmessagetext = file_save_draft_area_files($tempmessage['itemid'],
+                $context->id, 'block_news', 'message', $id, array('subdirs' => 0),
+                $tempmessage['text']);
 
-        if ($rw_message_text != $temp_message['text']) {
-            $DB->set_field('block_news_messages', 'message', $rw_message_text, array('id' => $id));
+        if ($rwmessagetext != $tempmessage['text']) {
+            $DB->set_field('block_news_messages', 'message', $rwmessagetext, array('id' => $id));
         }
 
         $event = \block_news\event\message_created::create(array(
@@ -322,10 +322,10 @@ class block_news_message {
     public function edit($data) {
         global $DB, $USER, $COURSE;
         $DB->update_record('block_news_messages', $data);
-        
-        // save files.
+
+        // Save files.
         $context = context_block::instance($data->blockinstanceid);
-        if ($data->messageimage) {
+        if (!empty($data->messageimage)) {
             file_save_draft_area_files($data->messageimage, $context->id, 'block_news',
                     'messageimage', $data->id, array('subdirs' => 0));
         }

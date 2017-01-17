@@ -40,10 +40,6 @@ Feature: Basic usage of news block
     And I follow "Course 1"
     Then I should see "My first message"
 
-  # Note: Scenario does not require JS, but one step randomly fails in non-JS mode.
-  # Maybe possible to remove @javascript in future Moodle version if they fix the
-  # bug that causes this (whatever it is).
-  @javascript
   Scenario: Test post and view multiple messages, summaries
     # Add block.
     Given I log in as "teacher1"
@@ -191,7 +187,7 @@ Feature: Basic usage of news block
     Then I should see "ANNE" in the ".block_news_message" "css_element"
 
     # Turn off author display.
-    When I click on "edit" "link"
+    When I click on "Edit" "link"
     And I set the field "Hide author" to "Yes"
     And I press "Save changes"
     Then I should not see "ANNE" in the ".block_news_message" "css_element"

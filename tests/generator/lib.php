@@ -24,6 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+global $CFG;
+require_once($CFG->dirroot . '/blocks/news/block_news_message.php');
+require_once($CFG->dirroot . '/blocks/news/edit_message_form.php');
+
 class block_news_generator extends testing_block_generator {
 
     protected function preprocess_record(stdClass $record, array $options) {
@@ -101,7 +105,7 @@ class block_news_generator extends testing_block_generator {
      * @return bool|int
      */
     public function create_block_new_message($block, $record) {
-        global $DB;
+        global $CFG, $DB;
 
         $record->blockinstanceid = $block->id;
 
@@ -126,7 +130,7 @@ class block_news_generator extends testing_block_generator {
         if (!isset($record->messagevisable)) {
             $record->messagevisible = 1;
         }
-        if (!isset($record->massagedate)) {
+        if (!isset($record->messagedate)) {
             $record->messagedate = time() - 3600;
         }
         if (!isset($record->hideauthor)) {
@@ -141,6 +145,27 @@ class block_news_generator extends testing_block_generator {
         if (!isset($record->attachments)) {
             $record->attachments = null;
         }
-        return $DB->insert_record('block_news_messages', $record, true);
+        $id = $DB->insert_record('block_news_messages', $record, true);
+
+        if (isset($record->image)) {
+            $imagepath = $CFG->dirroot . $record->image;
+            $fs = get_file_storage();
+            $fr = (object) [
+                'contextid' => context_block::instance($block->id)->id,
+                'component' => 'block_news',
+                'filearea' => 'messageimage',
+                'filepath' => '/',
+                'filename' => basename($record->image),
+                'itemid' => $id
+            ];
+            $fs->create_file_from_pathname($fr, $imagepath);
+            $thumbpath = tempnam(sys_get_temp_dir(), 'bnt');
+            \theme_osep\util::create_thumbnail($imagepath, $thumbpath, block_news_edit_message_form::THUMBNAIL_MAX_EDGE);
+            $fr->filearea = 'thumbnail';
+            $fr->filename = 'thumbnail.jpg';
+            $fs->create_file_from_pathname($fr, $thumbpath);
+            unlink($thumbpath);
+        }
+        return $id;
     }
 }

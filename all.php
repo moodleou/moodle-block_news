@@ -40,7 +40,7 @@ $blockcontext = context_block::instance($blockinstanceid);
 $urlparams = array('bi' => $blockinstanceid);
 $PAGE->set_url('/blocks/news/all.php', $urlparams);
 
-// breadcrumb
+// Breadcrumb.
 $title = $bns->get_title();
 $title = empty($title) ? get_string('pluginname', 'block_news') : $title;
 $title .= ': ' . get_string('allmessages', 'block_news');
@@ -54,11 +54,11 @@ echo $OUTPUT->header();
 echo $output->render_message_page_header($bns, $title, (isset($CFG->enablerssfeeds) && $CFG->enablerssfeeds),
         has_capability('block/news:add', $blockcontext));
 
-// get the messages
+// Get the messages.
 if (has_capability('block/news:viewhidden', $blockcontext)) {
-    $bnms = $bns->get_messages_all(true); // see all dates, all visibilty
+    $bnms = $bns->get_messages_all(true); // See all dates, all visibilty.
 } else {
-    $bnms = $bns->get_messages_all(false); // see past/present only and visible
+    $bnms = $bns->get_messages_all(false); // See past/present only and visible.
 }
 
 // Display the messages.
@@ -67,7 +67,7 @@ if ($bnms == null) {
 } else {
     foreach ($bnms as $bnm) {
         $SESSION->news_block_views[$bnm->get_id()] = true;
-        $msgwidget = new block_news_message_full($bnm, null, null, $bns, 'all');
+        $msgwidget = new block_news_message_full($bnm, null, null, $bns, 'all', $bns->get_images());
         echo $output->render($msgwidget);
     }
 }
