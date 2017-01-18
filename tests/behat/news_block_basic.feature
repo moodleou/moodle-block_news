@@ -100,12 +100,12 @@ Feature: Basic usage of news block
     And I should see "Short message"
 
     # Delete the earliest message from this page. (Try cancel first.)
-    When I click on "delete" "link" in the "//div[contains(@class, 'block_news_message')][3]" "xpath_element"
+    When I click on "Delete Short message" "link"
     Then I should see "Confirm deletion"
     And I should see "Short message"
     When I press "Cancel"
     Then I should see "All messages"
-    When I click on "delete" "link" in the "//div[contains(@class, 'block_news_message')][3]" "xpath_element"
+    When I click on "Delete Short message" "link"
     And I press "Continue"
     Then I should see "All messages"
     And I should see "Medium message"
