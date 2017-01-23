@@ -117,3 +117,13 @@
     font-size: 0.8em;
     font-style: italic;
 }
+
+/*
+ * TEMPORARY: This option should be visible (even on non-ousubject sites)
+ * but because the feature is not fully implemented, we are hiding it.
+ * TODO This style should be removed by June release.
+ */
+body:not(.osep-courseformat-ousubject) #fitem_id_config_displaytype,
+body:not(.osep-courseformat-ousubject) #fitem_id_messageimage {
+    display: none;
+}
