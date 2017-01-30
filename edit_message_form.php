@@ -41,7 +41,7 @@ class block_news_edit_message_form extends moodleform {
      * Maximum width/height of thumbnail images.
      * @var int
      */
-    const THUMBNAIL_MAX_EDGE = 256;
+    const THUMBNAIL_MAX_EDGE = 340;
     const IMAGE_FILE_TYPES = array('.jpg', '.png');
     const IMAGE_FILE_OPTIONS = array('subdirs' => 0, 'maxbytes' => 50 * 1024, 'areamaxbytes' => 50 * 1024,
             'maxfiles' => 1, 'accepted_types' => self::IMAGE_FILE_TYPES);
@@ -106,11 +106,31 @@ class block_news_edit_message_form extends moodleform {
 
             $mform->addElement('select', 'messagetype', get_string('messagetype', 'block_news'), $messagetype);
             $mform->setDefault('messagetype', block_news_message::MESSAGETYPE_NEWS);
+
+            $mform->addElement('date_time_selector', 'eventstart',
+                    get_string('msgediteventstart', 'block_news'), array('optional' => false));
+            $mform->disabledIf('eventstart', 'messagetype', 'neq', block_news_message::MESSAGETYPE_EVENT);
+            $mform->disabledIf('eventstart[hour]', 'alldayevent', 'checked');
+            $mform->disabledIf('eventstart[minute]', 'alldayevent', 'checked');
+
+            $mform->addElement('advcheckbox', 'alldayevent', get_string('msgeditalldayevent', 'block_news'));
+            $mform->setDefault('alldayevent', 1);
+            $mform->disabledIf('alldayevent', 'messagetype', 'neq', block_news_message::MESSAGETYPE_EVENT);
+
+            $mform->addElement('date_time_selector', 'eventend',
+                    get_string('msgediteventend', 'block_news'), array('optional' => false));
+            $mform->disabledIf('eventend', 'messagetype', 'neq', block_news_message::MESSAGETYPE_EVENT);
+            $mform->disabledIf('eventend', 'alldayevent', 'checked');
+
+            $mform->addElement('text', 'eventlocation', get_string('msgediteventlocation', 'block_news'));
+            $mform->disabledIf('eventlocation', 'messagetype', 'neq', block_news_message::MESSAGETYPE_EVENT);
+            $mform->setType('eventlocation', PARAM_TEXT);
         }
 
         if (theme_osep\util::is_osep_design($COURSE)) {
             $mform->addElement('filemanager', 'messageimage', get_string('messageimage', 'block_news'),
                     null, self::IMAGE_FILE_OPTIONS);
+            $mform->disabledIf('messageimage', 'messagetype', 'eq', block_news_message::MESSAGETYPE_EVENT);
         }
 
         $mform->addElement('selectyesno', 'messagevisible',
@@ -180,11 +200,33 @@ class block_news_edit_message_form extends moodleform {
         $mform->addElement('selectyesno', 'hideauthor',
             get_string('msgedithideauthor', 'block_news'));
         $mform->setDefault('hideauthor', (int) get_config('block_news', 'block_news_hideauthor'));
+        $mform->disabledIf('hideauthor', 'messagetype', 'eq', block_news_message::MESSAGETYPE_EVENT);
 
         $mform->addElement('static', 'lastupdated',
                     get_string('msgeditlastupdated', 'block_news'));
 
         $this->add_action_buttons();
+    }
+
+    /**
+     * Ensure that if an event is added with an end date, the end is after the start.
+     *
+     * @param array $data
+     * @param array $files
+     * @return array
+     */
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+        if ($this->displaytype == block_news_system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS
+                && $data['messagetype'] == block_news_message::MESSAGETYPE_EVENT) {
+            if ($data['eventstart'] < time()) {
+                $errors['eventstart'] = get_string('erroreventstart', 'block_news');
+            }
+            if (!$data['alldayevent'] && $data['eventend'] < $data['eventstart']) {
+                $errors['eventend'] = get_string('erroreventend', 'block_news');
+            }
+        }
+        return $errors;
     }
 
 }

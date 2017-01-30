@@ -162,7 +162,56 @@ class block_news_message_full implements renderable {
  *
  * @package block_news
  */
-class block_news_message_short implements renderable {
+class block_news_message_short implements renderable, templatable {
+
+    /** @var string Title of message */
+    public $title;
+    /** @var string Additional CSS classes for message wrapper */
+    public $classes;
+    /** @var string Source URL for the message (if from a feed) */
+    public $link;
+    /** @var string URL to view the whole message */
+    public $viewlink;
+    /** @var string Message text */
+    public $message;
+    /** @var string Message publication date */
+    public $messagedate;
+    /** @var bool Is the message visibile? */
+    public $messagevisible;
+    /** @var int Message text format */
+    public $messageformat;
+    /** @var int Message type - news or event */
+    public $messagetype;
+    /** @var string Name of author (if shown) */
+    public $author;
+    /** @var string Group visibility indication (if shown) */
+    public $groupindication;
+    /** @var array imageinfo for thumbnail, if there is one */
+    public $thumbinfo;
+    /** @var moodle_url The URL of the thumbnail image */
+    public $thumburl;
+    /** @var string The message text with formatting and filtering applied */
+    public $formattedmessage;
+    /** @var int The width of the thumbnail image in pixels */
+    public $thumbwidth;
+    /** @var int The height of the thumbnail image in pixels */
+    public $thumbheight;
+    /** @var int The timestamp for the start of the event */
+    public $eventstart;
+    /** @var int The timestamp for the end of the event */
+    public $eventend;
+    /** @var string The ISO8601 date for the start of the event (and time if it's not an all-day event) */
+    public $eventdatetime;
+    /** @var string The format string to format eventstart into eventdatetime */
+    public $eventdatetimeformat;
+    /** @var string The 2-digit day of the event's start date */
+    public $eventday;
+    /** @var string The shorthand month of the event's start date */
+    public $eventmonth;
+    /** @var string The location of the event */
+    public $eventlocation;
+    /** @var string The full formatted description of the event's start (and end) date (and time). */
+    public $fulleventdate;
 
     /**
      * Build short message data
@@ -174,7 +223,7 @@ class block_news_message_short implements renderable {
      * @param array $thumbnails Thumbnail images for all messages, keyed by message ID.
      */
     public function __construct($bnm, $bns, $summarylength, $count, array $thumbnails = []) {
-        global $CFG;
+        global $CFG, $USER;
 
         $this->classes = '';
         if ($bns->get_hidetitles()) {
@@ -191,11 +240,6 @@ class block_news_message_short implements renderable {
 
         $this->viewlink = $CFG->wwwroot . '/blocks/news/message.php?m=' . $bnm->get_id();
 
-        if ($summarylength) {
-            $this->message = shorten_text(strip_tags($bnm->get_message()), $summarylength);
-        } else {
-            $this->message = '';
-        }
         $this->messagedate = userdate($bnm->get_messagedate(),
                                                 get_string('dateformat', 'block_news'));
         $this->messagevisible = $bnm->get_messagevisible();
@@ -224,6 +268,54 @@ class block_news_message_short implements renderable {
                     'thumbnail', $bnm->get_id(), $thumb->get_filename());
             $this->thumburl = new moodle_url(implode('/', $pathparts));
         }
+
+        $this->messagetype = $bnm->get_messagetype();
+        $this->fulleventdate = '';
+        if ($this->messagetype == block_news_message::MESSAGETYPE_EVENT) {
+            $alldayevent = $bnm->get_alldayevent();
+            if ($alldayevent) {
+                $this->eventstart = $bnm->get_eventstart_local();
+                $this->eventdatetimeformat = '%F';
+                $this->eventend = null;
+            } else {
+                $this->eventstart = $bnm->get_eventstart();
+                $this->eventend = $bnm->get_eventend();
+                $this->eventdatetimeformat = '%FT%T';
+            }
+            $this->eventlocation = $bnm->get_eventlocation();
+
+            if ($alldayevent) {
+                $this->fulleventdate = userdate($this->eventstart, get_string('strftimedaydate', 'langconfig'));
+            } else {
+                $eventtime = (object) ['start' => '', 'end' => ''];
+                $eventtime->start = userdate($this->eventstart, get_string('strftimedaydatetime', 'langconfig'));
+                if (userdate($this->eventstart, '%Y%m%d') === userdate($this->eventend, '%Y%m%d')) {
+                    $eventtime->end = userdate($this->eventend, get_string('strftimetime', 'langconfig'));
+                } else {
+                    $eventtime->end = userdate($this->eventend, get_string('strftimedaydatetime', 'langconfig'));
+                }
+                $this->fulleventdate = get_string('fulleventdate', 'block_news', $eventtime);
+            }
+        }
+
+        if ($summarylength) {
+            $this->message = shorten_text(strip_tags($bnm->get_message()), $summarylength);
+        } else {
+            $this->message = '';
+        }
+    }
+
+    public function export_for_template(renderer_base $output) {
+        if ($this->messagetype == block_news_message::MESSAGETYPE_EVENT) {
+            $this->eventday = strftime('%d', $this->eventstart);
+            $this->eventmonth = strftime('%b', $this->eventstart);
+            $this->eventdatetime = strftime($this->eventdatetimeformat, $this->eventstart);
+        } else {
+            $this->thumbwidth = $this->thumbinfo['width'];
+            $this->thumbheight = $this->thumbinfo['height'];
+        }
+        $this->formattedmessage = format_text($this->message, $this->messageformat);
+        return $this;
     }
 }
 
@@ -446,45 +538,13 @@ class block_news_renderer extends plugin_renderer_base {
      * @return string HTML
      */
     protected function render_block_news_message_short(block_news_message_short $nmsg) {
-        global $CFG;
-
-        $out = '';
-        $out .= $this->output->container_start('block_news_msg');
-
-        $date = html_writer::tag('span', $nmsg->messagedate,
-                array('class' => 'block_news_msg_messagedate'));
-        $title = html_writer::tag('span', format_string($nmsg->title),
-                array('class' => 'block_news_msg_title'));
-        if (!empty($nmsg->link)) {
-            $title = $this->output->action_link($nmsg->link, $title);
+        $context = $nmsg->export_for_template($this->output);
+        if ($nmsg->messagetype == block_news_message::MESSAGETYPE_EVENT) {
+            $template = 'block_news/event_short';
+        } else {
+            $template = 'block_news/message_short';
         }
-
-        $out .= $this->render_block_news_message_heading($date, $title);
-        if (!empty($nmsg->author)) {
-            $out .= $this->output->container(format_string($nmsg->author),
-                'block_news_msg_author');
-        }
-        if (!empty($nmsg->thumburl)) {
-            $thumbattrs = array(
-                'src' => $nmsg->thumburl->out(),
-                'alt' => '',
-                'width' => $nmsg->thumbinfo['width'],
-                'height' => $nmsg->thumbinfo['height']
-            );
-            $out .= $this->output->box(html_writer::empty_tag('img', $thumbattrs), 'messageimage ');
-        }
-        $out .= $this->output->container(format_text($nmsg->message, $nmsg->messageformat),
-                'block_news_msg_message');
-
-        // View.
-        $out .= $this->output->container_start('link');
-        $accesshidetxt = html_writer::tag('span', ' ' . $nmsg->title, array('class' => 'accesshide'));
-        $out .= $this->render_block_news_message_link($nmsg->viewlink, $accesshidetxt);
-        $out .= $this->output->container_end();
-        $out .= $this->output->container($nmsg->groupindication, 'block_news_group_indication');
-        $out .= $this->output->container_end();
-
-        return $this->output->container($out, 'block_news '.$nmsg->classes);
+        return $this->output->render_from_template($template, $context);
     }
 
     /**

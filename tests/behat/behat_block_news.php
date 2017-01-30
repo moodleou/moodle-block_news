@@ -47,7 +47,7 @@ class behat_block_news extends behat_base {
      * @param TableNode $messagetable List of messages to create
      */
     public function the_following_news_messages_exist($courseshortname, TableNode $messagetable) {
-        global $DB, $CFG;
+        global $DB;
         $generator = testing_util::get_data_generator()->get_plugin_generator('block_news');
         $course = $DB->get_record('course', ['shortname' => $courseshortname], '*', MUST_EXIST);
         $coursecontext = context_course::instance($course->id);
@@ -69,12 +69,11 @@ class behat_block_news extends behat_base {
      */
     public function i_should_see_image_in_news_message($imagename, $messagetitle) {
         if ($imagename === 'thumbnail.jpg') {
-            $titlecontainer = "span[contains(@class, 'block_news_msg_title')][contains(text(), '$messagetitle')]/..";
+            $titlecontainer = "span[contains(@class, 'block_news_msg_title')][contains(text(), '$messagetitle')]/../../";
         } else {
-            $titlecontainer = "div[contains(@class, 'box title')][contains(text(), '$messagetitle')]";
+            $titlecontainer = "div[contains(@class, 'box title')][contains(text(), '$messagetitle')]/following-sibling::";
         }
-        $xpath = "//" . $titlecontainer . "/following-sibling::div[contains(@class, 'messageimage')]" .
-                "/img[contains(@src, '$imagename')]";
+        $xpath = "//" . $titlecontainer . "div[contains(@class, 'messageimage')]/img[contains(@src, '$imagename')]";
         $this->find('xpath', $xpath);
     }
 }

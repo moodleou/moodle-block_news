@@ -1,0 +1,72 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_news/message_short
+
+    Template for displaying the short version of a news message within a block.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * messagedate
+    * title
+    * formattedmessage
+    * viewlink
+    * groupindication
+
+    Example context (json):
+    {
+        "messagedate": "23 Jan 2017",
+        "title": "Fake news",
+        "author": "Donald J. Trump",
+        "thumburl": "http://placehold.it/340x160",
+        "thumbwidth": "340",
+        "thumbheight": "160",
+        "formattedmessage": "This is <b>fake news</b>. Sad!",
+        "viewlink": "http://example.com",
+        "classes": "",
+        "groupindication": ""
+    }
+
+}}
+<article class="block_news clearfix {{classes}}">
+    <div class="block_news_msg">
+        {{#thumburl}}
+            <div class="box messageimage">
+                <img src="{{thumburl}}" width="{{thumbwidth}}" height="{{thumbheight}}" alt="" />
+            </div>
+        {{/thumburl}}
+        <h1>
+            {{#link}}<a href="{{link}}">{{/link}}
+            <span class="block_news_msg_title">{{title}}</span>
+            {{#link}}</a>{{/link}}
+        </h1>
+        <span class="block_news_msg_messagedate">{{#str}} posted, block_news {{/str}} {{messagedate}}</span>
+        {{#author}}
+            <div class="block_news_msg_author">{{author}}</div>
+        {{/author}}
+        <div class="block_news_msg_message">{{{formattedmessage}}}</div>
+        <div class="link">
+            {{> block_news/message_link}}
+        </div>
+        <div class="block_news_group_indication">{{{groupindication}}}</div>
+    </div>
+</article>

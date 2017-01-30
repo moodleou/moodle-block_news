@@ -1,6 +1,16 @@
-.block_news_msg h3 {
+.block .content .block_news_msglist > h3,
+.block .content .block_news_eventlist > h3 {
+    color: #38254c;
+    font-weight: normal;
+    font-size: 2.14285em;
+    margin-top: 0px;
+    margin-bottom: 5px;
+}
+
+.block_news_msg h1 {
     font-size: 1.0em;
-    margin: 10px 0 0 0;
+    margin: 18px 0 0 0;
+    line-height: 1.2;
 }
 
 .block_news_msg .block_news_msg_messagedate {
@@ -13,7 +23,6 @@
 }
 
 .block_news_msg .block_news_msg_author {
-    clear: both;
     font-style: italic;
     margin-bottom: 5px;
 }
@@ -22,7 +31,7 @@
     font-weight: bold;
 }
 
-.block_news_msg h3.main {
+.block_news_msg h1.main {
     margin-bottom: 5px;
 }
 
@@ -96,7 +105,7 @@
 }
 
 .block_news_message .messageimage img,
-.block_news_msg .messageimage img {
+.block_news .messageimage img {
     max-width: 100%;
     height: auto;
 }

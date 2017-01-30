@@ -79,39 +79,56 @@ class block_news extends block_base {
             $canaddnews = null;
         }
         $nummsgs = $this->bns->get_nummessages();
-        $msgs = $this->bns->get_messages_limited($nummsgs);
+        if ($this->bns->get_displaytype() == block_news_system::DISPLAY_DEFAULT) {
+            $msgs = $this->bns->get_messages_limited($nummsgs);
+            $events = null;
+        } else {
+            $msgs = $this->bns->get_messages_limited($nummsgs, block_news_message::MESSAGETYPE_NEWS);
+            $events = $this->bns->get_messages_limited($nummsgs, block_news_message::MESSAGETYPE_EVENT);
+        }
 
         $sumlen = $this->bns->get_summarylength();
-        if ($msgs) {
+        if ($msgs || $events || $this->bns->get_displaytype() == block_news_system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
             $c = 1;
             $this->content->text = $output->open_news_block_custom_wrapper();
             $this->content->text .= $output->container_start('block_news_msglist');
+
+            if ($this->bns->get_displaytype() == block_news_system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
+                $this->content->text .= $output->heading(get_string('newsheading', 'block_news'), 3);
+            }
 
             $newmsg = false;
 
             $thumbnails = $this->bns->get_images('thumbnail');
 
-            foreach ($msgs as $msg) {
-                // Check whether there are news posts the user is not likely to have seen.
-                if (!empty($SESSION->news_block_views) &&
-                        !empty($SESSION->news_block_views[$msg->get_id()])) {
-                    $courseaccess = time();
-                } else if (isset($USER->lastcourseaccess[$COURSE->id])) {
-                    $courseaccess = $USER->lastcourseaccess[$COURSE->id];
-                } else {
-                    $courseaccess = false;
+            if (empty($msgs)) {
+                $this->content->text .= get_string('nonewsyet', 'block_news');
+            } else {
+                foreach ($msgs as $msg) {
+                    // Check whether there are news posts the user is not likely to have seen.
+                    if (!empty($SESSION->news_block_views) &&
+                            !empty($SESSION->news_block_views[$msg->get_id()])
+                    ) {
+                        $courseaccess = time();
+                    } else {
+                        if (isset($USER->lastcourseaccess[$COURSE->id])) {
+                            $courseaccess = $USER->lastcourseaccess[$COURSE->id];
+                        } else {
+                            $courseaccess = false;
+                        }
+                    }
+
+                    $msgdate = $msg->get_messagedate();
+                    $msguserid = $msg->get_userid();
+
+                    if ($USER->id != $msguserid && (!$courseaccess || $msgdate > $courseaccess)) {
+                        $newmsg = true;
+                    }
+
+                    $msgwidget = new block_news_message_short($msg, $this->bns, $sumlen, $c, $thumbnails);
+                    $this->content->text .= $output->render($msgwidget);
+                    $c++;
                 }
-
-                $msgdate = $msg->get_messagedate();
-                $msguserid = $msg->get_userid();
-
-                if ($USER->id != $msguserid && (!$courseaccess || $msgdate > $courseaccess)) {
-                    $newmsg = true;
-                }
-
-                $msgwidget = new block_news_message_short($msg, $this->bns, $sumlen, $c, $thumbnails);
-                $this->content->text .= $output->render($msgwidget);
-                $c++;
             }
 
             if ($newmsg) {
@@ -119,6 +136,20 @@ class block_news extends block_base {
             }
 
             $this->content->text .= $output->container_end();
+
+            if ($this->bns->get_displaytype() == block_news_system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
+                $this->content->text .= $output->container_start('block_news_eventlist');
+                $this->content->text .= $output->heading(get_string('eventsheading', 'block_news'), 3);
+                if (empty($events)) {
+                    $this->content->text .= get_string('noeventsyet', 'block_news');
+                } else {
+                    foreach ($events as $event) {
+                        $eventwidget = new block_news_message_short($event, $this->bns, $sumlen, $c, $thumbnails);
+                        $this->content->text .= $output->render($eventwidget);
+                    }
+                }
+                $this->content->text .= $output->container_end();
+            }
             $this->content->text .= $output->close_news_block_custom_wrapper();
             // Main footer.
             $this->content->footer .= $output->container_start($canaddnews, 'block_news_viewall');

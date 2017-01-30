@@ -57,14 +57,16 @@ class block_news_message {
     protected $userid;
     protected $groupingid;
     protected $groupid;
+    protected $eventstart;
+    protected $eventend;
+    protected $eventlocation;
 
     protected $user;
 
     /**
      * Constructor
      *
-     * @param int $id Message is
-     * @return object block_news_message
+     * @param stdClass $mrec Database record for the message.
      */
     public function __construct($mrec) {
         // Assign the properties.
@@ -80,6 +82,8 @@ class block_news_message {
     }
 
     /**
+     * Get the ID of the message.
+     *
      * @return int Message id
      */
     public function get_id() {
@@ -87,6 +91,8 @@ class block_news_message {
     }
 
     /**
+     * Get the block instance ID for the block the message appears in.
+     *
      * @return int Block instance id
      */
     public function get_blockinstanceid() {
@@ -94,6 +100,8 @@ class block_news_message {
     }
 
     /**
+     * Get the ID of the block's news feed.
+     *
      * @return int News feed id
      */
     public function get_newsfeedid() {
@@ -101,6 +109,8 @@ class block_news_message {
     }
 
     /**
+     * Get the title of the message.
+     *
      * @return string Message title
      */
     public function get_title() {
@@ -108,6 +118,8 @@ class block_news_message {
     }
 
     /**
+     * Get the link to the message, if from a feed.
+     *
      * @return string Link to message on remote feed (if feed message)
      */
     public function get_link() {
@@ -115,6 +127,8 @@ class block_news_message {
     }
 
     /**
+     * Get the main text of the message.
+     *
      * @return string Message text
      */
     public function get_message() {
@@ -122,6 +136,8 @@ class block_news_message {
     }
 
     /**
+     * Get the format of the message text.
+     *
      * @return int Message format
      */
     public function get_messageformat() {
@@ -129,6 +145,8 @@ class block_news_message {
     }
 
     /**
+     * Get the type of message, news or event.
+     *
      * @return int Message type (self::MESSAGETYPE_NEWS for news items and self::MESSAGETYPE_EVENT for events)
      */
     public function get_messagetype() {
@@ -136,6 +154,8 @@ class block_news_message {
     }
 
     /**
+     * Get the publication date of the message.
+     *
      * @return int Message published date (seconds since start of epoch)
      */
     public function get_messagedate() {
@@ -143,6 +163,8 @@ class block_news_message {
     }
 
     /**
+     * Should the message repeat when restored to a new course?
+     *
      * @return boolean Whether message is repeated on course restore
      */
     public function get_messagerepeat() {
@@ -150,6 +172,8 @@ class block_news_message {
     }
 
     /**
+     * Is this message visible?
+     *
      * @return boolean Whether message is visible
      * @see is_visible_to_students
      */
@@ -158,6 +182,8 @@ class block_news_message {
     }
 
     /**
+     * Should the author's name be hidden?
+     *
      * @return boolean Whether author name is hidden
      */
     public function get_hideauthor() {
@@ -165,6 +191,8 @@ class block_news_message {
     }
 
     /**
+     * Get the publication status of the message.
+     *
      * @return int Publish status (0=Immediately, 1=At specified date, 2=Already published)
      */
     public function get_publish() {
@@ -172,6 +200,8 @@ class block_news_message {
     }
 
     /**
+     * Get the author's User ID.
+     *
      * @return int Internal id of message author
      */
     public function get_userid() {
@@ -179,6 +209,8 @@ class block_news_message {
     }
 
     /**
+     * Get the grouping ID of the message.
+     *
      * @return int grouping id of the message
      */
     public function get_groupingid() {
@@ -186,6 +218,8 @@ class block_news_message {
     }
 
     /**
+     * Get the group ID of the message.
+     *
      * @return int group id of the message
      */
     public function get_groupid() {
@@ -193,10 +227,74 @@ class block_news_message {
     }
 
     /**
+     * Get the last modified time for the message.
+     *
      * @return int Time message record was last updated (seconds since epoch)
      */
     public function get_timemodified() {
         return $this->timemodified;
+    }
+
+    /**
+     * Get the timestamp of the event.
+     *
+     * @return int The timestamp the event will occur
+     */
+    public function get_eventstart() {
+        return $this->eventstart;
+    }
+
+    /**
+     * Get the timestamp of 00:00 on the day the event will occur, adjusted for the user's timezone.
+     *
+     * Because "All day events" are stored as midnight on the day, users in a timezone behind the server's would see the start
+     * date as the previous day.  This adjusts the timestamp to the same date within their timezone.
+     *
+     * @return int The timestamp for the event's start day, adjusted to the user's timezone.
+     */
+    public function get_eventstart_local() {
+        global $USER;
+        $eventdate = new DateTime(null, core_date::get_server_timezone_object());
+        $eventdate->setTimestamp($this->eventstart);
+        $localdate = new DateTime(null, core_date::get_user_timezone_object($USER));
+        $localdate->setDate($eventdate->format('Y'), $eventdate->format('m'), $eventdate->format('d'));
+        $localdate->setTime(0, 0);
+        return $localdate->getTimestamp();
+    }
+
+    /**
+     * Is this an all day event?
+     *
+     * An event happening at 00:00 server time with no end date is considered an all day event.
+     *
+     * @return bool Whether this message is an all-day event.
+     */
+    public function get_alldayevent() {
+        $eventstart = new DateTime(null, core_date::get_server_timezone_object());
+        $eventstart->setTimestamp($this->eventstart);
+        if (empty($this->eventend) && $eventstart->format('Hi') == '0000') {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Get the timestamp of the event's end.
+     *
+     * @return int The timestamp the event will end
+     */
+    public function get_eventend() {
+        return $this->eventend;
+    }
+
+    /**
+     * Get the location of the event.
+     *
+     * @return string The event location
+     */
+    public function get_eventlocation() {
+        return $this->eventlocation;
     }
 
     /**
@@ -213,6 +311,7 @@ class block_news_message {
     }
 
     /**
+     * Set the message's visibility.
      *
      * @param boolean $visible Message visible
      */
@@ -282,6 +381,8 @@ class block_news_message {
         $tempmessage = $data->message;
         $data->message = $data->message['text'];
 
+        $data = self::set_alldayevent($data);
+
         $id = $DB->insert_record('block_news_messages', $data, true);
 
         // Save files.
@@ -321,6 +422,7 @@ class block_news_message {
      */
     public function edit($data) {
         global $DB, $USER, $COURSE;
+        $data = self::set_alldayevent($data);
         $DB->update_record('block_news_messages', $data);
 
         // Save files.
@@ -346,7 +448,7 @@ class block_news_message {
         return true;
     }
 
-    /*
+    /**
      * Delete message
      */
     public function delete() {
@@ -366,5 +468,22 @@ class block_news_message {
         // Delete files.
         $fs = get_file_storage();
         $fs->delete_area_files($context->id, 'block_news');
+    }
+
+    /**
+     * Return the submitted data with adjusted eventstart and eventend time if alldayevent was selected.
+     *
+     * @param stdClass $data The submitted form data
+     * @return stdClass
+     */
+    private static function set_alldayevent($data) {
+        if (!empty($data->messagetype) && $data->messagetype == self::MESSAGETYPE_EVENT && $data->alldayevent) {
+            $eventstart = new DateTime(null, core_date::get_server_timezone_object());
+            $eventstart->setTimestamp($data->eventstart);
+            $eventstart->setTime(0, 0);
+            $data->eventstart = $eventstart->getTimestamp();
+            $data->eventend = null;
+        }
+        return $data;
     }
 }

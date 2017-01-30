@@ -24,10 +24,10 @@
 
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
-    // It must be included from a Moodle page
+    // It must be included from a Moodle page.
 }
 
-// general
+// General.
 $string['news:addinstance'] = 'Add a new news block';
 $string['pluginname'] = 'News';
 $string['defaultblocktitle'] = '(new News block)';
@@ -35,7 +35,7 @@ $string['addnewmessage'] = 'Add a new message';
 $string['allmessages'] = 'All messages';
 $string['editmessage'] = 'Edit message';
 $string['confirmdeletion'] = 'Confirm deletion of \'{$a}\'?';
-$string['dateformat'] = '%d %b %Y'; // http://php.net/manual/en/function.strftime.php
+$string['dateformat'] = '%d %b %Y'; // See http://php.net/manual/en/function.strftime.php.
 $string['dateformatlong'] = '%d %b %Y %H:%M';
 $string['new'] = 'new';
 $string['subscribe'] = 'Subscribe';
@@ -45,8 +45,13 @@ $string['messagetype'] = 'Type';
 $string['messageimage'] = 'Image';
 $string['delete'] = 'Delete {$a}';
 $string['edit'] = 'Edit {$a}';
+$string['posted'] = 'Posted:';
+$string['newsheading'] = 'News';
+$string['eventsheading'] = 'Events';
+$string['nonewsyet'] = 'No news messages have been posted to this website.';
+$string['noeventsyet'] = 'There are no upcoming events to display.';
 
-// error messages
+// Error messages.
 $string['erroremptymessage'] = 'Missing entry';
 $string['errorperms'] = 'Sorry, insufficient permissions to complete this operation';
 $string['errortexttoolong'] = 'Text in this field is limited to {$a} characters';
@@ -60,8 +65,10 @@ $string['errorinvalidblockinstanceid'] = 'Invalid block instance id';
 $string['errorupdateblocknews'] = 'Update of block news failed';
 $string['errornocsemodinfo'] = 'Could not get course/module info';
 $string['errorwritefile'] = 'Unable to write cache file';
+$string['erroreventstart'] = 'Event start must be in the future';
+$string['erroreventend'] = 'Event end must be after event start';
 
-// block config
+// Block config.
 $string['configtitle'] = 'Block title';
 $string['confignummessages'] = 'Show messages';
 $string['configsummarylength'] = 'Summary';
@@ -73,14 +80,14 @@ $string['configgroupingsupport_help'] = 'Enable access restriction on the news m
 $string['configgroupingoptionnotenable'] = 'Not enabled';
 $string['configgroupingoptiongrouping'] = 'Grouping';
 $string['configgroupingoptiongroup'] = 'Group';
-// block
+// Block.
 $string['msgblocknonews'] = 'There is no news yet';
 $string['msgblockadd'] = 'Add';
 $string['msgblockaddalt'] = 'Add a message';
 $string['msgblockviewall'] = 'View all';
 $string['msgblockviewallalt'] = 'View all messages';
 
-// global settings - settings.php
+// Global settings - settings.php.
 $string['settingsupdatetime'] = 'Minimum feed delay';
 $string['settingsupdatetime_info'] = 'Minimum time between updates of a feed (eg 1 hour means feed will be updated every hour)';
 $string['settingsmaxpercron'] = 'Cron feed limit';
@@ -91,7 +98,7 @@ $string['settingshideauthor'] = 'Hide author';
 $string['settingshideauthor_info'] = 'Set default value for the hide author option when posting news.';
 $string['separateintoeventsandnewsitems'] = 'Separate into events and news items';
 
-// edit
+// Edit.
 $string['msgeditpghdr'] = 'News';
 $string['msgeditpgtitle'] = 'News message';
 $string['msgfieldgroup'] = 'message';
@@ -111,8 +118,12 @@ $string['msgedithlpattach'] = 'Attachments';
 $string['msgeditimmediately'] = 'Immediately';
 $string['msgeditatspecdate'] = 'At specified date';
 $string['msgeditalreadypub'] = 'Already published';
+$string['msgediteventstart'] = 'Event start';
+$string['msgediteventend'] = 'Event end';
+$string['msgeditalldayevent'] = 'All day event';
+$string['msgediteventlocation'] = 'Event location';
 
-// message render
+// Message render.
 $string['rendermsggroupindication'] = 'Not available unless: You belong to <strong>{$a}</strong>';
 $string['rendermsghidden'] = 'This message has been hidden from students';
 $string['rendermsgfuture'] = 'This message does not display to students until {$a}';
@@ -120,10 +131,13 @@ $string['rendermsgnext'] = 'Next (newer) message';
 $string['rendermsgprev'] = 'Previous (older) message';
 $string['rendermsgview'] = '(View)';
 
-// message class
+// Event render.
+$string['fulleventdate'] = '{$a->start} to {$a->end}';
+
+// Message class.
 $string['msgclassconfdel'] = 'Are you sure you want to delete the message \'{$a}\'? This action cannot be undone';
 
-// access permissions
+// Access permissions.
 $string['news:add'] = 'Add a message';
 $string['news:edit'] = 'Edit a message';
 $string['news:hide'] = 'Hide or show a message';

@@ -25,7 +25,7 @@ Feature: Display images in posts
     And I should see image "thumbnail.jpg" in news message "message2"
 
   Scenario: The single view page should display the full image for the message
-    When I click on "View" "link" in the ".block_news_msg:first-child" "css_element"
+    When I click on "View" "link" in the ".block_news_msg" "css_element"
     Then I should see "message2"
     And I should see image "kitten2.jpg" in news message "message2"
     And I should not see "message1"

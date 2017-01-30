@@ -122,6 +122,8 @@ class block_news_system {
     }
 
     /**
+     * Get the database ID of the block_news record.
+     *
      * @return integer id
      */
     public function get_id() {
@@ -129,6 +131,8 @@ class block_news_system {
     }
 
     /**
+     * Get the block instance ID.
+     *
      * @return integer id
      */
     public function get_blockinstanceid() {
@@ -136,6 +140,8 @@ class block_news_system {
     }
 
     /**
+     * Get the configured block title.
+     *
      * @return string title
      */
     public function get_title() {
@@ -143,6 +149,8 @@ class block_news_system {
     }
 
     /**
+     * Get the number of messages to show in the block.
+     *
      * @return integer Number of messages to show in block
      */
     public function get_nummessages() {
@@ -150,6 +158,8 @@ class block_news_system {
     }
 
     /**
+     * Get the number of characters to limit the message summaries to.
+     *
      * @return integer Length of summary in characters (0 if turned off)
      */
     public function get_summarylength() {
@@ -157,6 +167,8 @@ class block_news_system {
     }
 
     /**
+     * Return whether to hide message titles in the block.
+     *
      * @return boolean Whether to hide all message titles in block
      */
     public function get_hidetitles() {
@@ -173,6 +185,8 @@ class block_news_system {
     }
 
     /**
+     * Return whether to hide message links in the block.
+     *
      * @return boolean Whether to hide message links (from feed messages) in block
      */
     public function get_hidelinks() {
@@ -180,6 +194,8 @@ class block_news_system {
     }
 
     /**
+     * Return whether grouping support is enabled.
+     *
      * @return boolean Whether grouping support is enabled in block
      */
     public function get_groupingsupport() {
@@ -187,6 +203,8 @@ class block_news_system {
     }
 
     /**
+     * Return the username to use when applying group restrictions.
+     *
      * @return string Username to get groups when enable group restriction
      */
     public function get_username() {
@@ -198,6 +216,7 @@ class block_news_system {
      * out which messages to display.  This will be because the user is a member of particular
      * groupings and groupings support is enabled or some groupings have been specified in a
      * querystring and specified using set_user_groupingids().
+     *
      * @return array - array of the groupingids (empty if none).
      */
     public function get_groupingids() {
@@ -284,7 +303,8 @@ class block_news_system {
 
     /**
      * Sets the value of the user groupings ids class variable.
-     * @param array $groupingsids
+     *
+     * @param array $groupingids
      */
     public function set_user_groupingids($groupingids) {
         $this->usergroupingids = $groupingids;
@@ -320,6 +340,7 @@ class block_news_system {
     /**
      * Return SQL WHERE and clause and params to append to queries when grouping support
      * is enabled.
+     *
      * @return array - 'sql' (empty string if nothing to return)
      * and 'params' (empty array if nothing).
      */
@@ -386,6 +407,29 @@ class block_news_system {
         $output['params'] = $groups;
 
         return $output;
+    }
+
+    /**
+     * Return SQL WHERE clause and params to restrict results by a given message type when separate display is enabled.
+     *
+     * @param int $type Message type, one of the block_news_message::MESSAGETYPE_ constants.
+     * @return array
+     */
+    public function get_type_sql($type) {
+        $sql = '';
+        $params = [];
+        if ($this->displaytype == self::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS && !is_null($type)) {
+            $sql = ' AND messagetype = ? ';
+            $params = [$type];
+            if ($type == block_news_message::MESSAGETYPE_EVENT) {
+                // Automatically exclude events that happened before midnight this morning (according to server time).
+                $sql .= 'AND eventstart > ? ';
+                $date = new DateTime(null, core_date::get_server_timezone_object());
+                $date->setTime(0, 0);
+                $params[] = $date->getTimestamp();
+            }
+        }
+        return ['sql' => $sql, 'params' => $params];
     }
 
     /**
@@ -456,25 +500,28 @@ class block_news_system {
      * Read DB and pass each row to constructor
      *
      * @param integer $max Maximum number of messages to return
+     * @param integer $type Restrict returned messages by messagetype.
      * @return array block_news_message
      */
-    public function get_messages_limited($max) {
+    public function get_messages_limited($max, $type = null) {
         global $DB;
         $bnms = array();
 
         $groupings = $this->get_grouping_sql();
         $groups = $this->get_group_sql();
+        $restricttype = $this->get_type_sql($type);
         $sql = self::get_message_sql_start() .
                 'WHERE blockinstanceid=?
                  AND messagevisible=1
                  AND messagedate <= ?'
                 . $groupings['sql']
-                . $groups['sql'] .
-                 'ORDER BY messagedate DESC
+                . $groups['sql']
+                . $restricttype['sql'] .
+                 'ORDER BY eventstart ASC, messagedate DESC
                  LIMIT '.$max;
 
         $params = array($this->blockinstanceid, time());
-        $params = array_merge($params, $groupings['params'], $groups['params']);
+        $params = array_merge($params, $groupings['params'], $groups['params'], $restricttype['params']);
         $mrecs = $DB->get_records_sql($sql, $params);
         foreach ($mrecs as $mrec) {
             $bnms[] = new block_news_message($mrec);
@@ -641,6 +688,8 @@ class block_news_system {
 
 
     /**
+     * Get the URL of the feed for the block.
+     *
      * @return string - the url of the current news feed including grouping support
      */
     public function get_feed_url() {
@@ -682,6 +731,7 @@ class block_news_system {
 
     /**
      * Create feed record for this instance
+     *
      * @param array $feeds Feed URL strings
      */
     protected function set_feeds($feeds) {
@@ -729,6 +779,7 @@ class block_news_system {
 
     /**
      * Get all feed setup details for this instance
+     *
      * @return array feed-record
      */
     public function get_feeds() {
@@ -744,6 +795,7 @@ class block_news_system {
 
     /**
      * Updates a feed for a block
+     *
      * @param StdClass $fbrec block_news_feeds
      */
     public function update_feed($fbrec) {

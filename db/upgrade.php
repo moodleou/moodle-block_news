@@ -24,73 +24,73 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-// ref http://docs.moodle.org/dev/XMLDB_creating_new_DDL_functions
+// Ref http://docs.moodle.org/dev/XMLDB_creating_new_DDL_functions.
 
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
-    // It must be included from a Moodle page
+    // It must be included from a Moodle page.
 }
 
 function xmldb_block_news_upgrade($oldversion) {
     global $DB;
 
     $result = true;
-    $dbman = $DB->get_manager(); // loads ddl manager and xmldb classes
+    $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
-    /// Add a new column newcol to the mdl_question_myqtype
+    // Add a new column newcol to the mdl_question_myqtype.
     if ($result && $oldversion < 2011062700) {
-        // Changing precision of field currenthash on table block_news_feeds to (40)
+        // Changing precision of field currenthash on table block_news_feeds to (40).
         $table = new xmldb_table('block_news_feeds');
         $field = new xmldb_field('currenthash', XMLDB_TYPE_CHAR, '40', null, null, null, null,
             'feedurl');
 
-        // Launch change of precision for field currenthash
+        // Launch change of precision for field currenthash.
         $dbman->change_field_precision($table, $field);
 
-        // news savepoint reached
+        // News savepoint reached.
         upgrade_block_savepoint(true, 2011062700, 'news');
     }
 
-    if ($oldversion <  2011071400) {
-        // Changing type of field feedurl on table block_news_feeds to text
+    if ($oldversion < 2011071400) {
+        // Changing type of field feedurl on table block_news_feeds to text.
         $table = new xmldb_table('block_news_feeds');
 
-        // Changing type of field link on table block_news_messages to text
+        // Changing type of field link on table block_news_messages to text.
         $table = new xmldb_table('block_news_messages');
         $field = new xmldb_field('link', XMLDB_TYPE_TEXT, 'small', null, null,
                                                                     null, null, 'title');
 
-        // Launch change of type for field link
+        // Launch change of type for field link.
         $dbman->change_field_type($table, $field);
 
-        // news savepoint reached
+        // News savepoint reached.
         upgrade_block_savepoint(true, 2011071400, 'news');
     }
 
     if ($oldversion < 2011071800) {
-        // Define field publish to be dropped from block_news_messages
+        // Define field publish to be dropped from block_news_messages.
         $table = new xmldb_table('block_news_messages');
         $field = new xmldb_field('publish');
 
-        // Conditionally launch drop field publish
+        // Conditionally launch drop field publish.
         if ($dbman->field_exists($table, $field)) {
             $dbman->drop_field($table, $field);
         }
 
-        // news savepoint reached
+        // News savepoint reached.
         upgrade_block_savepoint(true, 2011071800, 'news');
     }
 
     if ($result && $oldversion < 2012031400) {
-        // Changing precision of field title on table block_news_feeds to (80)
+        // Changing precision of field title on table block_news_feeds to (80).
         $table = new xmldb_table('block_news');
         $field = new xmldb_field('title', XMLDB_TYPE_CHAR, '80', null, null, null, null,
                         'blockinstanceid');
 
-        // Launch change of precision for field title
+        // Launch change of precision for field title.
         $dbman->change_field_precision($table, $field);
 
-        // news savepoint reached
+        // News savepoint reached.
         upgrade_block_savepoint(true, 2012031400, 'news');
     }
 
@@ -108,7 +108,7 @@ function xmldb_block_news_upgrade($oldversion) {
         $field->set_attributes($type, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'userid');
         $dbman->add_field($table, $field);
 
-        // news savepoint reached
+        // News savepoint reached.
         upgrade_block_savepoint(true, 2012033000, 'news');
     }
 
@@ -167,6 +167,39 @@ function xmldb_block_news_upgrade($oldversion) {
 
         // News savepoint reached.
         upgrade_block_savepoint(true, 2017011100, 'news');
+    }
+
+    if ($oldversion < 2017013100) {
+
+        // Define field eventstart to be added to block_news_messages.
+        $table = new xmldb_table('block_news_messages');
+        $field = new xmldb_field('eventstart', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'messagetype');
+
+        // Conditionally launch add field eventstart.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field eventend to be added to block_news_messages.
+        $table = new xmldb_table('block_news_messages');
+        $field = new xmldb_field('eventend', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'eventstart');
+
+        // Conditionally launch add field eventend.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field eventlocation to be added to block_news_messages.
+        $table = new xmldb_table('block_news_messages');
+        $field = new xmldb_field('eventlocation', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'eventend');
+
+        // Conditionally launch add field eventlocation.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // News savepoint reached.
+        upgrade_block_savepoint(true, 2017013100, 'news');
     }
 
     return $result;

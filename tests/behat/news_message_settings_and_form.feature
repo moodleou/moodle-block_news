@@ -62,9 +62,8 @@ Feature: Usage of settings and checking the message_form in block
     And I should see "kitten1.jpg"
     Then I press "Save changes"
 
-    # Modify existing message by changing the type and checking if the image is still there.
+    # Modify existing message by changing the title and checking if the image is still there.
     When I click on "Edit News item 002" "link"
-    And I set the field "Title" to "Event 001"
-    And I set the field "Type" to "Event"
+    And I set the field "Title" to "Edited news item"
     And I should see "kitten1.jpg"
     Then I press "Save changes"

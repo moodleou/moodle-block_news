@@ -145,6 +145,15 @@ class block_news_generator extends testing_block_generator {
         if (!isset($record->attachments)) {
             $record->attachments = null;
         }
+        if (!isset($record->eventstart)) {
+            $record->eventstart = null;
+        }
+        if (!isset($record->eventend)) {
+            $record->eventend = null;
+        }
+        if (!isset($record->eventlocation)) {
+            $record->eventlocation = null;
+        }
         $id = $DB->insert_record('block_news_messages', $record, true);
 
         if (isset($record->image)) {
