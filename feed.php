@@ -47,6 +47,9 @@ if ($blockinstanceid == 0 && $shortname === '') {
 
     // Get the top news block instance id.
     $blockinstanceid = block_news_get_top_news_block($courseid);
+    if (empty($blockinstanceid)) {
+        throw new moodle_exception('News not enabled on this site');
+    }
 
     // Get the grouping ids.
     $groupingids = block_news_get_groupingids($courseid, $userid);
