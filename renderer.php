@@ -108,10 +108,11 @@ class block_news_message_full implements renderable {
             print_error('errorinvalidmode', 'block_news', $mode);
         }
 
+        // Context for access checks.
+        $blockcontext = context_block::instance($bnm->get_blockinstanceid());
+
         // If a feed message (newsfeedid != 0) dont show edit etc icons.
         if ($bnm->get_newsfeedid() == 0) {
-            // Context for access checks.
-            $blockcontext = context_block::instance($bnm->get_blockinstanceid());
             if (has_capability('block/news:hide', $blockcontext)) {
                 $this->hideicon = new pix_icon('t/' . $this->showhideact, $this->showhideact);
                     // Eg 't/hide', 'hide'.
