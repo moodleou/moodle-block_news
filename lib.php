@@ -26,20 +26,20 @@
  */
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
-    // It must be included from a Moodle page
+    // It must be included from a Moodle page.
 }
 
 /**
  * Standard attachments handler
  *
  * @param course $course
- * @param $birecord_or_cm
+ * @param $birecordorcm
  * @param $context
  * @param $filearea
  * @param $args
  * @param $forcedownload
  */
-function block_news_pluginfile($course, $birecord_or_cm, $context, $filearea, $args,
+function block_news_pluginfile($course, $birecordorcm, $context, $filearea, $args,
                                 $forcedownload) {
 
     if ($context->contextlevel != CONTEXT_BLOCK) {
@@ -59,36 +59,42 @@ function block_news_pluginfile($course, $birecord_or_cm, $context, $filearea, $a
         send_file_not_found();
     }
 
-    if ($parentcontext = context::instance_by_id($birecord_or_cm->parentcontextid)) {
+    if ($parentcontext = context::instance_by_id($birecordorcm->parentcontextid)) {
         if ($parentcontext->contextlevel == CONTEXT_USER) {
-            // force download on all personal pages including /my/
-            //because we do not have reliable way to find out from where this is used
+            // Force download on all personal pages including /my/
+            // because we do not have reliable way to find out from where this is used.
             $forcedownload = true;
         }
     } else {
-        // weird, there should be parent context, better force dowload then
+        // Weird, there should be parent context, better force dowload then.
         $forcedownload = true;
     }
 
     \core\session\manager::write_close();
-    send_stored_file($file, 60*60, 0, $forcedownload);
+    send_stored_file($file, 60 * 60, 0, $forcedownload);
 }
 
 /**
  * Calls require_login and adds standard breadcrumb item.
  * @param int $blockinstanceid
  * @param string $title Block title or null for default
+ * @param int $displaytype The block's displaytype (block_news_system::DISPLAY_* constant)
  * @return StdClass Course/Module identity information (useful for Form redirect logic)
  */
-function block_news_init_page($blockinstanceid, $title) {
+function block_news_init_page($blockinstanceid, $title, $displaytype = block_news_system::DISPLAY_DEFAULT) {
     global $PAGE;
 
     $csemod = block_news_get_course_mod_info($blockinstanceid);
     if (!$csemod) {
         return null;
     }
-    $PAGE->set_pagelayout('incourse');
-    // coursecontext set_context should have been set to block context, but this causes problems
+    if ($displaytype == block_news_system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
+        $PAGE->add_body_class('block-news-all-news-and-events');
+        $PAGE->set_pagelayout('base');
+    } else {
+        $PAGE->set_pagelayout('incourse');
+    }
+    // Coursecontext set_context should have been set to block context, but this causes problems.
     $coursecontext = context_course::instance($csemod->course->id);
     $PAGE->set_context($coursecontext);
     require_course_login($csemod->course);
@@ -114,31 +120,31 @@ function block_news_get_course_mod_info($blockinstanceid) {
     $cse = null;
     $csemod = new StdClass();
 
-    // context instance
+    // Context instance.
     $cibi = context_block::instance($blockinstanceid);
     if (!$cibi) {
         return null;
     }
 
-    $ctxa = explode('/', $cibi->path); // /1/46/53/318
+    $ctxa = explode('/', $cibi->path); // E.g: /1/46/53/318.
     unset($ctxa[0]);
-    $ctxin = implode(', ', $ctxa);  // 1, 46, 53, 318
+    $ctxin = implode(', ', $ctxa);  // E.g: 1, 46, 53, 318.
 
-    // create "IN" SQL
+    // Create "IN" SQL.
     list($insql, $params) = $DB->get_in_or_equal($ctxa, SQL_PARAMS_QM);
 
-    // get course related to the context
+    // Get course related to the context.
     $sql = 'SELECT {course}.* FROM {context}
              INNER JOIN {course} ON {context}.instanceid = {course}.id
              WHERE {context}.contextlevel = '.CONTEXT_COURSE;
     $sql .= " AND {context}.id $insql";
     $cse = $DB->get_record_sql($sql, $params);
 
-    // get module info via course_module table to get extra info if block is
-    // called from a module (glossary, page etc)
+    // Get module info via course_module table to get extra info if block is
+    // called from a module (glossary, page etc).
     $sql = 'SELECT * FROM {context}
          INNER JOIN {course_modules} ON {context}.instanceid = {course_modules}.id
-         WHERE {context}.contextlevel = '.CONTEXT_MODULE; // 70 = CONTEXT_MODULE
+         WHERE {context}.contextlevel = '.CONTEXT_MODULE;
     $sql .= " AND {context}.id $insql";
     $cmrec = $DB->get_record_sql($sql, $params);
 
@@ -149,7 +155,7 @@ function block_news_get_course_mod_info($blockinstanceid) {
     $mi = get_fast_modinfo($cse);
     $coursecategory = $DB->get_record('course_categories', array('id' => $cse->category));
 
-    // build info object
+    // Build info object.
     $csemod->course = $cse;
     $csemod->context = $cibi;
     $csemod->cseid = $cse->id;
@@ -183,7 +189,7 @@ function block_news_get_new_time($oldtime, $offset) {
         return $newtime;
     }
 
-    // adjust
+    // Adjust.
     $oldhours = $oldinfo['hours'];
     $minutes = $newinfo['minutes'];
     $seconds = $newinfo['seconds'];
@@ -192,15 +198,15 @@ function block_news_get_new_time($oldtime, $offset) {
     $year = $newinfo['year'];
     $a = mktime($oldhours, $minutes, $seconds, $month, $day, $year);
 
-    // adjust by 1 day forward/backward
+    // Adjust by 1 day forward/backward.
     if ($a < $newtime) {
         $b = strtotime('+1 day', $a);
     } else if ($a > $newtime) {
         $b = strtotime('-1 day', $a);
     }
 
-    // return the candidate closest
-    // to the original estimate
+    // Return the candidate closest
+    // to the original estimate.
     $offseta = abs($newtime - $a);
     $offsetb = abs($newtime - $a);
     if ($offseta < $offsetb) {

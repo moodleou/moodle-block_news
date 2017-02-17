@@ -183,6 +183,7 @@ Feature: Basic usage of news block
     Then I should see "ANNE" in the "(new News block)" "block"
 
     # In view all.
+    Given "View all news and events" "link" should not exist
     When I click on "View all" "link" in the "(new News block)" "block"
     Then I should see "ANNE" in the ".block_news_message" "css_element"
 

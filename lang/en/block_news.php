@@ -47,9 +47,11 @@ $string['delete'] = 'Delete {$a}';
 $string['edit'] = 'Edit {$a}';
 $string['posted'] = 'Posted:';
 $string['newsheading'] = 'News';
-$string['eventsheading'] = 'Events';
+$string['eventsheading'] = 'Upcoming events';
+$string['pasteventsheading'] = 'Past events';
 $string['nonewsyet'] = 'No news messages have been posted to this website.';
 $string['noeventsyet'] = 'There are no upcoming events to display.';
+$string['nopastevents'] = 'There are no past events to display';
 
 // Error messages.
 $string['erroremptymessage'] = 'Missing entry';
@@ -67,6 +69,8 @@ $string['errornocsemodinfo'] = 'Could not get course/module info';
 $string['errorwritefile'] = 'Unable to write cache file';
 $string['erroreventstart'] = 'Event start must be in the future';
 $string['erroreventend'] = 'Event end must be after event start';
+$string['errorimagesize'] = 'The message image must be less than {$a}KB.';
+$string['errorimagedimensions'] = 'The message image must be exactly {$a->width}x{$a->height} pixels.';
 
 // Block config.
 $string['configtitle'] = 'Block title';
@@ -85,6 +89,7 @@ $string['msgblocknonews'] = 'There is no news yet';
 $string['msgblockadd'] = 'Add';
 $string['msgblockaddalt'] = 'Add a message';
 $string['msgblockviewall'] = 'View all';
+$string['msgblockviewallnewsandevents'] = 'View all news and events';
 $string['msgblockviewallalt'] = 'View all messages';
 
 // Global settings - settings.php.

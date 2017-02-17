@@ -39,7 +39,6 @@ Feature: News message restriction by grouping or group
     And I turn editing mode on
     And I add the "News" block
 
-  @javascript
   Scenario: Set Enable message restriction in Block News configuration to Grouping and set Grouping
             to a message to restrict user.
     # Go to settings page. Set Enable message restriction to Grouping.

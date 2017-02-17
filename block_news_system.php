@@ -38,18 +38,24 @@ require_once('lib.php');
  */
 class block_news_system {
 
-    // DAYSECS, used below, is defined in lib/moodlelib.php.
-    const MAXSTDMSGS = 20; // Maximum std feed messages to show (see generate_block_feed().
+    /** @var int Maximum std feed messages to show (see generate_block_feed(). */
+    const MAXSTDMSGS = 20;
 
-    // Define grouping support by grouping.
+    /** @var int Define grouping support by grouping. */
     const RESTRICTBYGROUPING = 1;
 
-    // Define grouping support by group.
+    /** @var int Define grouping support by group. */
     const RESTRICTBYGROUP = 2;
 
-    // Define display type (default or Separate into events and news items).
+    /** @var int Default display type (news messages only) */
     const DISPLAY_DEFAULT = 0;
+    /** @var int Display news and events as separate messages */
     const DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS = 1;
+
+    /** @var int The number of news messages on a page of the View All screen */
+    const ALL_NEWS_PAGE_SIZE = 9;
+    /** @var int The number of event messages on a page of the View All screen */
+    const ALL_EVENTS_PAGE_SIZE = 3;
 
     public static function get_message_sql_start() {
         return "SELECT {block_news_messages}.*, u.id AS u_id, " .
@@ -413,23 +419,44 @@ class block_news_system {
      * Return SQL WHERE clause and params to restrict results by a given message type when separate display is enabled.
      *
      * @param int $type Message type, one of the block_news_message::MESSAGETYPE_ constants.
+     * @param bool $pastevents If showing events, show past events instead of upcoming ones?
      * @return array
      */
-    public function get_type_sql($type) {
+    public function get_type_sql($type, $pastevents = false) {
         $sql = '';
         $params = [];
         if ($this->displaytype == self::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS && !is_null($type)) {
             $sql = ' AND messagetype = ? ';
             $params = [$type];
             if ($type == block_news_message::MESSAGETYPE_EVENT) {
-                // Automatically exclude events that happened before midnight this morning (according to server time).
-                $sql .= 'AND eventstart > ? ';
+                if ($pastevents) {
+                    // Show events that have already happened.
+                    $sql .= 'AND eventstart < ? ';
+                } else {
+                    // Automatically exclude events that happened before midnight this morning (according to server time).
+                    $sql .= 'AND eventstart > ? ';
+                }
                 $date = new DateTime(null, core_date::get_server_timezone_object());
                 $date->setTime(0, 0);
                 $params[] = $date->getTimestamp();
             }
         }
         return ['sql' => $sql, 'params' => $params];
+    }
+
+    /**
+     * Return SQL WHERE clause and params to restrict results visibility if the user cannot view hidden.
+     *
+     * @param $viewhidden
+     * @return array
+     */
+    public function get_hidden_sql($viewhidden) {
+        $hidden = ['sql' => '', 'params' => []];
+        if (!$viewhidden) { // Only show visible and past/present messages.
+            $hidden['sql'] = ' AND messagevisible = 1 AND messagedate <= ? ';
+            $hidden['params'] = [time()];
+        }
+        return $hidden;
     }
 
     /**
@@ -536,41 +563,74 @@ class block_news_system {
      * Read DB and pass each row to constructor
      *
      * @param boolean $viewhidden
+     * @param int|null $pagesize The size of page to use, if paging
+     * @param int|null $pagenumber The page to get results for
+     * @param int|null $type Restrict returned messages by messagetype.
+     * @param string $order ORDER BY statement for sorting results (default: eventstart ASC, messagedate DESC)
+     * @param bool $pastevents If showing events, show past events instead of upcoming ones?
      * @return array block_news_message
      */
-    public function get_messages_all($viewhidden) {
+    public function get_messages_all($viewhidden, $pagesize = null, $pagenumber = null, $type = null,
+            $order = 'eventstart ASC, messagedate DESC', $pastevents = false) {
         global $DB;
         $bnms = array();
+        $orderby = 'ORDER BY ' . $order;
+        $limit = '';
+        if (!is_null($pagenumber) && !is_null($pagesize)) {
+            $limit = 'LIMIT ' . $pagesize;
+            if ($pagenumber > 0) {
+                $limit .= ' OFFSET ' . ($pagesize * $pagenumber);
+            }
+        }
 
         $groupings = $this->get_grouping_sql();
         $groups = $this->get_group_sql();
-        if ($viewhidden) { // See all dates, all visibilty.
-            $sql = self::get_message_sql_start() .
-                    'WHERE blockinstanceid = ?'
-                    . $groupings['sql']
-                    . $groups['sql'] .
-                    'ORDER BY messagedate DESC';
-            $params = array($this->blockinstanceid);
-            $params = array_merge($params, $groupings['params'], $groups['params']);
-            $mrecs = $DB->get_records_sql($sql, $params);
-        } else {  // See past/present only and visible.
-            $sql = self::get_message_sql_start() .
-                    'WHERE blockinstanceid = ?
-                     AND messagevisible = 1
-                     AND messagedate <= ?'
-                    . $groupings['sql']
-                    . $groups['sql'] .
-                    'ORDER BY messagedate DESC';
-            $params = array($this->blockinstanceid, time());
-            $params = array_merge($params, $groupings['params'], $groups['params']);
-            $mrecs = $DB->get_records_sql($sql, $params);
-        }
+        $restricttype = $this->get_type_sql($type, $pastevents);
+        $hidden = $this->get_hidden_sql($viewhidden);
+
+        $sql = self::get_message_sql_start() .
+                'WHERE blockinstanceid = ?'
+                . $hidden['sql']
+                . $groupings['sql']
+                . $groups['sql']
+                . $restricttype['sql']
+                . $orderby . ' ' . $limit;
+        $params = array($this->blockinstanceid);
+        $params = array_merge($params, $hidden['params'], $groupings['params'], $groups['params'], $restricttype['params']);
+        $mrecs = $DB->get_records_sql($sql, $params);
 
         foreach ($mrecs as $mrec) {
             $bnms[] = new block_news_message($mrec);
         }
 
         return $bnms;
+    }
+
+    /**
+     * Get the total number of events of the given type.
+     *
+     * @param bool $viewhidden Include hidden or future messages?
+     * @param int $type Message type to count - block_news_message::MESSAGETYPE_* constant
+     * @param bool $pastevents If counting events, count past events instead of upcoming ones?
+     * @return int
+     */
+    public function get_message_count($viewhidden, $type, $pastevents = false) {
+        global $DB;
+        $groupings = $this->get_grouping_sql();
+        $groups = $this->get_group_sql();
+        $restricttype = $this->get_type_sql($type, $pastevents);
+        $hidden = $this->get_hidden_sql($viewhidden);
+
+        $sql = "SELECT COUNT(*)
+                  FROM {block_news_messages}
+                 WHERE blockinstanceid = ? " .
+                $hidden['sql'] .
+                $groupings['sql'] .
+                $groups['sql'] .
+                $restricttype['sql'];
+        $params = array($this->blockinstanceid);
+        $params = array_merge($params, $hidden['params'], $groupings['params'], $groups['params'], $restricttype['params']);
+        return $DB->count_records_sql($sql, $params);
     }
 
 
@@ -1256,6 +1316,63 @@ class block_news_system {
             }
         }
         return $imagesbyitemid;
+    }
+
+    /**
+     * Return the total number of messages posted to the block that the user can view, optionally restricted by type.
+     *
+     * @param bool $viewhidden
+     * @param null|int $type
+     * @return int
+     */
+    public function count_messages($viewhidden, $type = null) {
+        global $DB;
+        $groupings = $this->get_grouping_sql();
+        $groups = $this->get_group_sql();
+        $restricttype = $this->get_type_sql($type);
+        $hidden = $this->get_hidden_sql($viewhidden);
+        $sql = "SELECT COUNT(*)
+                  FROM {block_news_messages}
+                 WHERE blockinstanceid = ? "
+                . $hidden['sql']
+                . $groupings['sql']
+                . $groups['sql']
+                . $restricttype['sql'];
+        $params = [$this->blockinstanceid];
+        $params = array_merge($params, $hidden['params'], $groupings['params'], $groups['params'], $restricttype['params']);
+        return $DB->count_records_sql($sql, $params);
+    }
+
+    /**
+     * Find the largest number of pages given counts and page sizes of different message types.
+     *
+     * @param stdClass[] $pageinfo Array of objects with 'messagecount' and 'pagesize' fields.
+     * @return stdClass The member of $pageinfo with the largest result of messagecount / pagesize.
+     */
+    public function find_most_pages(array $pageinfo) {
+        return array_reduce($pageinfo, function($carry, $item) {
+            if (empty($carry)) {
+                return $item;
+            }
+            if (($carry->messagecount / $carry->pagesize) > ($item->messagecount / $item->pagesize)) {
+                return $carry;
+            } else {
+                return $item;
+            }
+        });
+    }
+
+    /**
+     * Return the correct text for the block's "View all" link, depending on the display mode.
+     *
+     * @return string
+     */
+    public function get_viewall_label() {
+        if ($this->displaytype == self::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
+            return get_string('msgblockviewallnewsandevents', 'block_news');
+        } else {
+            return get_string('msgblockviewall', 'block_news');
+        }
     }
 
 } // End class.

@@ -30,6 +30,8 @@ require_once($CFG->dirroot . '/blocks/news/edit_message_form.php');
 
 class block_news_generator extends testing_block_generator {
 
+    const MESSAGETYPES = ['news' => block_news_message::MESSAGETYPE_NEWS, 'event' => block_news_message::MESSAGETYPE_EVENT];
+
     protected function preprocess_record(stdClass $record, array $options) {
         $context = context_course::instance($options['courseid']);
         $record->parentcontextid = $context->id;
@@ -120,6 +122,8 @@ class block_news_generator extends testing_block_generator {
         }
         if (!isset($record->messagetype)) {
             $record->messagetype = block_news_message::MESSAGETYPE_NEWS;
+        } else if (!is_numeric($record->messagetype) && array_key_exists($record->messagetype, self::MESSAGETYPES)) {
+            $record->messagetype = self::MESSAGETYPES[$record->messagetype];
         }
         if (!isset($record->messageimage)) {
             $record->messageimage = null;

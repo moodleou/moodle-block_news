@@ -46,7 +46,20 @@
         "title": "Mark's birthday",
         "viewlink": "http://example.com",
         "classes": "",
-        "groupindication": ""
+        "groupindication": "",
+        "hasactions": true,
+        "actions": [
+            {
+                "icon": {
+                    "attributes": [
+                        { "name": "src", "value": "https://moodle.org/logo/moodle-logo.svg" },
+                        { "name": "class", "value": "iconsmall" },
+                        {"name": "alt", "value": "Alt text for icon"}
+                    ]
+                },
+                "url": "http://example.com"
+            }
+        ]
     }
 
 }}
@@ -67,5 +80,18 @@
             {{> block_news/message_link}}
         </div>
         <div class="block_news_group_indication">{{{groupindication}}}</div>
+        {{#hasactions}}
+        <div class="box editicons">
+        {{/hasactions}}
+        {{#actions}}
+            <a href="{{url}}">
+                {{#icon}}
+                    {{> core/pix_icon}}
+                {{/icon}}
+            </a>
+        {{/actions}}
+        {{#hasactions}}
+        </div>
+        {{/hasactions}}
     </div>
 </article>

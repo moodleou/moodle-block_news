@@ -27,146 +27,11 @@ if (!defined('MOODLE_INTERNAL')) {
 }
 
 /**
- * Full message class (for display in the single message or all messages pages).
+ * Base class for rendering news messages.
  *
  * @package block_news
  */
-class block_news_message_full implements renderable {
-
-    /**
-     * Build full message data
-     *
-     * @param block_news_message $bnm
-     * @param integer $previd
-     * @param integer $nextid
-     * @param block_news_system $bns
-     * @param string $mode
-     * @param array $images List of images for this block, keyed by message ID.
-     */
-    public function __construct($bnm, $previd, $nextid, $bns, $mode, array $images = []) {
-        global $CFG;
-
-        $this->classes = '';
-        $this->notes = array();
-        if ($bns->get_hidetitles()) {
-            $this->title = '';
-        } else {
-            $this->title = $bnm->get_title();
-        }
-        if ($bns->get_hidelinks()) {
-            $this->link = '';
-        } else {
-            $this->link = $bnm->get_link();
-        }
-
-        $this->viewlink = $bnm->get_link();
-
-        $this->message = $bnm->get_message();
-        $this->messagedate = userdate($bnm->get_messagedate(),
-            get_string('dateformat', 'block_news'));
-        $this->messagevisible = $bnm->get_messagevisible();
-        $usr = $bnm->get_user();
-        if ($bnm->get_hideauthor() || $usr == null) {
-            $this->author = '';
-        } else {
-            $this->author = fullname($usr);
-        }
-
-        if ($bnm->is_visible_to_students()) {
-            $this->classes .= ' msgvis';
-            $this->showhideact = 'hide'; // Wrong way round.
-        } else {
-            $this->classes .= ' msghide';
-            $this->showhideact = 'hide';
-
-            if (!$bnm->get_messagevisible()) {
-                $this->notes[] = get_string('rendermsghidden', 'block_news');
-                $this->showhideact = 'show';
-            }
-            if ($bnm->get_messagedate() > time()) {
-                $this->notes[] = get_string('rendermsgfuture', 'block_news',
-                    userdate($bnm->get_messagedate(), get_string('dateformatlong', 'block_news')));
-            }
-        }
-
-        if ($mode == 'one') { // Single message.
-            if ($previd == -1) {
-                $this->prevurl = 'end';
-            } else {
-                $this->prevurl = $CFG->wwwroot . '/blocks/news/message.php?m=' . $previd;
-            }
-
-            if ($nextid == -1) {
-                $this->nexturl = 'end';
-            } else {
-                $this->nexturl = $CFG->wwwroot.'/blocks/news/message.php?m=' . $nextid;
-            }
-        } else if ($mode == 'all') { // All messages - dont display prev/next links.
-            $this->prevurl = null;
-            $this->nexturl = null;
-        } else {
-            print_error('errorinvalidmode', 'block_news', $mode);
-        }
-
-        // Context for access checks.
-        $blockcontext = context_block::instance($bnm->get_blockinstanceid());
-
-        // If a feed message (newsfeedid != 0) dont show edit etc icons.
-        if ($bnm->get_newsfeedid() == 0) {
-            if (has_capability('block/news:hide', $blockcontext)) {
-                $this->hideicon = new pix_icon('t/' . $this->showhideact, $this->showhideact);
-                    // Eg 't/hide', 'hide'.
-                $this->hideurl = $CFG->wwwroot . '/blocks/news/message.php?m=' . $bnm->get_id()
-                    . '&action=hide&mode=' . $mode;
-            }
-
-            if (has_capability('block/news:add', $blockcontext)) {
-                $this->editicon = new pix_icon('t/edit',
-                        get_string('edit', 'block_news', $bnm->get_title()));
-                $this->editurl = $CFG->wwwroot . '/blocks/news/edit.php?m=' . $bnm->get_id()
-                     . '&mode=' . $mode;
-            }
-
-            if (has_capability('block/news:delete', $blockcontext)) {
-                $this->deleteicon = new pix_icon('t/delete',
-                        get_string('delete', 'block_news', $bnm->get_title()));
-                $this->deleteurl = $CFG->wwwroot.'/blocks/news/message.php?m=' . $bnm->get_id()
-                    . '&action=delete&mode=' . $mode;
-            }
-        }
-
-        // For group indication.
-        $this->groupindication = '';
-        if (has_any_capability(array('block/news:delete', 'block/news:add', 'block/news:edit'), $blockcontext)) {
-            $this->groupindication = $bns->get_group_indication($bnm);
-        }
-
-        // For attachments.
-        $this->blockinstanceid = $bnm->get_blockinstanceid();
-        $this->messageformat = $bnm->get_messageformat();
-        $this->id = $bnm->get_id();
-        if (array_key_exists($this->id, $images)) {
-            $image = $images[$this->id];
-            $this->imageinfo = $image->get_imageinfo();
-            $pathparts = array('/pluginfile.php', $blockcontext->id, 'block_news',
-                    'messageimage', $this->id, $image->get_filename());
-            $this->imageurl = new moodle_url(implode('/', $pathparts));
-        }
-
-    }
-}
-
-
-/**
- * Short message class (for display in the block).
- *
- * @package block_news
- */
-class block_news_message_short implements renderable, templatable {
-
-    /** @var string Tags allowed for block news short message */
-    const ALLOW_TAGS = '<a><br><p><div><span><ol><ul><li><strong><b><i><em>';
-
+abstract class block_news_renderable_message implements renderable {
     /** @var string Title of message */
     public $title;
     /** @var string Additional CSS classes for message wrapper */
@@ -215,6 +80,202 @@ class block_news_message_short implements renderable, templatable {
     public $eventlocation;
     /** @var string The full formatted description of the event's start (and end) date (and time). */
     public $fulleventdate;
+    /** @var array Additional notes if the message has restricted display */
+    public $notes;
+    /** @var string Show/Hide action to display the correct icon. */
+    public $showhideact;
+    /** @var pix_icon Icon for "hide" link */
+    public $hideicon;
+    /** @var moodle_url URL for "hide link */
+    public $hideurl;
+    /** @var pix_icon Icon for "edit" link */
+    public $editicon;
+    /** @var moodle_url URL for "edit" link */
+    public $editurl;
+    /** @var pix_icon Icon for "delete" link */
+    public $deleteicon;
+    /** @var moodle_url URL for "delete" link */
+    public $deleteurl;
+
+    /**
+     * Set the edit icons and URLs based on the current user's permissions.
+     *
+     * @param block_news_message $bnm
+     * @param context $blockcontext
+     * @param string $mode
+     */
+    protected function set_edit_links(block_news_message $bnm, context $blockcontext, $mode) {
+        // If a feed message (newsfeedid != 0) dont show edit etc icons.
+        if ($bnm->get_newsfeedid() == 0) {
+            if (has_capability('block/news:hide', $blockcontext)) {
+                $this->hideicon = new pix_icon('t/' . $this->showhideact, $this->showhideact);
+                // Eg 't/hide', 'hide'.
+                $this->hideurl = new moodle_url('/blocks/news/message.php',
+                        ['m' => $bnm->get_id(), 'action' => 'hide', 'mode' => $mode]);
+            }
+
+            if (has_capability('block/news:add', $blockcontext)) {
+                $this->editicon = new pix_icon('t/edit',
+                        get_string('edit', 'block_news', $bnm->get_title()));
+                $this->editurl = new moodle_url('/blocks/news/edit.php', ['m' => $bnm->get_id(), 'mode' => $mode]);
+            }
+
+            if (has_capability('block/news:delete', $blockcontext)) {
+                $this->deleteicon = new pix_icon('t/delete',
+                        get_string('delete', 'block_news', $bnm->get_title()));
+                $this->deleteurl = new moodle_url('/blocks/news/message.php',
+                        ['m' => $bnm->get_id(), 'action' => 'delete', 'mode' => $mode]);
+            }
+        }
+    }
+
+    /**
+     * Set various attributes to display the message correctly depending on whether its visible to students.
+     *
+     * @param block_news_message $bnm
+     */
+    protected function set_visibility_attributes(block_news_message $bnm) {
+        if ($bnm->is_visible_to_students()) {
+            $this->classes .= ' msgvis';
+            $this->showhideact = 'hide'; // Wrong way round.
+        } else {
+            $this->classes .= ' msghide';
+            $this->showhideact = 'hide';
+
+            if (!$bnm->get_messagevisible()) {
+                $this->notes[] = get_string('rendermsghidden', 'block_news');
+                $this->showhideact = 'show';
+            }
+            if ($bnm->get_messagedate() > time()) {
+                $this->notes[] = get_string('rendermsgfuture', 'block_news',
+                        userdate($bnm->get_messagedate(), get_string('dateformatlong', 'block_news')));
+            }
+        }
+    }
+}
+
+/**
+ * Full message class (for display in the single message or all messages pages).
+ *
+ * @package block_news
+ */
+class block_news_message_full extends block_news_renderable_message {
+
+    /** @var string URL for the previous message */
+    public $prevurl;
+    /** @var string URL for the next message */
+    public $nexturl;
+    /** @var int Block instance ID */
+    public $blockinstanceid;
+    /** @var int Message ID */
+    public $id;
+    /** @var array Info for message image */
+    public $imageinfo;
+    /** @var moodle_url URL for message image */
+    public $imageurl;
+
+    /**
+     * Build full message data
+     *
+     * @param block_news_message $bnm
+     * @param integer $previd
+     * @param integer $nextid
+     * @param block_news_system $bns
+     * @param string $mode
+     * @param array $images List of images for this block, keyed by message ID.
+     */
+    public function __construct($bnm, $previd, $nextid, $bns, $mode, array $images = []) {
+        global $CFG;
+
+        $this->classes = '';
+        $this->notes = array();
+        if ($bns->get_hidetitles()) {
+            $this->title = '';
+        } else {
+            $this->title = $bnm->get_title();
+        }
+        if ($bns->get_hidelinks()) {
+            $this->link = '';
+        } else {
+            $this->link = $bnm->get_link();
+        }
+
+        $this->viewlink = $bnm->get_link();
+
+        $this->message = $bnm->get_message();
+        $this->messagedate = userdate($bnm->get_messagedate(),
+            get_string('dateformat', 'block_news'));
+        $this->messagevisible = $bnm->get_messagevisible();
+        $usr = $bnm->get_user();
+        if ($bnm->get_hideauthor() || $usr == null) {
+            $this->author = '';
+        } else {
+            $this->author = fullname($usr);
+        }
+
+        $this->set_visibility_attributes($bnm);
+
+        if ($mode == 'one') { // Single message.
+            if ($previd == -1) {
+                $this->prevurl = 'end';
+            } else {
+                $this->prevurl = $CFG->wwwroot . '/blocks/news/message.php?m=' . $previd;
+            }
+
+            if ($nextid == -1) {
+                $this->nexturl = 'end';
+            } else {
+                $this->nexturl = $CFG->wwwroot.'/blocks/news/message.php?m=' . $nextid;
+            }
+        } else if ($mode == 'all') { // All messages - dont display prev/next links.
+            $this->prevurl = null;
+            $this->nexturl = null;
+        } else {
+            print_error('errorinvalidmode', 'block_news', $mode);
+        }
+
+        // Context for access checks.
+        $blockcontext = context_block::instance($bnm->get_blockinstanceid());
+
+        $this->set_edit_links($bnm, $blockcontext, $mode);
+
+        // For group indication.
+        $this->groupindication = '';
+        if (has_any_capability(array('block/news:delete', 'block/news:add', 'block/news:edit'), $blockcontext)) {
+            $this->groupindication = $bns->get_group_indication($bnm);
+        }
+
+        // For attachments.
+        $this->blockinstanceid = $bnm->get_blockinstanceid();
+        $this->messageformat = $bnm->get_messageformat();
+        $this->id = $bnm->get_id();
+        if (array_key_exists($this->id, $images)) {
+            $image = $images[$this->id];
+            $this->imageinfo = $image->get_imageinfo();
+            $pathparts = array('/pluginfile.php', $blockcontext->id, 'block_news',
+                    'messageimage', $this->id, $image->get_filename());
+            $this->imageurl = new moodle_url(implode('/', $pathparts));
+        }
+
+    }
+}
+
+
+/**
+ * Short message class (for display in the block).
+ *
+ * @package block_news
+ */
+class block_news_message_short extends block_news_renderable_message implements templatable {
+
+    /** @var string Tags allowed for block news short message */
+    const ALLOW_TAGS = '<a><br><p><div><span><ol><ul><li><strong><b><i><em>';
+
+    /** @var array Action icons and URLs */
+    public $actions;
+
+    /** @var bool True if $actions isn't empty */
+    public $hasactions;
 
     /**
      * Build short message data
@@ -224,9 +285,10 @@ class block_news_message_short implements renderable, templatable {
      * @param int $summarylength Length of text displayed (0 = none)
      * @param int $count Sequence, eg 1 is first message in the block
      * @param array $thumbnails Thumbnail images for all messages, keyed by message ID.
+     * @param null|string $mode Render mode, 'all' if rendering for the "View all" page.
      */
-    public function __construct($bnm, $bns, $summarylength, $count, array $thumbnails = []) {
-        global $CFG, $USER;
+    public function __construct($bnm, $bns, $summarylength, $count, array $thumbnails = [], $mode = null) {
+        global $CFG;
 
         $this->classes = '';
         if ($bns->get_hidetitles()) {
@@ -257,6 +319,11 @@ class block_news_message_short implements renderable, templatable {
 
         // Context for access checks.
         $blockcontext = context_block::instance($bnm->get_blockinstanceid());
+
+        if ($mode === 'all') {
+            $this->set_visibility_attributes($bnm);
+            $this->set_edit_links($bnm, $blockcontext, $mode);
+        }
 
         // For group indication.
         $this->groupindication = '';
@@ -320,6 +387,20 @@ class block_news_message_short implements renderable, templatable {
             $this->thumbheight = $this->thumbinfo['height'];
         }
         $this->formattedmessage = format_text($this->message, $this->messageformat);
+        $this->actions = [];
+        if (isset($this->hideurl) && isset($this->hideicon)) {
+            $this->actions[] = (object) ['icon' => $this->hideicon->export_for_template($output),
+                    'url' => $this->hideurl->out(false)];
+        }
+        if (isset($this->editurl) && isset($this->editicon)) {
+            $this->actions[] = (object) ['icon' => $this->editicon->export_for_template($output),
+                    'url' => $this->editurl->out(false)];
+        }
+        if (isset($this->deleteurl) && isset($this->deleteicon)) {
+            $this->actions[] = (object) ['icon' => $this->deleteicon->export_for_template($output),
+                    'url' => $this->deleteurl->out(false)];
+        }
+        $this->hasactions = !empty($this->actions);
         return $this;
     }
 }
@@ -565,11 +646,12 @@ class block_news_renderer extends plugin_renderer_base {
      * Renders the 'view all' link at bottom of block.
      *
      * @param int $blockinstanceid Instance id of block
+     * @param int $label The label text for the view all link.
      */
-    public function render_view_all($blockinstanceid) {
+    public function render_view_all($blockinstanceid, $label) {
         return $this->action_link(
                 new moodle_url('/blocks/news/all.php', array('bi' => $blockinstanceid)),
-                get_string('msgblockviewall', 'block_news'),
+                $label,
                 null,
                 array('title' => get_string('msgblockviewallalt', 'block_news')));
     }
@@ -584,6 +666,17 @@ class block_news_renderer extends plugin_renderer_base {
                 new moodle_url('/blocks/news/edit.php', array('bi' => $blockinstanceid)),
                 get_string('msgblockadd', 'block_news'),
                 null, array('title' => get_string('msgblockaddalt', 'block_news')));
+    }
+
+    /**
+     * Renders view_all_page component using template.
+     *
+     * @param \block_news\output\view_all_page $page
+     * @return bool|string
+     */
+    public function render_view_all_page(block_news\output\view_all_page $page) {
+        $context = $page->export_for_template($this->output);
+        return $this->output->render_from_template('block_news/view_all_page', $context);
     }
 
     /**

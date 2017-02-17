@@ -76,5 +76,25 @@ class behat_block_news extends behat_base {
         $xpath = "//" . $titlecontainer . "div[contains(@class, 'messageimage')]/img[contains(@src, '$imagename')]";
         $this->find('xpath', $xpath);
     }
+
+    /**
+     * Set the news block to news and events mode
+     *
+     * This saves us having to mess around with the theme or course format to have a news block in news and events mode.
+     *
+     * @Given /^the news block for course "([^"]+)" is in news and events mode$/
+     * @param string $courseshortname
+     */
+    public function the_news_block_for_course_is_in_news_and_events_mode($courseshortname) {
+        global $DB;
+        $course = $DB->get_record('course', ['shortname' => $courseshortname], '*', MUST_EXIST);
+        $context = context_course::instance($course->id);
+        $block = $DB->get_record('block_instances', ['parentcontextid' => $context->id, 'blockname' => 'news']);
+        $blockinstance = $DB->get_record('block_news', ['blockinstanceid' => $block->id]);
+        $blockinstance->displaytype = 1;
+        $blockinstance->title = 'News and events';
+        $DB->update_record('block_news', $blockinstance);
+        rebuild_course_cache($course->id);
+    }
 }
 

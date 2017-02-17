@@ -69,6 +69,7 @@ require_capability('block/news:add', $blockcontext);
 
 $PAGE->set_context($context);
 
+// Codechecker complains about missing require_login.  It's part of the following function.
 $csemod = block_news_init_page($blockinstanceid, $bns->get_title());
 
 $courseurl = new moodle_url('/course/view.php?id=' . $csemod->cseid);
@@ -119,6 +120,13 @@ if ($formdata = $mform->get_data()) {
     $formdata->timemodified = time();
     if (isset($formdata->m)) {
         $formdata->id = $formdata->m;
+    }
+    // Ensure that event fields are nulled if we're not creating an event.
+    if ($bns->get_displaytype() == block_news_system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS
+            && $formdata->messagetype != block_news_message::MESSAGETYPE_EVENT) {
+        $formdata->eventstart = null;
+        $formdata->eventend = null;
+        $formdata->eventlocation = null;
     }
     // We need to set messagerepeat as the
     // database expects it.

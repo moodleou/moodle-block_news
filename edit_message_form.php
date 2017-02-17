@@ -42,9 +42,16 @@ class block_news_edit_message_form extends moodleform {
      * @var int
      */
     const THUMBNAIL_MAX_EDGE = 340;
+    /** @var array File types allowed for message images */
     const IMAGE_FILE_TYPES = array('.jpg', '.png');
-    const IMAGE_FILE_OPTIONS = array('subdirs' => 0, 'maxbytes' => 50 * 1024, 'areamaxbytes' => 50 * 1024,
-            'maxfiles' => 1, 'accepted_types' => self::IMAGE_FILE_TYPES);
+    /** @var array Restrictions for message image file manager */
+    const IMAGE_FILE_OPTIONS = array('subdirs' => 0, 'maxfiles' => 1, 'accepted_types' => self::IMAGE_FILE_TYPES);
+    /** @var int Exact width for message images */
+    const IMAGE_WIDTH = 700;
+    /** @var int Exact height for message images */
+    const IMAGE_HEIGHT = 330;
+    /** @var int Max filesize (in bytes) for message images (currently 100KB) */
+    const IMAGE_MAX_FILESIZE = 102400;
 
     protected $displaytype = 0;
     protected $publishstate = '';
@@ -55,7 +62,7 @@ class block_news_edit_message_form extends moodleform {
      * Overide constructor to pass in publish radio button state before
      * definition() is called
      *
-     * @param $publishstate
+     * @param array $customdata
      */
     public function __construct($customdata) {
         $this->displaytype = $customdata['displaytype'];
@@ -127,11 +134,9 @@ class block_news_edit_message_form extends moodleform {
             $mform->setType('eventlocation', PARAM_TEXT);
         }
 
-        if (theme_osep\util::is_osep_design($COURSE)) {
-            $mform->addElement('filemanager', 'messageimage', get_string('messageimage', 'block_news'),
-                    null, self::IMAGE_FILE_OPTIONS);
-            $mform->disabledIf('messageimage', 'messagetype', 'eq', block_news_message::MESSAGETYPE_EVENT);
-        }
+        $mform->addElement('filemanager', 'messageimage', get_string('messageimage', 'block_news'),
+                null, self::IMAGE_FILE_OPTIONS);
+        $mform->disabledIf('messageimage', 'messagetype', 'eq', block_news_message::MESSAGETYPE_EVENT);
 
         $mform->addElement('selectyesno', 'messagevisible',
                 get_string('msgeditvisible', 'block_news'));
@@ -224,6 +229,21 @@ class block_news_edit_message_form extends moodleform {
             }
             if (!$data['alldayevent'] && $data['eventend'] < $data['eventstart']) {
                 $errors['eventend'] = get_string('erroreventend', 'block_news');
+            }
+        }
+        if (!empty($data['messageimage'])) {
+            $imageerrors = '';
+            $draftfiles = file_get_drafarea_files($data['messageimage']);
+            $image = reset($draftfiles->list); // There's only 1 file allowed, so this will give us the image.
+            if ($image->size > self::IMAGE_MAX_FILESIZE) {
+                $imageerrors .= get_string('errorimagesize', 'block_news', self::IMAGE_MAX_FILESIZE / 1024);
+            }
+            if ($image->image_width != self::IMAGE_WIDTH || $image->image_height != self::IMAGE_HEIGHT) {
+                $errorparts = (object) ['width' => self::IMAGE_WIDTH, 'height' => self::IMAGE_HEIGHT];
+                $imageerrors .= get_string('errorimagedimensions', 'block_news', $errorparts);
+            }
+            if (!empty($imageerrors)) {
+                $errors['messageimage'] = $imageerrors;
             }
         }
         return $errors;

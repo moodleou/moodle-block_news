@@ -153,14 +153,14 @@ class block_news extends block_base {
             $this->content->text .= $output->close_news_block_custom_wrapper();
             // Main footer.
             $this->content->footer .= $output->container_start($canaddnews, 'block_news_viewall');
-            $this->content->footer .= $output->render_view_all($blockinstanceid);
+            $this->content->footer .= $output->render_view_all($blockinstanceid, $this->bns->get_viewall_label());
             $this->content->footer .= $output->container_end();
         } else {
             $this->content->text = $output->container(
                     get_string('msgblocknonews', 'block_news'), null, 'msgblocknonews');
             if (has_capability('block/news:viewhidden', $blockcontext)) {
                 $this->content->footer .= $output->container_start(null, 'block_news_viewall');
-                $this->content->footer .= $output->render_view_all($blockinstanceid);
+                $this->content->footer .= $output->render_view_all($blockinstanceid, $this->bns->get_viewall_label());
                 $this->content->footer .= $output->container_end();
             }
         }

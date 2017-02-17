@@ -6,18 +6,21 @@ Feature: Display events in news block
 
   Background:
     Given the following "courses" exist:
-      | fullname | shortname | category | format    |
-      | Course 1 | C1        | 0        | ousubject |
+      | fullname | shortname |
+      | Course 1 | C1        |
     And the following "users" exist:
       | username | timezone      |
       | ukuser   | Europe/London |
     And the following "course enrolments" exist:
       | user   | course | role    |
       | ukuser | C1     | student |
-    And I am using the OSEP theme
-    And I log in as "admin" (in the OSEP theme)
+    And I log in as "admin"
     And I am on site homepage
     And I follow "Course 1"
+    And I turn editing mode on
+    And I add the "News" block
+    And the news block for course "C1" is in news and events mode
+    And I reload the page
 
   Scenario: Test activitation of additional form fields for events
     Given I click on "Add" "link" in the "News and events" "block"
@@ -34,7 +37,7 @@ Feature: Display events in news block
     And the "eventend[hour]" "field" should be disabled
     And the "eventend[minute]" "field" should be disabled
     And the "Event location" "field" should be disabled
-    And the "class" attribute of "#fitem_id_messageimage" "css_element" should not contain "disabled"
+    And the "class" attribute of "//label[contains(., 'Image')]/../.." "xpath_element" should not contain "disabled"
     When I set the field "Type" to "Event"
     Then the "eventstart[day]" "field" should be enabled
     And the "eventstart[month]" "field" should be enabled
@@ -48,7 +51,7 @@ Feature: Display events in news block
     And the "eventend[hour]" "field" should be disabled
     And the "eventend[minute]" "field" should be disabled
     And the "Event location" "field" should be enabled
-    And the "class" attribute of "#fitem_id_messageimage" "css_element" should contain "disabled"
+    And the "class" attribute of "//label[contains(., 'Image')]/../.." "xpath_element" should contain "disabled"
     When I set the field "All day event" to ""
     Then the "eventstart[day]" "field" should be enabled
     And the "eventstart[month]" "field" should be enabled
@@ -62,7 +65,7 @@ Feature: Display events in news block
     And the "eventend[hour]" "field" should be enabled
     And the "eventend[minute]" "field" should be enabled
     And the "Event location" "field" should be enabled
-    And the "class" attribute of "#fitem_id_messageimage" "css_element" should contain "disabled"
+    And the "class" attribute of "//label[contains(., 'Image')]/../.." "xpath_element" should contain "disabled"
 
   Scenario: Event date validation
     Given I click on "Add" "link" in the "News and events" "block"
@@ -129,9 +132,9 @@ Feature: Display events in news block
     Given the following news messages exist on course "C1":
       | title    | message           | messagetype | messagedate | eventstart |
       | message1 | Lorem ipsum dolor | 2           | 1483228800  | 2145888000 |
-    And I log out (in the OSEP theme)
+    And I log out
     # View the event as a user in the UK (8 hours behind).
-    And I log in as "ukuser" (in the OSEP theme)
+    And I log in as "ukuser"
     And I follow "Course 1"
     Then I should see "01" in the ".block_news_event time" "css_element"
     And I should see "Jan" in the ".block_news_event time" "css_element"

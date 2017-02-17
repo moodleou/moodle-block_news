@@ -1,0 +1,108 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_news/view_all_page
+
+    Template for the View all page, displaying news messages, upcoming events and past events.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * news - An array of news messages to be rendered by the block_news/message_short template.
+    * upcomingevents - An array of event messages to be rendered by the block_news/event_short template.
+    * pastevents - An array of event messages to be rendered by the block_news/event_short template.
+
+    Example context (json):
+    {
+        "news": [
+            {
+                "messagedate": "23 Jan 2017",
+                "title": "Fake news",
+                "author": "Donald J. Trump",
+                "thumburl": "http://placehold.it/340x160",
+                "thumbwidth": "340",
+                "thumbheight": "160",
+                "formattedmessage": "This is <b>fake news</b>. Sad!",
+                "viewlink": "http://example.com",
+                "classes": "",
+                "groupindication": ""
+            }
+        ],
+        "upcomingevents": [
+            {
+                "messagedate": "23 Jan 2017",
+                "eventdate": "16 May 2017",
+                "eventmonth": "May",
+                "eventday": "16",
+                "fulleventdate": "Tuesday, May 16, 2017",
+                "eventlocation": "A pub",
+                "title": "Mark's birthday",
+                "viewlink": "http://example.com",
+                "classes": "",
+                "groupindication": ""
+            }
+        ],
+        "pastevents": [
+            {
+                "messagedate": "01 Jan 1970",
+                "eventdate":  "01 Jan 1970",
+                "eventmonth": "Jan",
+                "eventday": "01",
+                "fulleventdate": "Thursday, Jan 01, 1970",
+                "eventlocation": "The Internet",
+                "title": "Unix epoch began",
+                "viewlink": "http://example.com",
+                "classes": "",
+                "groupindication": ""
+            }
+        ]
+    }
+
+}}
+<section class="block-news-viewall-news">
+    <h1>{{#str}} newsheading, block_news {{/str}}</h1>
+    {{#news}}
+        {{>block_news/message_short}}
+    {{/news}}
+    {{^news}}
+        {{#str}} nonewsyet, block_news {{/str}}
+    {{/news}}
+</section>
+<div class="block-news-viewall-events">
+    <section class="block-news-viewall-upcoming-events">
+        <h1>{{#str}} eventsheading, block_news {{/str}}</h1>
+        {{#upcomingevents}}
+            {{>block_news/event_short}}
+        {{/upcomingevents}}
+        {{^upcomingevents}}
+            {{#str}} noeventsyet, block_news {{/str}}
+        {{/upcomingevents}}
+    </section>
+    <section class="block-news-viewall-past-events">
+        <h1>{{#str}} pasteventsheading, block_news {{/str}}</h1>
+        {{#pastevents}}
+            {{>block_news/event_short}}
+        {{/pastevents}}
+        {{^pastevents}}
+            {{#str}} nopastevents, block_news {{/str}}
+        {{/pastevents}}
+    </section>
+</div>

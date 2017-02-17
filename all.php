@@ -28,11 +28,15 @@ require_once('block_news_message.php');
 require_once('block_news_system.php');
 require_once('lib.php');
 
+use block_news\output\view_all_page;
+
 $blockinstanceid = required_param('bi', PARAM_INT);
+$page = optional_param('page', 0, PARAM_INT);
 
 $bns = block_news_system::get_block_settings($blockinstanceid);
 
-$csemod = block_news_init_page($blockinstanceid, $bns->get_title());
+// Codechecker complains about missing require_login.  It's part of the following function.
+$csemod = block_news_init_page($blockinstanceid, $bns->get_title(), $bns->get_displaytype());
 
 $output = $PAGE->get_renderer('block_news');
 $blockcontext = context_block::instance($blockinstanceid);
@@ -55,21 +59,50 @@ echo $output->render_message_page_header($bns, $title, (isset($CFG->enablerssfee
         has_capability('block/news:add', $blockcontext));
 
 // Get the messages.
-if (has_capability('block/news:viewhidden', $blockcontext)) {
-    $bnms = $bns->get_messages_all(true); // See all dates, all visibilty.
-} else {
-    $bnms = $bns->get_messages_all(false); // See past/present only and visible.
-}
-
-// Display the messages.
-if ($bnms == null) {
-    echo $OUTPUT->container(get_string('msgblocknonews', 'block_news'), 'block_news_nonews');
-} else {
-    foreach ($bnms as $bnm) {
-        $SESSION->news_block_views[$bnm->get_id()] = true;
-        $msgwidget = new block_news_message_full($bnm, null, null, $bns, 'all', $bns->get_images());
-        echo $output->render($msgwidget);
+$viewhidden = has_capability('block/news:viewhidden', $blockcontext);
+if ($bns->get_displaytype() == block_news_system::DISPLAY_DEFAULT) {
+    $bnms = $bns->get_messages_all($viewhidden);
+    // Display the messages.
+    if ($bnms == null) {
+        echo $OUTPUT->container(get_string('msgblocknonews', 'block_news'), 'block_news_nonews');
+    } else {
+        foreach ($bnms as $bnm) {
+            $SESSION->news_block_views[$bnm->get_id()] = true;
+            $msgwidget = new block_news_message_full($bnm, null, null, $bns, 'all', $bns->get_images());
+            echo $output->render($msgwidget);
+        }
     }
+
+} else {
+    $pageinfo = [
+            (object) [
+                'messagecount' => $bns->get_message_count($viewhidden, block_news_message::MESSAGETYPE_NEWS),
+                'pagesize' => block_news_system::ALL_NEWS_PAGE_SIZE,
+            ],
+            (object) [
+                'messagecount' => $bns->get_message_count($viewhidden, block_news_message::MESSAGETYPE_EVENT),
+                'pagesize' => block_news_system::ALL_EVENTS_PAGE_SIZE,
+            ],
+            (object) [
+                'messagecount' => $bns->get_message_count($viewhidden, block_news_message::MESSAGETYPE_EVENT, true),
+                'pagesize' => block_news_system::ALL_EVENTS_PAGE_SIZE,
+            ],
+    ];
+    $mostpages = $bns->find_most_pages($pageinfo);
+    $pager = new paging_bar($mostpages->messagecount, $page, $mostpages->pagesize, '/blocks/news/all.php?bi=' . $blockinstanceid);
+    echo $output->render($pager);
+
+    $news = $bns->get_messages_all($viewhidden, block_news_system::ALL_NEWS_PAGE_SIZE, $page, block_news_message::MESSAGETYPE_NEWS);
+    $upcomingevents = $bns->get_messages_all(
+            $viewhidden, block_news_system::ALL_EVENTS_PAGE_SIZE, $page, block_news_message::MESSAGETYPE_EVENT);
+    $pastevents = $bns->get_messages_all(
+            $viewhidden, block_news_system::ALL_EVENTS_PAGE_SIZE, $page, block_news_message::MESSAGETYPE_EVENT,
+            'eventstart DESC, messagedate DESC', true);
+
+    $viewallpage = new view_all_page($bns, $news, $upcomingevents, $pastevents);
+    echo $output->render($viewallpage);
+
+    echo $output->render($pager);
 }
 
 echo $OUTPUT->footer();
