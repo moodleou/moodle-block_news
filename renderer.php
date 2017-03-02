@@ -164,6 +164,9 @@ class block_news_message_full implements renderable {
  */
 class block_news_message_short implements renderable, templatable {
 
+    /** @var string Tags allowed for block news short message */
+    const ALLOW_TAGS = '<a><br><p><div><span><ol><ul><li><strong><b><i><em>';
+
     /** @var string Title of message */
     public $title;
     /** @var string Additional CSS classes for message wrapper */
@@ -299,7 +302,9 @@ class block_news_message_short implements renderable, templatable {
         }
 
         if ($summarylength) {
-            $this->message = shorten_text(strip_tags($bnm->get_message()), $summarylength);
+            $this->message = shorten_text(strip_tags($bnm->get_message(), self::ALLOW_TAGS), $summarylength);
+            $this->message = file_rewrite_pluginfile_urls($this->message, 'pluginfile.php',
+                $blockcontext->id, 'block_news', 'message', $bnm->get_id());
         } else {
             $this->message = '';
         }
