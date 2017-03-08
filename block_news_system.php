@@ -643,16 +643,18 @@ class block_news_system {
         }
 
         $groups = $this->get_group_sql();
+        $grouppings = $this->get_grouping_sql();
 
         $sql = 'SELECT id, messagedate
                 FROM {block_news_messages}
                 WHERE blockinstanceid = ? '
                 . $groups['sql']
+                . $grouppings['sql']
                 . $sqlvh
                 .'ORDER BY messagedate ASC';
 
         $params = array($this->blockinstanceid);
-        $params = array_merge($params, $groups['params'], $paramsvh);
+        $params = array_merge($params, $groups['params'], $grouppings['params'], $paramsvh);
         $mrecs = $DB->get_records_sql($sql, $params);
         $pnid = -1;
         $i = 0;
