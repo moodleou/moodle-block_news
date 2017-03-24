@@ -14,10 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die;
+use block_news\system;
+use block_news\message;
+use block_news\output\short_message;
 
-require_once($CFG->dirroot . '/blocks/news/block_news_system.php');
-require_once($CFG->dirroot . '/blocks/news/block_news_message.php');
+defined('MOODLE_INTERNAL') || die;
 
 /**
  * News block main class.
@@ -79,21 +80,21 @@ class block_news extends block_base {
             $canaddnews = null;
         }
         $nummsgs = $this->bns->get_nummessages();
-        if ($this->bns->get_displaytype() == block_news_system::DISPLAY_DEFAULT) {
+        if ($this->bns->get_displaytype() == system::DISPLAY_DEFAULT) {
             $msgs = $this->bns->get_messages_limited($nummsgs);
             $events = null;
         } else {
-            $msgs = $this->bns->get_messages_limited($nummsgs, block_news_message::MESSAGETYPE_NEWS);
-            $events = $this->bns->get_messages_limited($nummsgs, block_news_message::MESSAGETYPE_EVENT);
+            $msgs = $this->bns->get_messages_limited($nummsgs, message::MESSAGETYPE_NEWS);
+            $events = $this->bns->get_messages_limited($nummsgs, message::MESSAGETYPE_EVENT);
         }
 
         $sumlen = $this->bns->get_summarylength();
-        if ($msgs || $events || $this->bns->get_displaytype() == block_news_system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
+        if ($msgs || $events || $this->bns->get_displaytype() == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
             $c = 1;
             $this->content->text = $output->open_news_block_custom_wrapper();
             $this->content->text .= $output->container_start('block_news_msglist');
 
-            if ($this->bns->get_displaytype() == block_news_system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
+            if ($this->bns->get_displaytype() == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
                 $this->content->text .= $output->heading(get_string('newsheading', 'block_news'), 3);
             }
 
@@ -125,7 +126,7 @@ class block_news extends block_base {
                         $newmsg = true;
                     }
 
-                    $msgwidget = new block_news_message_short($msg, $this->bns, $sumlen, $c, $thumbnails);
+                    $msgwidget = new short_message($msg, $this->bns, $sumlen, $c, $thumbnails);
                     $this->content->text .= $output->render($msgwidget);
                     $c++;
                 }
@@ -137,14 +138,14 @@ class block_news extends block_base {
 
             $this->content->text .= $output->container_end();
 
-            if ($this->bns->get_displaytype() == block_news_system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
+            if ($this->bns->get_displaytype() == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
                 $this->content->text .= $output->container_start('block_news_eventlist');
                 $this->content->text .= $output->heading(get_string('eventsheading', 'block_news'), 3);
                 if (empty($events)) {
                     $this->content->text .= get_string('noeventsyet', 'block_news');
                 } else {
                     foreach ($events as $event) {
-                        $eventwidget = new block_news_message_short($event, $this->bns, $sumlen, $c, $thumbnails);
+                        $eventwidget = new short_message($event, $this->bns, $sumlen, $c, $thumbnails);
                         $this->content->text .= $output->render($eventwidget);
                     }
                 }
@@ -189,7 +190,7 @@ class block_news extends block_base {
      */
     public function specialization() {
         $blockinstanceid = $this->instance->id;
-        $this->bns = block_news_system::get_block_settings($blockinstanceid);
+        $this->bns = system::get_block_settings($blockinstanceid);
 
         // Display title of this instance on config page (its put in block header and on
         // block edit page header).

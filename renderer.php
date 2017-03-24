@@ -22,389 +22,14 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use block_news\system;
+use block_news\message;
+use block_news\output\short_message;
+use block_news\output\full_message;
+
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
 }
-
-/**
- * Base class for rendering news messages.
- *
- * @package block_news
- */
-abstract class block_news_renderable_message implements renderable {
-    /** @var string Title of message */
-    public $title;
-    /** @var string Additional CSS classes for message wrapper */
-    public $classes;
-    /** @var string Source URL for the message (if from a feed) */
-    public $link;
-    /** @var string URL to view the whole message */
-    public $viewlink;
-    /** @var string Message text */
-    public $message;
-    /** @var string Message publication date */
-    public $messagedate;
-    /** @var bool Is the message visibile? */
-    public $messagevisible;
-    /** @var int Message text format */
-    public $messageformat;
-    /** @var int Message type - news or event */
-    public $messagetype;
-    /** @var string Name of author (if shown) */
-    public $author;
-    /** @var string Group visibility indication (if shown) */
-    public $groupindication;
-    /** @var array imageinfo for thumbnail, if there is one */
-    public $thumbinfo;
-    /** @var moodle_url The URL of the thumbnail image */
-    public $thumburl;
-    /** @var string The message text with formatting and filtering applied */
-    public $formattedmessage;
-    /** @var int The width of the thumbnail image in pixels */
-    public $thumbwidth;
-    /** @var int The height of the thumbnail image in pixels */
-    public $thumbheight;
-    /** @var int The timestamp for the start of the event */
-    public $eventstart;
-    /** @var int The timestamp for the end of the event */
-    public $eventend;
-    /** @var string The ISO8601 date for the start of the event (and time if it's not an all-day event) */
-    public $eventdatetime;
-    /** @var string The format string to format eventstart into eventdatetime */
-    public $eventdatetimeformat;
-    /** @var string The 2-digit day of the event's start date */
-    public $eventday;
-    /** @var string The shorthand month of the event's start date */
-    public $eventmonth;
-    /** @var string The location of the event */
-    public $eventlocation;
-    /** @var string The full formatted description of the event's start (and end) date (and time). */
-    public $fulleventdate;
-    /** @var array Additional notes if the message has restricted display */
-    public $notes;
-    /** @var string Show/Hide action to display the correct icon. */
-    public $showhideact;
-    /** @var pix_icon Icon for "hide" link */
-    public $hideicon;
-    /** @var moodle_url URL for "hide link */
-    public $hideurl;
-    /** @var pix_icon Icon for "edit" link */
-    public $editicon;
-    /** @var moodle_url URL for "edit" link */
-    public $editurl;
-    /** @var pix_icon Icon for "delete" link */
-    public $deleteicon;
-    /** @var moodle_url URL for "delete" link */
-    public $deleteurl;
-
-    /**
-     * Set the edit icons and URLs based on the current user's permissions.
-     *
-     * @param block_news_message $bnm
-     * @param context $blockcontext
-     * @param string $mode
-     */
-    protected function set_edit_links(block_news_message $bnm, context $blockcontext, $mode) {
-        // If a feed message (newsfeedid != 0) dont show edit etc icons.
-        if ($bnm->get_newsfeedid() == 0) {
-            if (has_capability('block/news:hide', $blockcontext)) {
-                $this->hideicon = new pix_icon('t/' . $this->showhideact, $this->showhideact);
-                // Eg 't/hide', 'hide'.
-                $this->hideurl = new moodle_url('/blocks/news/message.php',
-                        ['m' => $bnm->get_id(), 'action' => 'hide', 'mode' => $mode]);
-            }
-
-            if (has_capability('block/news:add', $blockcontext)) {
-                $this->editicon = new pix_icon('t/edit',
-                        get_string('edit', 'block_news', $bnm->get_title()));
-                $this->editurl = new moodle_url('/blocks/news/edit.php', ['m' => $bnm->get_id(), 'mode' => $mode]);
-            }
-
-            if (has_capability('block/news:delete', $blockcontext)) {
-                $this->deleteicon = new pix_icon('t/delete',
-                        get_string('delete', 'block_news', $bnm->get_title()));
-                $this->deleteurl = new moodle_url('/blocks/news/message.php',
-                        ['m' => $bnm->get_id(), 'action' => 'delete', 'mode' => $mode]);
-            }
-        }
-    }
-
-    /**
-     * Set various attributes to display the message correctly depending on whether its visible to students.
-     *
-     * @param block_news_message $bnm
-     */
-    protected function set_visibility_attributes(block_news_message $bnm) {
-        if ($bnm->is_visible_to_students()) {
-            $this->classes .= ' msgvis';
-            $this->showhideact = 'hide'; // Wrong way round.
-        } else {
-            $this->classes .= ' msghide';
-            $this->showhideact = 'hide';
-
-            if (!$bnm->get_messagevisible()) {
-                $this->notes[] = get_string('rendermsghidden', 'block_news');
-                $this->showhideact = 'show';
-            }
-            if ($bnm->get_messagedate() > time()) {
-                $this->notes[] = get_string('rendermsgfuture', 'block_news',
-                        userdate($bnm->get_messagedate(), get_string('dateformatlong', 'block_news')));
-            }
-        }
-    }
-}
-
-/**
- * Full message class (for display in the single message or all messages pages).
- *
- * @package block_news
- */
-class block_news_message_full extends block_news_renderable_message {
-
-    /** @var string URL for the previous message */
-    public $prevurl;
-    /** @var string URL for the next message */
-    public $nexturl;
-    /** @var int Block instance ID */
-    public $blockinstanceid;
-    /** @var int Message ID */
-    public $id;
-    /** @var array Info for message image */
-    public $imageinfo;
-    /** @var moodle_url URL for message image */
-    public $imageurl;
-
-    /**
-     * Build full message data
-     *
-     * @param block_news_message $bnm
-     * @param integer $previd
-     * @param integer $nextid
-     * @param block_news_system $bns
-     * @param string $mode
-     * @param array $images List of images for this block, keyed by message ID.
-     */
-    public function __construct($bnm, $previd, $nextid, $bns, $mode, array $images = []) {
-        global $CFG;
-
-        $this->classes = '';
-        $this->notes = array();
-        if ($bns->get_hidetitles()) {
-            $this->title = '';
-        } else {
-            $this->title = $bnm->get_title();
-        }
-        if ($bns->get_hidelinks()) {
-            $this->link = '';
-        } else {
-            $this->link = $bnm->get_link();
-        }
-
-        $this->viewlink = $bnm->get_link();
-
-        $this->message = $bnm->get_message();
-        $this->messagedate = userdate($bnm->get_messagedate(),
-            get_string('dateformat', 'block_news'));
-        $this->messagevisible = $bnm->get_messagevisible();
-        $usr = $bnm->get_user();
-        if ($bnm->get_hideauthor() || $usr == null) {
-            $this->author = '';
-        } else {
-            $this->author = fullname($usr);
-        }
-
-        $this->set_visibility_attributes($bnm);
-
-        if ($mode == 'one') { // Single message.
-            if ($previd == -1) {
-                $this->prevurl = 'end';
-            } else {
-                $this->prevurl = $CFG->wwwroot . '/blocks/news/message.php?m=' . $previd;
-            }
-
-            if ($nextid == -1) {
-                $this->nexturl = 'end';
-            } else {
-                $this->nexturl = $CFG->wwwroot.'/blocks/news/message.php?m=' . $nextid;
-            }
-        } else if ($mode == 'all') { // All messages - dont display prev/next links.
-            $this->prevurl = null;
-            $this->nexturl = null;
-        } else {
-            print_error('errorinvalidmode', 'block_news', $mode);
-        }
-
-        // Context for access checks.
-        $blockcontext = context_block::instance($bnm->get_blockinstanceid());
-
-        $this->set_edit_links($bnm, $blockcontext, $mode);
-
-        // For group indication.
-        $this->groupindication = '';
-        if (has_any_capability(array('block/news:delete', 'block/news:add', 'block/news:edit'), $blockcontext)) {
-            $this->groupindication = $bns->get_group_indication($bnm);
-        }
-
-        // For attachments.
-        $this->blockinstanceid = $bnm->get_blockinstanceid();
-        $this->messageformat = $bnm->get_messageformat();
-        $this->id = $bnm->get_id();
-        if (array_key_exists($this->id, $images)) {
-            $image = $images[$this->id];
-            $this->imageinfo = $image->get_imageinfo();
-            $pathparts = array('/pluginfile.php', $blockcontext->id, 'block_news',
-                    'messageimage', $this->id, $image->get_filename());
-            $this->imageurl = new moodle_url(implode('/', $pathparts));
-        }
-
-    }
-}
-
-
-/**
- * Short message class (for display in the block).
- *
- * @package block_news
- */
-class block_news_message_short extends block_news_renderable_message implements templatable {
-
-    /** @var string Tags allowed for block news short message */
-    const ALLOW_TAGS = '<a><br><p><div><span><ol><ul><li><strong><b><i><em>';
-
-    /** @var array Action icons and URLs */
-    public $actions;
-
-    /** @var bool True if $actions isn't empty */
-    public $hasactions;
-
-    /**
-     * Build short message data
-     *
-     * @param block_news_message $bnm
-     * @param block_news_system $bns
-     * @param int $summarylength Length of text displayed (0 = none)
-     * @param int $count Sequence, eg 1 is first message in the block
-     * @param array $thumbnails Thumbnail images for all messages, keyed by message ID.
-     * @param null|string $mode Render mode, 'all' if rendering for the "View all" page.
-     */
-    public function __construct($bnm, $bns, $summarylength, $count, array $thumbnails = [], $mode = null) {
-        global $CFG;
-
-        $this->classes = '';
-        if ($bns->get_hidetitles()) {
-            $this->title = '';
-        } else {
-            $this->title = $bnm->get_title();
-        }
-
-        if ($bns->get_hidelinks()) {
-            $this->link = '';
-        } else {
-            $this->link = $bnm->get_link();
-        }
-
-        $this->viewlink = $CFG->wwwroot . '/blocks/news/message.php?m=' . $bnm->get_id();
-
-        $this->messagedate = userdate($bnm->get_messagedate(),
-                                                get_string('dateformat', 'block_news'));
-        $this->messagevisible = $bnm->get_messagevisible();
-        $this->messageformat = $bnm->get_messageformat();
-
-        $usr = $bnm->get_user();
-        if ($bnm->get_hideauthor() || $usr == null) {
-            $this->author = '';
-        } else {
-            $this->author = fullname($usr);
-        }
-
-        // Context for access checks.
-        $blockcontext = context_block::instance($bnm->get_blockinstanceid());
-
-        if ($mode === 'all') {
-            $this->set_visibility_attributes($bnm);
-            $this->set_edit_links($bnm, $blockcontext, $mode);
-        }
-
-        // For group indication.
-        $this->groupindication = '';
-        if (has_any_capability(array('block/news:delete', 'block/news:add', 'block/news:edit'), $blockcontext)) {
-            $this->groupindication = $bns->get_group_indication($bnm);
-        }
-
-        if (array_key_exists($bnm->get_id(), $thumbnails)) {
-            $thumb = $thumbnails[$bnm->get_id()];
-            $this->thumbinfo = $thumb->get_imageinfo();
-            $pathparts = array('/pluginfile.php', $blockcontext->id, 'block_news',
-                    'thumbnail', $bnm->get_id(), $thumb->get_filename());
-            $this->thumburl = new moodle_url(implode('/', $pathparts));
-        }
-
-        $this->messagetype = $bnm->get_messagetype();
-        $this->fulleventdate = '';
-        if ($this->messagetype == block_news_message::MESSAGETYPE_EVENT) {
-            $alldayevent = $bnm->get_alldayevent();
-            if ($alldayevent) {
-                $this->eventstart = $bnm->get_eventstart_local();
-                $this->eventdatetimeformat = '%F';
-                $this->eventend = null;
-            } else {
-                $this->eventstart = $bnm->get_eventstart();
-                $this->eventend = $bnm->get_eventend();
-                $this->eventdatetimeformat = '%FT%T';
-            }
-            $this->eventlocation = $bnm->get_eventlocation();
-
-            if ($alldayevent) {
-                $this->fulleventdate = userdate($this->eventstart, get_string('strftimedaydate', 'langconfig'));
-            } else {
-                $eventtime = (object) ['start' => '', 'end' => ''];
-                $eventtime->start = userdate($this->eventstart, get_string('strftimedaydatetime', 'langconfig'));
-                if (userdate($this->eventstart, '%Y%m%d') === userdate($this->eventend, '%Y%m%d')) {
-                    $eventtime->end = userdate($this->eventend, get_string('strftimetime', 'langconfig'));
-                } else {
-                    $eventtime->end = userdate($this->eventend, get_string('strftimedaydatetime', 'langconfig'));
-                }
-                $this->fulleventdate = get_string('fulleventdate', 'block_news', $eventtime);
-            }
-        }
-
-        if ($summarylength) {
-            $this->message = shorten_text(strip_tags($bnm->get_message(), self::ALLOW_TAGS), $summarylength);
-            $this->message = file_rewrite_pluginfile_urls($this->message, 'pluginfile.php',
-                $blockcontext->id, 'block_news', 'message', $bnm->get_id());
-        } else {
-            $this->message = '';
-        }
-    }
-
-    public function export_for_template(renderer_base $output) {
-        if ($this->messagetype == block_news_message::MESSAGETYPE_EVENT) {
-            $this->eventday = strftime('%d', $this->eventstart);
-            $this->eventmonth = strftime('%b', $this->eventstart);
-            $this->eventdatetime = strftime($this->eventdatetimeformat, $this->eventstart);
-        } else {
-            $this->thumbwidth = $this->thumbinfo['width'];
-            $this->thumbheight = $this->thumbinfo['height'];
-        }
-        $this->formattedmessage = format_text($this->message, $this->messageformat);
-        $this->actions = [];
-        if (isset($this->hideurl) && isset($this->hideicon)) {
-            $this->actions[] = (object) ['icon' => $this->hideicon->export_for_template($output),
-                    'url' => $this->hideurl->out(false)];
-        }
-        if (isset($this->editurl) && isset($this->editicon)) {
-            $this->actions[] = (object) ['icon' => $this->editicon->export_for_template($output),
-                    'url' => $this->editurl->out(false)];
-        }
-        if (isset($this->deleteurl) && isset($this->deleteicon)) {
-            $this->actions[] = (object) ['icon' => $this->deleteicon->export_for_template($output),
-                    'url' => $this->deleteurl->out(false)];
-        }
-        $this->hasactions = !empty($this->actions);
-        return $this;
-    }
-}
-
 
 /**
  * Main renderer.
@@ -430,7 +55,7 @@ class block_news_renderer extends plugin_renderer_base {
     /**
      * Return HTML for the heading section of a news block page (all.php/message.php)
      *
-     * @param block_news_system $bns Block news instance record
+     * @param system $bns Block news instance record
      * @param string $title Page title
      * @param boolean $showfeed Show the subscribe to RSS feed link?
      * @param boolean $canmanage User can add message?
@@ -456,7 +81,7 @@ class block_news_renderer extends plugin_renderer_base {
      * Return HTMl for news block page title
      *
      * @param string $title
-     * @param block_news_system $bns Block news instance record
+     * @param system $bns Block news instance record
      * @return string
      */
     public function render_message_page_title($title, $bns = null) {
@@ -466,7 +91,7 @@ class block_news_renderer extends plugin_renderer_base {
     /**
      * Subscribe to news feed link on all page
      *
-     * @param block_news_system $bns Block news instance record
+     * @param system $bns Block news instance record
      * @return string
      */
     public function render_message_page_subscribe($bns) {
@@ -480,7 +105,7 @@ class block_news_renderer extends plugin_renderer_base {
     /**
      * Create message link on all page
      *
-     * @param block_news_system $bns Block news instance record
+     * @param system $bns Block news instance record
      * @return string
      */
     public function render_message_page_add($bns) {
@@ -495,10 +120,11 @@ class block_news_renderer extends plugin_renderer_base {
 
     /**
      * Generate HTML for full message
-     * @param block_news_message_full $nmsg Renderable data
+     *
+     * @param full_message $nmsg Renderable data
      * @return string HTML
      */
-    protected function render_block_news_message_full(block_news_message_full $nmsg) {
+    protected function render_full_message(full_message $nmsg) {
         global $CFG;
 
         require_once($CFG->libdir . '/filelib.php');
@@ -620,12 +246,12 @@ class block_news_renderer extends plugin_renderer_base {
                 get_string('rendermsgview', 'block_news') . $extralinktext);
     }
     /**
-     * @param block_news_message_short $nmsg Renderable data
+     * @param short_message $nmsg Renderable data
      * @return string HTML
      */
-    protected function render_block_news_message_short(block_news_message_short $nmsg) {
+    protected function render_short_message(short_message $nmsg) {
         $context = $nmsg->export_for_template($this->output);
-        if ($nmsg->messagetype == block_news_message::MESSAGETYPE_EVENT) {
+        if ($nmsg->messagetype == message::MESSAGETYPE_EVENT) {
             $template = 'block_news/event_short';
         } else {
             $template = 'block_news/message_short';

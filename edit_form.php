@@ -29,8 +29,6 @@ if (!defined('MOODLE_INTERNAL')) {
     // must be included from a Moodle page
 }
 
-require_once('block_news_system.php');
-
 /**
  * block edit form definition
  * @package blocks
@@ -129,7 +127,7 @@ class block_news_edit_form extends block_edit_form {
         // convert from textarea to array
         $feeds = preg_split('/\R/', $data['config_feedurls']); // splits on any of \n \r\n \r
 
-        // just check length of each feed url (other cleanup done in block_news_system::save()
+        // just check length of each feed url (other cleanup done in block_news\system::save()
         foreach ($feeds as $feed) {
             if (strlen(trim($feed)) > self::MAXURLLEN) {
                 $errors['config_feedurls'] =

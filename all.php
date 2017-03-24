@@ -24,16 +24,18 @@
  */
 
 require_once(dirname(__FILE__) . '/../../config.php');
-require_once('block_news_message.php');
-require_once('block_news_system.php');
+
 require_once('lib.php');
 
+use block_news\system;
+use block_news\message;
+use block_news\output\full_message;
 use block_news\output\view_all_page;
 
 $blockinstanceid = required_param('bi', PARAM_INT);
 $page = optional_param('page', 0, PARAM_INT);
 
-$bns = block_news_system::get_block_settings($blockinstanceid);
+$bns = system::get_block_settings($blockinstanceid);
 
 // Codechecker complains about missing require_login.  It's part of the following function.
 $csemod = block_news_init_page($blockinstanceid, $bns->get_title(), $bns->get_displaytype());
@@ -60,7 +62,7 @@ echo $output->render_message_page_header($bns, $title, (isset($CFG->enablerssfee
 
 // Get the messages.
 $viewhidden = has_capability('block/news:viewhidden', $blockcontext);
-if ($bns->get_displaytype() == block_news_system::DISPLAY_DEFAULT) {
+if ($bns->get_displaytype() == system::DISPLAY_DEFAULT) {
     $bnms = $bns->get_messages_all($viewhidden);
     // Display the messages.
     if ($bnms == null) {
@@ -68,7 +70,7 @@ if ($bns->get_displaytype() == block_news_system::DISPLAY_DEFAULT) {
     } else {
         foreach ($bnms as $bnm) {
             $SESSION->news_block_views[$bnm->get_id()] = true;
-            $msgwidget = new block_news_message_full($bnm, null, null, $bns, 'all', $bns->get_images());
+            $msgwidget = new full_message($bnm, null, null, $bns, 'all', $bns->get_images());
             echo $output->render($msgwidget);
         }
     }
@@ -76,27 +78,27 @@ if ($bns->get_displaytype() == block_news_system::DISPLAY_DEFAULT) {
 } else {
     $pageinfo = [
             (object) [
-                'messagecount' => $bns->get_message_count($viewhidden, block_news_message::MESSAGETYPE_NEWS),
-                'pagesize' => block_news_system::ALL_NEWS_PAGE_SIZE,
+                'messagecount' => $bns->get_message_count($viewhidden, message::MESSAGETYPE_NEWS),
+                'pagesize' => system::ALL_NEWS_PAGE_SIZE,
             ],
             (object) [
-                'messagecount' => $bns->get_message_count($viewhidden, block_news_message::MESSAGETYPE_EVENT),
-                'pagesize' => block_news_system::ALL_EVENTS_PAGE_SIZE,
+                'messagecount' => $bns->get_message_count($viewhidden, message::MESSAGETYPE_EVENT),
+                'pagesize' => system::ALL_EVENTS_PAGE_SIZE,
             ],
             (object) [
-                'messagecount' => $bns->get_message_count($viewhidden, block_news_message::MESSAGETYPE_EVENT, true),
-                'pagesize' => block_news_system::ALL_EVENTS_PAGE_SIZE,
+                'messagecount' => $bns->get_message_count($viewhidden, message::MESSAGETYPE_EVENT, true),
+                'pagesize' => system::ALL_EVENTS_PAGE_SIZE,
             ],
     ];
     $mostpages = $bns->find_most_pages($pageinfo);
     $pager = new paging_bar($mostpages->messagecount, $page, $mostpages->pagesize, '/blocks/news/all.php?bi=' . $blockinstanceid);
     echo $output->render($pager);
 
-    $news = $bns->get_messages_all($viewhidden, block_news_system::ALL_NEWS_PAGE_SIZE, $page, block_news_message::MESSAGETYPE_NEWS);
+    $news = $bns->get_messages_all($viewhidden, system::ALL_NEWS_PAGE_SIZE, $page, message::MESSAGETYPE_NEWS);
     $upcomingevents = $bns->get_messages_all(
-            $viewhidden, block_news_system::ALL_EVENTS_PAGE_SIZE, $page, block_news_message::MESSAGETYPE_EVENT);
+            $viewhidden, system::ALL_EVENTS_PAGE_SIZE, $page, message::MESSAGETYPE_EVENT);
     $pastevents = $bns->get_messages_all(
-            $viewhidden, block_news_system::ALL_EVENTS_PAGE_SIZE, $page, block_news_message::MESSAGETYPE_EVENT,
+            $viewhidden, system::ALL_EVENTS_PAGE_SIZE, $page, message::MESSAGETYPE_EVENT,
             'eventstart DESC, messagedate DESC', true);
 
     $viewallpage = new view_all_page($bns, $news, $upcomingevents, $pastevents);

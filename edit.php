@@ -22,11 +22,12 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use block_news\system;
+use block_news\message;
+
 require_once(dirname(__FILE__) . '/../../config.php');
 require_once($CFG->libdir.'/formslib.php');
 require_once('edit_message_form.php');
-require_once('block_news_message.php');
-require_once('block_news_system.php');
 require_once('lib.php');
 
 define('ADD', 1);
@@ -38,12 +39,12 @@ $mode            = optional_param('mode', '', PARAM_TEXT); // Where from: all|on
 
 if ($id) {
     $action = EDIT;
-    $sql = block_news_system::get_message_sql_start() .
+    $sql = system::get_message_sql_start() .
         'WHERE {block_news_messages}.id = ?';
     $mrec = $DB->get_record_sql($sql, array('id' => $id));
 
     $blockinstanceid = $mrec->blockinstanceid;
-    $bnm = new block_news_message($mrec);
+    $bnm = new message($mrec);
     $title = get_string('editmessage', 'block_news') . ': ' . $bnm->get_title();
     $url = new moodle_url('/blocks/news/edit.php', array('m' => $id));
     $publishstate = ($bnm->get_messagedate() > time() ? 'asd' : 'ap');
@@ -59,7 +60,7 @@ $PAGE->set_url($url);
 if (empty($blockinstanceid)) {
     print_error('errorinvalidblockinstanceid', 'block_news');
 }
-$bns = block_news_system::get_block_settings($blockinstanceid);
+$bns = system::get_block_settings($blockinstanceid);
 
 $context = context_system::instance();
 
@@ -122,8 +123,8 @@ if ($formdata = $mform->get_data()) {
         $formdata->id = $formdata->m;
     }
     // Ensure that event fields are nulled if we're not creating an event.
-    if ($bns->get_displaytype() == block_news_system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS
-            && $formdata->messagetype != block_news_message::MESSAGETYPE_EVENT) {
+    if ($bns->get_displaytype() == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS
+            && $formdata->messagetype != message::MESSAGETYPE_EVENT) {
         $formdata->eventstart = null;
         $formdata->eventend = null;
         $formdata->eventlocation = null;
@@ -143,7 +144,7 @@ if ($formdata = $mform->get_data()) {
     // From editor.
     $formdata->messageformat = $formdata->message['format'];
 
-    $bns = block_news_system::get_block_settings($blockinstanceid);
+    $bns = system::get_block_settings($blockinstanceid);
     $bns->uncache_block_feed();
 
     // Add or edit - set current date and set publish to 'Already published'
@@ -156,7 +157,7 @@ if ($formdata = $mform->get_data()) {
     if ($action == EDIT) {
         $bnm->edit($formdata);
     } else {
-        $id = block_news_message::create($formdata);
+        $id = message::create($formdata);
     }
 
     // Save thumbnail version of the image file.
@@ -178,7 +179,7 @@ if ($formdata = $mform->get_data()) {
             $ok = \theme_osep\util::create_thumbnail($fullpath, $fullpath, block_news_edit_message_form::THUMBNAIL_MAX_EDGE);
             if ($ok) {
                 $thumbnailexist = $fs->get_file($blockcontext->id, 'block_news', 'thumbnail', $id,
-                        '/', block_news_message::THUMBNAIL_JPG);
+                        '/', message::THUMBNAIL_JPG);
                 if ($thumbnailexist) {
                     $thumbnailexist->delete();
                 }
@@ -188,7 +189,7 @@ if ($formdata = $mform->get_data()) {
                         'filearea' => 'thumbnail',
                         'itemid' => $id,
                         'filepath' => '/',
-                        'filename' => block_news_message::THUMBNAIL_JPG);
+                        'filename' => message::THUMBNAIL_JPG);
                 $fs->create_file_from_pathname($info, $fullpath);
             }
             unlink($fullpath);
@@ -233,7 +234,7 @@ if ($action == EDIT) {
 } else {
     $messagetext = null;
     $messageformat = null;
-    $messagetype = block_news_message::MESSAGETYPE_NEWS;
+    $messagetype = message::MESSAGETYPE_NEWS;
     $toform['publish'] = 0;
 }
 

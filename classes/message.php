@@ -22,19 +22,21 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace block_news;
+
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
     // It must be included from a Moodle page.
 }
 
-
 /**
  * main message class
+ *
  * @package blocks
  * @subpackage news
  *
  */
-class block_news_message {
+class message {
 
     const MESSAGETYPE_NEWS = 1;
     const MESSAGETYPE_EVENT = 2;
@@ -66,17 +68,19 @@ class block_news_message {
     /**
      * Constructor
      *
-     * @param stdClass $mrec Database record for the message.
+     * @param \stdClass $mrec Database record for the message.
      */
     public function __construct($mrec) {
         // Assign the properties.
-        $this->user = new stdClass;
-        foreach ((array)$mrec as $field => $value) {
+        $this->user = new \stdClass;
+        foreach ((array) $mrec as $field => $value) {
             if (property_exists($this, $field)) {
                 $this->{$field} = $value;
-            } else if (strpos($field, 'u_') === 0) {
-                $subfield = substr($field, 2);
-                $this->user->{$subfield} = $value;
+            } else {
+                if (strpos($field, 'u_') === 0) {
+                    $subfield = substr($field, 2);
+                    $this->user->{$subfield} = $value;
+                }
             }
         }
     }
@@ -254,9 +258,9 @@ class block_news_message {
      */
     public function get_eventstart_local() {
         global $USER;
-        $eventdate = new DateTime(null, core_date::get_server_timezone_object());
+        $eventdate = new \DateTime(null, \core_date::get_server_timezone_object());
         $eventdate->setTimestamp($this->eventstart);
-        $localdate = new DateTime(null, core_date::get_user_timezone_object($USER));
+        $localdate = new \DateTime(null, \core_date::get_user_timezone_object($USER));
         $localdate->setDate($eventdate->format('Y'), $eventdate->format('m'), $eventdate->format('d'));
         $localdate->setTime(0, 0);
         return $localdate->getTimestamp();
@@ -270,7 +274,7 @@ class block_news_message {
      * @return bool Whether this message is an all-day event.
      */
     public function get_alldayevent() {
-        $eventstart = new DateTime(null, core_date::get_server_timezone_object());
+        $eventstart = new \DateTime(null, \core_date::get_server_timezone_object());
         $eventstart->setTimestamp($this->eventstart);
         if (empty($this->eventend) && $eventstart->format('Hi') == '0000') {
             return true;
@@ -300,7 +304,7 @@ class block_news_message {
     /**
      * Build mock-up of minimal user object from object-local data
      *
-     * @return StdClass Author user details
+     * @return \stdClass Author user details
      */
     public function get_user() {
         if (empty($this->user->id)) {
@@ -372,7 +376,7 @@ class block_news_message {
         later (if rewritten to accommodate embedded images).
         */
         // No extra handling/conversion for feed messages (->message is not an array).
-        if ($data->newsfeedid != 0 ) {
+        if ($data->newsfeedid != 0) {
             $id = $DB->insert_record('block_news_messages', $data, true);
             // No logging for feed messages.
             return $id;
@@ -386,7 +390,7 @@ class block_news_message {
         $id = $DB->insert_record('block_news_messages', $data, true);
 
         // Save files.
-        $context = context_block::instance($data->blockinstanceid);
+        $context = \context_block::instance($data->blockinstanceid);
         if (!empty($data->messageimage)) {
             file_save_draft_area_files($data->messageimage, $context->id,
                     'block_news', 'messageimage', $id, array('subdirs' => 0));
@@ -406,8 +410,8 @@ class block_news_message {
         }
 
         $event = \block_news\event\message_created::create(array(
-            'objectid' => $id,
-            'context' => context_block::instance($data->blockinstanceid)
+                'objectid' => $id,
+                'context' => \context_block::instance($data->blockinstanceid)
         ));
         $event->trigger();
 
@@ -421,12 +425,12 @@ class block_news_message {
      * @return boolean
      */
     public function edit($data) {
-        global $DB, $USER, $COURSE;
+        global $DB;
         $data = self::set_alldayevent($data);
         $DB->update_record('block_news_messages', $data);
 
         // Save files.
-        $context = context_block::instance($data->blockinstanceid);
+        $context = \context_block::instance($data->blockinstanceid);
         if (!empty($data->messageimage)) {
             file_save_draft_area_files($data->messageimage, $context->id, 'block_news',
                     'messageimage', $data->id, array('subdirs' => 0));
@@ -436,12 +440,12 @@ class block_news_message {
                     'attachment', $data->id, array('subdirs' => 0));
         }
         $data->message = file_save_draft_area_files($data->message['itemid'], $context->id,
-             'block_news', 'message', $data->id, array('subdirs' => 0), $data->message['text']);
+                'block_news', 'message', $data->id, array('subdirs' => 0), $data->message['text']);
         $DB->set_field('block_news_messages', 'message', $data->message, array('id' => $data->id));
 
         $event = \block_news\event\message_updated::create(array(
-            'objectid' => $data->id,
-            'context' => context_block::instance($data->blockinstanceid)
+                'objectid' => $data->id,
+                'context' => \context_block::instance($data->blockinstanceid)
         ));
         $event->trigger();
 
@@ -452,12 +456,12 @@ class block_news_message {
      * Delete message
      */
     public function delete() {
-        global $DB, $USER, $COURSE;
-        $context = context_block::instance($this->blockinstanceid);
+        global $DB;
+        $context = \context_block::instance($this->blockinstanceid);
 
         $event = \block_news\event\message_deleted::create(array(
-            'objectid' => $this->id,
-            'context' => $context
+                'objectid' => $this->id,
+                'context' => $context
         ));
         $event->add_record_snapshot('block_news_messages',
                 $DB->get_record('block_news_messages', array('id' => $this->id)));
@@ -473,12 +477,12 @@ class block_news_message {
     /**
      * Return the submitted data with adjusted eventstart and eventend time if alldayevent was selected.
      *
-     * @param stdClass $data The submitted form data
-     * @return stdClass
+     * @param \stdClass $data The submitted form data
+     * @return \stdClass
      */
     private static function set_alldayevent($data) {
         if (!empty($data->messagetype) && $data->messagetype == self::MESSAGETYPE_EVENT && $data->alldayevent) {
-            $eventstart = new DateTime(null, core_date::get_server_timezone_object());
+            $eventstart = new \DateTime(null, \core_date::get_server_timezone_object());
             $eventstart->setTimestamp($data->eventstart);
             $eventstart->setTime(0, 0);
             $data->eventstart = $eventstart->getTimestamp();

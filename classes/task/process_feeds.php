@@ -24,6 +24,7 @@
 
 namespace block_news\task;
 
+use block_news\system;
 
 class process_feeds extends \core\task\scheduled_task {
 
@@ -40,15 +41,13 @@ class process_feeds extends \core\task\scheduled_task {
      * Get News block feeds to update and process them.
      */
     public function execute() {
-        global $DB, $CFG;
-        require_once($CFG->dirroot . '/blocks/news/block_news_system.php');
         // System config.
         $config = get_config('block_news');
 
         // Get list of feeds.
         mtrace("\n" . 'Listing news feeds for update...', '');
         $starttime = microtime(true);
-        $fbrecs = \block_news_system::get_feeds_to_update();
+        $fbrecs = system::get_feeds_to_update();
         $endtime = microtime(true);
         mtrace(' done (' . round($endtime - $starttime, 1) . 's), ' . count($fbrecs) . ' feed(s) to process');
 
@@ -60,7 +59,7 @@ class process_feeds extends \core\task\scheduled_task {
         $beginning = microtime(true);
         $done = 0;
         foreach ($fbrecs as $fbrec) {
-            $bns = \block_news_system::get_block_settings($fbrec->blockinstanceid);
+            $bns = system::get_block_settings($fbrec->blockinstanceid);
 
             // When verbose mode is enabled, show every feed while being retrieved.
             $feedinfo = $bns->get_title() . ' (' . $fbrec->blockinstanceid . '): ' .

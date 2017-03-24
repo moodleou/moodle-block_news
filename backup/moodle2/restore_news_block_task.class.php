@@ -53,7 +53,7 @@ class restore_news_block_task extends restore_block_task {
 
     static public function define_decode_contents() {
         $content = array();
-        $contents[] = new restore_decode_content('block_news_messages', array('message'), 'block_news_message');
+        $contents[] = new restore_decode_content('block_news_messages', array('message'), 'block_news\message');
         return $contents;
     }
 

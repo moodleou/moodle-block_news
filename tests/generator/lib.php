@@ -22,15 +22,16 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use block_news\message;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->dirroot . '/blocks/news/block_news_message.php');
 require_once($CFG->dirroot . '/blocks/news/edit_message_form.php');
 
 class block_news_generator extends testing_block_generator {
 
-    const MESSAGETYPES = ['news' => block_news_message::MESSAGETYPE_NEWS, 'event' => block_news_message::MESSAGETYPE_EVENT];
+    const MESSAGETYPES = ['news' => message::MESSAGETYPE_NEWS, 'event' => message::MESSAGETYPE_EVENT];
 
     protected function preprocess_record(stdClass $record, array $options) {
         $context = context_course::instance($options['courseid']);
@@ -121,7 +122,7 @@ class block_news_generator extends testing_block_generator {
             $record->messageformat = 1;
         }
         if (!isset($record->messagetype)) {
-            $record->messagetype = block_news_message::MESSAGETYPE_NEWS;
+            $record->messagetype = message::MESSAGETYPE_NEWS;
         } else if (!is_numeric($record->messagetype) && array_key_exists($record->messagetype, self::MESSAGETYPES)) {
             $record->messagetype = self::MESSAGETYPES[$record->messagetype];
         }

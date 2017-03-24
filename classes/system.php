@@ -21,22 +21,25 @@
  * @copyright 2014 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+namespace block_news;
+
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
     // It must be included from a Moodle page.
 }
-require_once('block_news_message.php');
-require_once('atomlib.php');
-require_once('lib.php');
 
+require_once($CFG->dirroot . '/blocks/news/atomlib.php');
+require_once($CFG->dirroot . '/blocks/news/lib.php');
 
 /**
  * main system class
+ *
  * @package blocks
  * @subpackage news
  *
  */
-class block_news_system {
+class system {
 
     /** @var int Maximum std feed messages to show (see generate_block_feed(). */
     const MAXSTDMSGS = 20;
@@ -59,8 +62,8 @@ class block_news_system {
 
     public static function get_message_sql_start() {
         return "SELECT {block_news_messages}.*, u.id AS u_id, " .
-            get_all_user_name_fields(true, 'u', null, 'u_') .
-            " FROM {block_news_messages}
+                get_all_user_name_fields(true, 'u', null, 'u_') .
+                " FROM {block_news_messages}
              LEFT JOIN {user} u ON {block_news_messages}.userid = u.id ";
     }
 
@@ -80,7 +83,7 @@ class block_news_system {
     /**
      * Construct object
      *
-     * @param StdClass $bn Block details (typically called internally @see get_block_settings )
+     * @param \stdClass $bn Block details (typically called internally @see get_block_settings )
      */
     public function __construct($bn) {
         $this->id = $bn->id;
@@ -101,15 +104,15 @@ class block_news_system {
      * otherwise sets properties with default values, and inserts a new record in DB
      *
      * @param integer $blockinstanceid
-     * @return block_news_system
+     * @return system
      */
     public static function get_block_settings($blockinstanceid) {
-        global $DB, $USER, $COURSE;
+        global $DB;
 
         $bn = $DB->get_record('block_news', array('blockinstanceid' => $blockinstanceid));
 
         if (empty($bn)) {
-            $bn = new StdClass;
+            $bn = new \stdClass;
             $bn->blockinstanceid = $blockinstanceid;
             $bn->title = '';
             $bn->nummessages = 2;
@@ -123,7 +126,7 @@ class block_news_system {
             $bn->id = $rid;
         }
 
-        return new block_news_system($bn);
+        return new system($bn);
 
     }
 
@@ -236,7 +239,7 @@ class block_news_system {
             return $SESSION->block_news_user_groupings[$COURSE->id];
         }
 
-        $context = context_course::instance($COURSE->id);
+        $context = \context_course::instance($COURSE->id);
         if (has_capability('moodle/site:accessallgroups', $context)) {
             // If the user has the allgroups capability they can see everything.
             $g = groups_get_all_groupings($COURSE->id);
@@ -291,7 +294,7 @@ class block_news_system {
         $userid = $userid ? $userid : $USER->id;
         $courseid = $courseid ? $courseid : $COURSE->id;
 
-        $context = context_course::instance($COURSE->id);
+        $context = \context_course::instance($COURSE->id);
         if (has_capability('moodle/site:accessallgroups', $context)) {
             // If the user has the allgroups capability they can see everything.
             $g = groups_get_all_groups($COURSE->id);
@@ -362,7 +365,7 @@ class block_news_system {
             return $output;
         }
 
-        $context = context_course::instance($COURSE->id);
+        $context = \context_course::instance($COURSE->id);
         if (has_capability('moodle/site:accessallgroups', $context)) {
             return $output;
         }
@@ -373,7 +376,7 @@ class block_news_system {
 
         list($sql, $groupings) = $DB->get_in_or_equal($groupings);
 
-        $output['sql'] = ' AND groupingid ' . $sql .' ';
+        $output['sql'] = ' AND groupingid ' . $sql . ' ';
         $output['params'] = $groupings;
 
         return $output;
@@ -398,7 +401,7 @@ class block_news_system {
             return $output;
         }
 
-        $context = context_course::instance($COURSE->id);
+        $context = \context_course::instance($COURSE->id);
         if (has_capability('moodle/site:accessallgroups', $context)) {
             return $output;
         }
@@ -409,7 +412,7 @@ class block_news_system {
 
         list($sql, $groups) = $DB->get_in_or_equal($groups);
 
-        $output['sql'] = ' AND groupid ' . $sql .' ';
+        $output['sql'] = ' AND groupid ' . $sql . ' ';
         $output['params'] = $groups;
 
         return $output;
@@ -418,7 +421,7 @@ class block_news_system {
     /**
      * Return SQL WHERE clause and params to restrict results by a given message type when separate display is enabled.
      *
-     * @param int $type Message type, one of the block_news_message::MESSAGETYPE_ constants.
+     * @param int $type Message type, one of the block_news\message::MESSAGETYPE_ constants.
      * @param bool $pastevents If showing events, show past events instead of upcoming ones?
      * @return array
      */
@@ -428,7 +431,7 @@ class block_news_system {
         if ($this->displaytype == self::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS && !is_null($type)) {
             $sql = ' AND messagetype = ? ';
             $params = [$type];
-            if ($type == block_news_message::MESSAGETYPE_EVENT) {
+            if ($type == message::MESSAGETYPE_EVENT) {
                 if ($pastevents) {
                     // Show events that have already happened.
                     $sql .= 'AND eventstart < ? ';
@@ -436,7 +439,7 @@ class block_news_system {
                     // Automatically exclude events that happened before midnight this morning (according to server time).
                     $sql .= 'AND eventstart > ? ';
                 }
-                $date = new DateTime(null, core_date::get_server_timezone_object());
+                $date = new \DateTime(null, \core_date::get_server_timezone_object());
                 $date->setTime(0, 0);
                 $params[] = $date->getTimestamp();
             }
@@ -476,7 +479,7 @@ class block_news_system {
     /**
      *  Save object - convenience method to save object returned from form processing
      *
-     * @param StdClass $data Form data
+     * @param \stdClass $data Form data
      */
     public function save($data) {
         global $DB;
@@ -513,22 +516,19 @@ class block_news_system {
         global $DB;
         $DB->delete_records('block_news', array('id' => $this->id));
         $DB->delete_records('block_news_messages',
-            array('blockinstanceid' => $this->blockinstanceid));
+                array('blockinstanceid' => $this->blockinstanceid));
         $DB->delete_records('block_news_feeds',
-            array('blockinstanceid' => $this->blockinstanceid));
+                array('blockinstanceid' => $this->blockinstanceid));
     }
 
-
-
-
     /**
-     * Get block_news_message objects limited by visibility and date and sorted by messagedate
+     * Get block_news\message objects limited by visibility and date and sorted by messagedate
      *
      * Read DB and pass each row to constructor
      *
      * @param integer $max Maximum number of messages to return
      * @param integer $type Restrict returned messages by messagetype.
-     * @return array block_news_message
+     * @return array block_news\message
      */
     public function get_messages_limited($max, $type = null) {
         global $DB;
@@ -544,22 +544,21 @@ class block_news_system {
                 . $groupings['sql']
                 . $groups['sql']
                 . $restricttype['sql'] .
-                 'ORDER BY eventstart ASC, messagedate DESC
-                 LIMIT '.$max;
+                'ORDER BY eventstart ASC, messagedate DESC
+                 LIMIT ' . $max;
 
         $params = array($this->blockinstanceid, time());
         $params = array_merge($params, $groupings['params'], $groups['params'], $restricttype['params']);
         $mrecs = $DB->get_records_sql($sql, $params);
         foreach ($mrecs as $mrec) {
-            $bnms[] = new block_news_message($mrec);
+            $bnms[] = new message($mrec);
         }
 
         return $bnms;
     }
 
-
     /**
-     * Get block_news_message objects controlled by visibility and sorted by message date
+     * Get block_news\message objects controlled by visibility and sorted by message date
      * Read DB and pass each row to constructor
      *
      * @param boolean $viewhidden
@@ -568,7 +567,7 @@ class block_news_system {
      * @param int|null $type Restrict returned messages by messagetype.
      * @param string $order ORDER BY statement for sorting results (default: eventstart ASC, messagedate DESC)
      * @param bool $pastevents If showing events, show past events instead of upcoming ones?
-     * @return array block_news_message
+     * @return array block_news\message
      */
     public function get_messages_all($viewhidden, $pagesize = null, $pagenumber = null, $type = null,
             $order = 'eventstart ASC, messagedate DESC', $pastevents = false) {
@@ -600,7 +599,7 @@ class block_news_system {
         $mrecs = $DB->get_records_sql($sql, $params);
 
         foreach ($mrecs as $mrec) {
-            $bnms[] = new block_news_message($mrec);
+            $bnms[] = new message($mrec);
         }
 
         return $bnms;
@@ -610,7 +609,7 @@ class block_news_system {
      * Get the total number of events of the given type.
      *
      * @param bool $viewhidden Include hidden or future messages?
-     * @param int $type Message type to count - block_news_message::MESSAGETYPE_* constant
+     * @param int $type Message type to count - block_news\message::MESSAGETYPE_* constant
      * @param bool $pastevents If counting events, count past events instead of upcoming ones?
      * @return int
      */
@@ -633,14 +632,13 @@ class block_news_system {
         return $DB->count_records_sql($sql, $params);
     }
 
-
     /**
-     * Get block_news_message object controlled by visibility
+     * Get block_news\message object controlled by visibility
      * Read DB and pass to constructor
      *
      * @param integer $id Message id
      * @param boolean $viewhidden
-     * @return block_news_message
+     * @return message
      */
     public function get_message($id, $viewhidden) {
         global $DB;
@@ -648,42 +646,41 @@ class block_news_system {
         $groupings = $this->get_grouping_sql();
         if ($viewhidden) {  // See any date, any visibilty.
             $sql = self::get_message_sql_start() .
-                  'WHERE blockinstanceid = ?
+                    'WHERE blockinstanceid = ?
                    AND {block_news_messages}.id = ?'
-                  .$groupings['sql'];
+                    . $groupings['sql'];
 
             $params = array($this->blockinstanceid, $id);
             $params = array_merge($params, $groupings['params']);
             $mrec = $DB->get_record_sql($sql, $params);
         } else {  // See past & present only and visible.
             $sql = self::get_message_sql_start() .
-                  'WHERE blockinstanceid = ?
+                    'WHERE blockinstanceid = ?
                    AND {block_news_messages}.id = ?
                    AND messagevisible = 1
                    AND messagedate <= ?'
-                  .$groupings['sql'];
+                    . $groupings['sql'];
 
-            $params = array($this->blockinstanceid, $id , time());
+            $params = array($this->blockinstanceid, $id, time());
             $params = array_merge($params, $groupings['params']);
             $mrec = $DB->get_record_sql($sql, $params);
         }
 
         if (!empty($mrec)) {
-            return new block_news_message($mrec);
+            return new message($mrec);
         } else {
             print_error('errornomsgfound', 'block_news', $id);
         }
 
     }
 
-
     /**
-     * Get next and previous block_news_message ids
+     * Get next and previous block_news\message ids
      * as determined by message date order and visibility
      *
-     * @param block_news_message $bnm Current message
+     * @param message $bnm Current message
      * @param boolean $viewhidden Whether allowed to see hidden messages
-     * @return StdClass Message prev and next id  (if id is -1 then at end of list)
+     * @return \stdClass Message prev and next id  (if id is -1 then at end of list)
      */
     public function get_message_pn($bnm, $viewhidden) {
         global $DB;
@@ -698,7 +695,7 @@ class block_news_system {
             $paramsvh = array();
         } else {
             $sqlvh = '  AND messagevisible = 1
-                         AND messagedate <= '.time().' ';
+                         AND messagedate <= ' . time() . ' ';
             $paramsvh = array($bnm->get_messagedate());
         }
 
@@ -711,7 +708,7 @@ class block_news_system {
                 . $groups['sql']
                 . $grouppings['sql']
                 . $sqlvh
-                .'ORDER BY messagedate ASC';
+                . 'ORDER BY messagedate ASC';
 
         $params = array($this->blockinstanceid);
         $params = array_merge($params, $groups['params'], $grouppings['params'], $paramsvh);
@@ -730,7 +727,7 @@ class block_news_system {
         $off = array_search($bnm->get_id(), $mida);
 
         // Next.
-        $pn = new StdClass();
+        $pn = new \stdClass();
         if ($off == count($mida) - 1) {
             $pn->nextid = -1;
         } else {
@@ -748,16 +745,15 @@ class block_news_system {
 
     }
 
-
     /**
      * Get the URL of the feed for the block.
      *
      * @return string - the url of the current news feed including grouping support
      */
     public function get_feed_url() {
-        global $CFG, $OUTPUT, $USER;
+        global $CFG, $USER;
 
-        $feedurl = $CFG->wwwroot . '/blocks/news/feed.php?bi='.$this->blockinstanceid;
+        $feedurl = $CFG->wwwroot . '/blocks/news/feed.php?bi=' . $this->blockinstanceid;
 
         if (!$this->get_groupingsupport()) {
             return $feedurl;
@@ -803,7 +799,7 @@ class block_news_system {
 
         // Get current feed records.
         $frecs = $DB->get_records('block_news_feeds',
-                                    array('blockinstanceid' => $this->blockinstanceid));
+                array('blockinstanceid' => $this->blockinstanceid));
 
         foreach ($frecs as $frec) {
             $idx = array_search($frec->feedurl, $feeds); // Needle, haystack.
@@ -823,7 +819,7 @@ class block_news_system {
 
         // Handle the new ones.
         foreach ($feeds as $feed) {
-            $frec = new StdClass();
+            $frec = new \stdClass();
             $frec->blockinstanceid = $this->blockinstanceid;
             $frec->feedurl = $feed;
             $frec->currenthash = '0';
@@ -838,7 +834,6 @@ class block_news_system {
 
     }
 
-
     /**
      * Get all feed setup details for this instance
      *
@@ -849,16 +844,15 @@ class block_news_system {
 
         $frecs = array();
         $bnfrecs = $DB->get_records('block_news_feeds',
-            array('blockinstanceid' => $this->blockinstanceid));
+                array('blockinstanceid' => $this->blockinstanceid));
 
         return $bnfrecs;
     }
 
-
     /**
      * Updates a feed for a block
      *
-     * @param StdClass $fbrec block_news_feeds
+     * @param \stdClass $fbrec block_news_feeds
      */
     public function update_feed($fbrec) {
         global $DB;
@@ -877,7 +871,7 @@ class block_news_system {
         $fia = @$this->get_simplepie($fbrec->feedurl);
 
         if (isset($fia[0]->errortext)) {
-            $bnf->feederror = core_text::substr($fia[0]->errortext, 0, 255);
+            $bnf->feederror = \core_text::substr($fia[0]->errortext, 0, 255);
             $DB->update_record('block_news_feeds', $bnf);
             $transaction->allow_commit();
             return;
@@ -901,9 +895,9 @@ class block_news_system {
                 $fi->newsfeedid = $bnf->id;
                 // Title, message, link already set.
                 // constrict title.
-                $fi->title = core_text::substr($fi->title, 0, 255);
+                $fi->title = \core_text::substr($fi->title, 0, 255);
                 // Put author at at start of message text, allow an empty element if no author.
-                $fi->message = '<div class=author>'.$fi->author.' </div>'.$fi->message;
+                $fi->message = '<div class=author>' . $fi->author . ' </div>' . $fi->message;
                 unset($fi->author);
                 $fi->messageformat = FORMAT_HTML;
                 // Convert date-time string into unixdate (false/0 if error).
@@ -915,7 +909,7 @@ class block_news_system {
                 $fi->userid = null; // Set to null for feed msgs.
                 $fi->timemodified = time();
 
-                block_news_message::create($fi);
+                message::create($fi);
             }
 
             // Write new hash.
@@ -930,7 +924,6 @@ class block_news_system {
         return;
     }
 
-
     /**
      * Get a whole feed using simplepie library
      *
@@ -942,8 +935,8 @@ class block_news_system {
 
         $fia = array();
 
-        require_once($CFG->libdir.'/simplepie/moodle_simplepie.php');
-        $feed = new moodle_simplepie($feedurl);
+        require_once($CFG->libdir . '/simplepie/moodle_simplepie.php');
+        $feed = new \moodle_simplepie($feedurl);
 
         $feed->set_timeout = 10; // Secs.
         if (isset($CFG->block_rss_client_timeout)) {
@@ -951,7 +944,7 @@ class block_news_system {
         }
 
         if ($feed->error()) {
-            $err = new StdClass();
+            $err = new \stdClass();
             $err->errortext = $feed->error();
             $fia[] = $err;
             return $fia;
@@ -966,9 +959,9 @@ class block_news_system {
 
         $fia = array();
         foreach ($feeditems as $item) {
-            $fi = new StdClass();
+            $fi = new \stdClass();
             $fi->link = $item->get_link();
-            $fi->title  = $item->get_title();
+            $fi->title = $item->get_title();
             $fi->author = ($item->get_author() == null ? '' : $item->get_author()->name);
             $fi->message = $item->get_description();
             $fi->date = $item->get_date();
@@ -978,7 +971,6 @@ class block_news_system {
 
         return $fia;
     }
-
 
     /**
      * Get a list of feeds that need updating
@@ -990,11 +982,11 @@ class block_news_system {
      * @param integer $max - limits number of feeds returned
      * @return array StdClass block_news_feeds
      */
-    public static function get_feeds_to_update($max=1000) {
+    public static function get_feeds_to_update($max = 1000) {
         global $DB;
 
         // Get value from system config_plugins table.
-        if (!$updatetime = get_config('block_news', 'block_news_updatetime') ) {
+        if (!$updatetime = get_config('block_news', 'block_news_updatetime')) {
             print_error('errornoupdatetime', 'block_news');
         }
 
@@ -1005,21 +997,19 @@ class block_news_system {
         // fresh gets each time (could optimise by having update_feed do one get per url
         // and then update all feed recs with same url).
         $sql = 'SELECT {block_news_feeds}.* FROM
-                    (SELECT feedurl,min(feedupdated) AS lowestdate
+                    (SELECT feedurl,MIN(feedupdated) AS lowestdate
                     FROM {block_news_feeds}
                     WHERE feedupdated <= ?
                     GROUP BY feedurl) tfeeds
                 JOIN {block_news_feeds} ON tfeeds.feedurl =  {block_news_feeds}.feedurl
                 ORDER BY tfeeds.lowestdate
-                LIMIT '.$max;
+                LIMIT ' . $max;
 
         $utime = time() - $updatetime;
         $fbrecs = $DB->get_records_sql($sql, array($utime));
 
         return $fbrecs;
     }
-
-
 
     /**
      * Get Atom feed of recent visible messages for this block instance
@@ -1033,9 +1023,9 @@ class block_news_system {
      * @return mixed boolean false or string feed xml
      */
     public static function get_block_feed($blockinstanceid,
-                                          $ifmodifiedsince=0,
-                                          $groupingids = null,
-                                          $username = '') {
+            $ifmodifiedsince = 0,
+            $groupingids = null,
+            $username = '') {
         global $DB;
 
         $fn = self::get_feed_filename($blockinstanceid, $groupingids, $username);
@@ -1079,7 +1069,7 @@ class block_news_system {
             if ($username) {
                 $userid = $DB->get_field('user', 'id', array('username' => $username), MUST_EXIST);
                 $bni = $DB->get_record('block_instances', array('id' => $blockinstanceid));
-                $context = context::instance_by_id($bni->parentcontextid);
+                $context = \context::instance_by_id($bni->parentcontextid);
                 $courseid = $context->instanceid;
                 $bns->set_user_groupids($bns->get_groupids($userid, $courseid));
                 $bns->set_username($username);
@@ -1102,7 +1092,6 @@ class block_news_system {
         return $feedxml;
     }
 
-
     /**
      * Create an Atom feed of recent visible messages from this feed
      * validator: @link http://validator.w3.org/feed/check.cgi
@@ -1110,21 +1099,21 @@ class block_news_system {
      * @return mixed boolean False or string feed xml
      */
     protected function generate_block_feed() {
-        global $DB, $PAGE, $CFG, $COURSE;
+        global $CFG;
 
         if (!$csemod = block_news_get_course_mod_info($this->blockinstanceid)) {
             print_error('errornocsemodinfo', 'block_news');
         }
 
-        $feedtitle = $csemod->cseshortname.' - ';
-        $feedtitle .= (isset($csemod->modname) ? $csemod->modname.' - ' : '');
+        $feedtitle = $csemod->cseshortname . ' - ';
+        $feedtitle .= (isset($csemod->modname) ? $csemod->modname . ' - ' : '');
         $feedtitle .= ($this->get_title() == '' ? get_string('pluginname', 'block_news') : $this->get_title());
 
         // Work out if we're in a module or course and derive the feed hdr alternate link value.
         if (isset($csemod->modname)) {
-            $altpath = '/mod/'.$csemod->modtype.'/view.php?id='.$csemod->modid;
+            $altpath = '/mod/' . $csemod->modtype . '/view.php?id=' . $csemod->modid;
         } else {
-            $altpath = '/course/view.php?id='.$csemod->cseid;
+            $altpath = '/course/view.php?id=' . $csemod->cseid;
         }
 
         // All msgs for this block instance in desc date order, newest (highest) first.
@@ -1148,7 +1137,7 @@ class block_news_system {
         if ($earliestdate != 0) {
             // Use 'expires' as integer not rfc3332.
             $nsi = "\nxmlns:news=\"http://ns.open.ac.uk/vle/news\" news:expires=\""
-            .$earliestdate."\"";
+                    . $earliestdate . "\"";
         } else {
             $nsi = '';
         }
@@ -1156,9 +1145,9 @@ class block_news_system {
         // Do header.
         $uniqueid = $this->get_feed_url();
         $linkself = $this->get_feed_url();
-        $linkalt = $CFG->wwwroot.$altpath;
+        $linkalt = $CFG->wwwroot . $altpath;
         $header = atom_standard_header($nsi, $uniqueid, $linkself, $linkalt, time(),
-        $feedtitle, null);
+                $feedtitle, null);
 
         // Generate Atom items
         // in desc order of date from now (recent first)
@@ -1174,8 +1163,10 @@ class block_news_system {
                 // Ie just last day, not future.
                 if ($bnm->get_messagedate() > $onedayago) {
                     $items[] = $this->generate_atom_item($bnm);
-                } else if ($c < self::MAXSTDMSGS) {
-                    $items[] = $this->generate_atom_item($bnm);
+                } else {
+                    if ($c < self::MAXSTDMSGS) {
+                        $items[] = $this->generate_atom_item($bnm);
+                    }
                 }
                 $c++;
             }
@@ -1185,25 +1176,24 @@ class block_news_system {
 
         $footer = atom_standard_footer();
 
-        $feedxml = $header.$body.$footer;
+        $feedxml = $header . $body . $footer;
         return $feedxml;
     }
-
 
     /**
      * Create an Atom 'entry'
      *
-     * @param block_news_message $bnm Message
+     * @param message $bnm Message
      * @return string Atom 'entry' xml
      */
     protected function generate_atom_item($bnm) {
         global $CFG;
 
-        $it = new StdClass();
+        $it = new \stdClass();
 
         $it->title = $bnm->get_title();
 
-        $it->id = $CFG->wwwroot."/blocks/news/message.php?m=" . $bnm->get_id();
+        $it->id = $CFG->wwwroot . "/blocks/news/message.php?m=" . $bnm->get_id();
 
         $it->link = $it->id; // Use url for both.
 
@@ -1219,13 +1209,12 @@ class block_news_system {
         $it->author = $author;
 
         // Convert any @@PLUGINFILE@@ links to real URLs.
-        $context = context_block::instance($bnm->get_blockinstanceid());
+        $context = \context_block::instance($bnm->get_blockinstanceid());
         $it->content = file_rewrite_pluginfile_urls($bnm->get_message(), 'pluginfile.php',
-                             $context->id, 'block_news', 'message', $bnm->get_id(), null);
+                $context->id, 'block_news', 'message', $bnm->get_id(), null);
 
         return $it;
     }
-
 
     /**
      *  Custom file names
@@ -1249,23 +1238,22 @@ class block_news_system {
         }
         $filename .= '.atom';
         $ttnum = floor($blockinstanceid / 10000);
-        $fn = $CFG->dataroot.'/cache/block_news/'.$ttnum.'/'.$filename;
+        $fn = $CFG->dataroot . '/cache/block_news/' . $ttnum . '/' . $filename;
 
         return $fn;
     }
 
-
     /**
      * Delete the feed file associated with this blockinstance
      *
-     * @throws moodle_exception if error
+     * @throws \moodle_exception if error
      */
     public function uncache_block_feed() {
         $fn = self::get_feed_filename($this->blockinstanceid);
         // Check if exists as its possible it was never created.
         if (file_exists($fn)) {
             if (unlink($fn) == false) {
-                throw new moodle_exception('cannotdeletefile');
+                throw new \moodle_exception('cannotdeletefile');
             }
         }
     }
@@ -1273,7 +1261,7 @@ class block_news_system {
     /**
      * Get group indication text
      *
-     * @param block_news_message $bnm Message
+     * @param message $bnm Message
      * @return string groupindication
      */
     public function get_group_indication($bnm) {
@@ -1282,13 +1270,13 @@ class block_news_system {
         if ($this->get_groupingsupport() == self::RESTRICTBYGROUPING) {
             if ($bnm->get_groupingid()) {
                 $groupindication = get_string('rendermsggroupindication', 'block_news',
-                    groups_get_grouping_name($bnm->get_groupingid()));
+                        groups_get_grouping_name($bnm->get_groupingid()));
             }
         }
         if ($this->get_groupingsupport() == self::RESTRICTBYGROUP) {
             if ($bnm->get_groupid()) {
                 $groupindication = get_string('rendermsggroupindication', 'block_news',
-                    groups_get_group_name($bnm->get_groupid()));
+                        groups_get_group_name($bnm->get_groupid()));
             }
         }
 
@@ -1307,7 +1295,7 @@ class block_news_system {
      */
     public function get_images($filearea = 'messageimage', $itemid = false) {
         $fs = get_file_storage();
-        $context = context_block::instance($this->blockinstanceid);
+        $context = \context_block::instance($this->blockinstanceid);
         $imagefiles = $fs->get_area_files($context->id, 'block_news', $filearea, $itemid, 'itemid', false);
         $imagesbyitemid = [];
         if (!empty($imagefiles)) {
@@ -1346,8 +1334,8 @@ class block_news_system {
     /**
      * Find the largest number of pages given counts and page sizes of different message types.
      *
-     * @param stdClass[] $pageinfo Array of objects with 'messagecount' and 'pagesize' fields.
-     * @return stdClass The member of $pageinfo with the largest result of messagecount / pagesize.
+     * @param \stdClass[] $pageinfo Array of objects with 'messagecount' and 'pagesize' fields.
+     * @return \stdClass The member of $pageinfo with the largest result of messagecount / pagesize.
      */
     public function find_most_pages(array $pageinfo) {
         return array_reduce($pageinfo, function($carry, $item) {

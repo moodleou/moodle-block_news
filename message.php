@@ -21,9 +21,11 @@
  * @copyright 2014 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+use block_news\system;
+use block_news\message;
+use block_news\output\full_message;
+
 require_once(dirname(__FILE__) . '/../../config.php');
-require_once('block_news_message.php');
-require_once('block_news_system.php');
 require_once('lib.php');
 
 $id              = required_param('m', PARAM_INT);
@@ -31,18 +33,18 @@ $mode            = optional_param('mode', '', PARAM_TEXT);
 $action          = optional_param('action', '', PARAM_TEXT);
 $confirm         = optional_param('confirm', '', PARAM_TEXT);
 
-$sql = block_news_system::get_message_sql_start() .
+$sql = system::get_message_sql_start() .
     'WHERE {block_news_messages}.id = ?';
 $mrec = $DB->get_record_sql($sql, array('id' => $id), MUST_EXIST);
 
 $blockinstanceid = $mrec->blockinstanceid;
-$bnm = new block_news_message($mrec);
+$bnm = new message($mrec);
 
 if (empty($blockinstanceid)) {
     print_error('errorinvalidblockinstanceid', 'block_news');
 }
 
-$bns = block_news_system::get_block_settings($blockinstanceid);
+$bns = system::get_block_settings($blockinstanceid);
 $newstitle = $bns->get_title();
 $csemod = block_news_init_page($blockinstanceid, $newstitle);
 
@@ -163,7 +165,7 @@ if ($action == 'delete' && !$confirm) {
     $pn = $bns->get_message_pn($bnm, $viewhidden);
 
     $image = $bns->get_images('messageimage', $bnm->get_id());
-    $msgwidget = new block_news_message_full($bnm, $pn->previd, $pn->nextid, $bns, 'one', $image);
+    $msgwidget = new full_message($bnm, $pn->previd, $pn->nextid, $bns, 'one', $image);
     echo $output->render($msgwidget);
 }
 

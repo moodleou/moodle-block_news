@@ -24,38 +24,39 @@
 
 namespace block_news\output;
 
-use renderer_base;
+use block_news\message;
+use block_news\system;
 
 defined('MOODLE_INTERNAL') || die();
 
 class view_all_page implements \renderable, \templatable {
 
-    /** @var \block_news_message_short[] */
+    /** @var short_message[] */
     public $news = [];
-    /** @var \block_news_message_short[] */
+    /** @var short_message[] */
     public $upcomingevents = [];
-    /** @var \block_news_message_short[] */
+    /** @var short_message[] */
     public $pastevents = [];
 
     /**
      * Creates view_all_page object with the messages to display on the page.
      *
-     * @param \block_news_system $bns
-     * @param \block_news_message[] $news
-     * @param \block_news_message[] $upcomingevents
-     * @param \block_news_message[] $pastevents
+     * @param system $bns
+     * @param message[] $news
+     * @param message[] $upcomingevents
+     * @param message[] $pastevents
      */
-    public function __construct(\block_news_system $bns, array $news, array $upcomingevents, array $pastevents) {
+    public function __construct(system $bns, array $news, array $upcomingevents, array $pastevents) {
         $summarylength = $bns->get_summarylength();
         $thumbnails = $bns->get_images('thumbnail');
         foreach ($news as $newsmessage) {
-            $this->news[] = new \block_news_message_short($newsmessage, $bns, $summarylength, 0, $thumbnails, 'all');
+            $this->news[] = new short_message($newsmessage, $bns, $summarylength, 0, $thumbnails, 'all');
         }
         foreach ($upcomingevents as $upcomingevent) {
-            $this->upcomingevents[] = new \block_news_message_short($upcomingevent, $bns, $summarylength, 0, [], 'all');
+            $this->upcomingevents[] = new short_message($upcomingevent, $bns, $summarylength, 0, [], 'all');
         }
         foreach ($pastevents as $pastevent) {
-            $this->pastevents[] = new \block_news_message_short($pastevent, $bns, $summarylength, 0, [], 'all');
+            $this->pastevents[] = new short_message($pastevent, $bns, $summarylength, 0, [], 'all');
         }
     }
 
@@ -64,10 +65,10 @@ class view_all_page implements \renderable, \templatable {
      *
      * Loops over all contained messages and returns export_for_template() for each.
      *
-     * @param renderer_base $output
+     * @param \renderer_base $output
      * @return array
      */
-    public function export_for_template(renderer_base $output) {
+    public function export_for_template(\renderer_base $output) {
         $context = [
             'news' => [],
             'upcomingevents' => [],

@@ -22,9 +22,10 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use block_news\system;
+
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
-require_once($CFG->dirroot . '/blocks/news/block_news_system.php');
 
 /**
  * PHPUnit tests for new news group restriction support functions.
@@ -83,7 +84,7 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
         $message2 = new stdClass();
         $message2id = $generator->create_block_new_message($nblock, $message2);
 
-        $bns = block_news_system::get_block_settings($nblock->id);
+        $bns = system::get_block_settings($nblock->id);
         $msgs = $bns->get_messages_limited(3);
 
         // When group restriction support is not enabled. Return 2 the messages.
@@ -113,7 +114,7 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
         $message2id = $generator->create_block_new_message($nblock, $message2);
 
         // Enable group support and call get_messages_limited function.
-        $bns = block_news_system::get_block_settings($nblock->id);
+        $bns = system::get_block_settings($nblock->id);
         $bns->set_groupingsupport(2);
         $msgs = $bns->get_messages_limited(3);
 
@@ -139,7 +140,7 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
         $message2id = $generator->create_block_new_message($nblock, $message2);
 
         // Call get_message_all function.
-        $bns = block_news_system::get_block_settings($nblock->id);
+        $bns = system::get_block_settings($nblock->id);
         $msgs = $bns->get_messages_all(1);
 
         // When group restriction support is not enabled. Return 2 the messages.
@@ -170,7 +171,7 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
         $message2id = $generator->create_block_new_message($nblock, $message2);
 
         // Enable group support and call get_messages_all function.
-        $bns = block_news_system::get_block_settings($nblock->id);
+        $bns = system::get_block_settings($nblock->id);
         $bns->set_groupingsupport(2);
         $msgs = $bns->get_messages_all(1);
 

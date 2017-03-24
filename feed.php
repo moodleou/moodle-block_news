@@ -24,8 +24,9 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use block_news\system;
+
 require_once(dirname(__FILE__) . '/../../config.php');
-require_once('block_news_system.php');
 
 $blockinstanceid = optional_param('bi', 0, PARAM_INT);
 $shortname = optional_param('shortname', '', PARAM_ALPHANUMEXT);
@@ -80,7 +81,7 @@ $groupingids = explode(',', $groupingids);
 // Remove any empty elements from clean param if non ints sent.
 $groupingids = array_filter($groupingids);
 
-$atomxml = block_news_system::get_block_feed($blockinstanceid, $ifmodifiedsince, $groupingids, $username);
+$atomxml = system::get_block_feed($blockinstanceid, $ifmodifiedsince, $groupingids, $username);
 
 if ($atomxml == false) {
     header("HTTP/1.0 304 Not Modified");

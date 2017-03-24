@@ -24,6 +24,8 @@
  * @author Jon Sharp <jonathans@catalyst-eu.net>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+use block_news\system;
+
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
     // It must be included from a Moodle page.
@@ -78,17 +80,17 @@ function block_news_pluginfile($course, $birecordorcm, $context, $filearea, $arg
  * Calls require_login and adds standard breadcrumb item.
  * @param int $blockinstanceid
  * @param string $title Block title or null for default
- * @param int $displaytype The block's displaytype (block_news_system::DISPLAY_* constant)
+ * @param int $displaytype The block's displaytype (block_news\system::DISPLAY_* constant)
  * @return StdClass Course/Module identity information (useful for Form redirect logic)
  */
-function block_news_init_page($blockinstanceid, $title, $displaytype = block_news_system::DISPLAY_DEFAULT) {
+function block_news_init_page($blockinstanceid, $title, $displaytype = system::DISPLAY_DEFAULT) {
     global $PAGE;
 
     $csemod = block_news_get_course_mod_info($blockinstanceid);
     if (!$csemod) {
         return null;
     }
-    if ($displaytype == block_news_system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
+    if ($displaytype == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
         $PAGE->add_body_class('block-news-all-news-and-events');
         $PAGE->set_pagelayout('base');
     } else {

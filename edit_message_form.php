@@ -24,6 +24,9 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use block_news\system;
+use block_news\message;
+
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
     // Must be included from a Moodle page.
@@ -107,36 +110,36 @@ class block_news_edit_message_form extends moodleform {
         $mform->addElement('filemanager', 'attachments',
             get_string('msgedithlpattach', 'block_news'), null, array('subdirs' => 0));
 
-        if ( $this->displaytype == block_news_system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS ) {
-            $messagetype = array(block_news_message::MESSAGETYPE_NEWS => get_string('newsitem', 'block_news'),
-                    block_news_message::MESSAGETYPE_EVENT => get_string('event', 'block_news'));
+        if ( $this->displaytype == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS ) {
+            $messagetype = array(message::MESSAGETYPE_NEWS => get_string('newsitem', 'block_news'),
+                    message::MESSAGETYPE_EVENT => get_string('event', 'block_news'));
 
             $mform->addElement('select', 'messagetype', get_string('messagetype', 'block_news'), $messagetype);
-            $mform->setDefault('messagetype', block_news_message::MESSAGETYPE_NEWS);
+            $mform->setDefault('messagetype', message::MESSAGETYPE_NEWS);
 
             $mform->addElement('date_time_selector', 'eventstart',
                     get_string('msgediteventstart', 'block_news'), array('optional' => false));
-            $mform->disabledIf('eventstart', 'messagetype', 'neq', block_news_message::MESSAGETYPE_EVENT);
+            $mform->disabledIf('eventstart', 'messagetype', 'neq', message::MESSAGETYPE_EVENT);
             $mform->disabledIf('eventstart[hour]', 'alldayevent', 'checked');
             $mform->disabledIf('eventstart[minute]', 'alldayevent', 'checked');
 
             $mform->addElement('advcheckbox', 'alldayevent', get_string('msgeditalldayevent', 'block_news'));
             $mform->setDefault('alldayevent', 1);
-            $mform->disabledIf('alldayevent', 'messagetype', 'neq', block_news_message::MESSAGETYPE_EVENT);
+            $mform->disabledIf('alldayevent', 'messagetype', 'neq', message::MESSAGETYPE_EVENT);
 
             $mform->addElement('date_time_selector', 'eventend',
                     get_string('msgediteventend', 'block_news'), array('optional' => false));
-            $mform->disabledIf('eventend', 'messagetype', 'neq', block_news_message::MESSAGETYPE_EVENT);
+            $mform->disabledIf('eventend', 'messagetype', 'neq', message::MESSAGETYPE_EVENT);
             $mform->disabledIf('eventend', 'alldayevent', 'checked');
 
             $mform->addElement('text', 'eventlocation', get_string('msgediteventlocation', 'block_news'));
-            $mform->disabledIf('eventlocation', 'messagetype', 'neq', block_news_message::MESSAGETYPE_EVENT);
+            $mform->disabledIf('eventlocation', 'messagetype', 'neq', message::MESSAGETYPE_EVENT);
             $mform->setType('eventlocation', PARAM_TEXT);
         }
 
         $mform->addElement('filemanager', 'messageimage', get_string('messageimage', 'block_news'),
                 null, self::IMAGE_FILE_OPTIONS);
-        $mform->disabledIf('messageimage', 'messagetype', 'eq', block_news_message::MESSAGETYPE_EVENT);
+        $mform->disabledIf('messageimage', 'messagetype', 'eq', message::MESSAGETYPE_EVENT);
 
         $mform->addElement('selectyesno', 'messagevisible',
                 get_string('msgeditvisible', 'block_news'));
@@ -205,7 +208,7 @@ class block_news_edit_message_form extends moodleform {
         $mform->addElement('selectyesno', 'hideauthor',
             get_string('msgedithideauthor', 'block_news'));
         $mform->setDefault('hideauthor', (int) get_config('block_news', 'block_news_hideauthor'));
-        $mform->disabledIf('hideauthor', 'messagetype', 'eq', block_news_message::MESSAGETYPE_EVENT);
+        $mform->disabledIf('hideauthor', 'messagetype', 'eq', message::MESSAGETYPE_EVENT);
 
         $mform->addElement('static', 'lastupdated',
                     get_string('msgeditlastupdated', 'block_news'));
@@ -222,8 +225,8 @@ class block_news_edit_message_form extends moodleform {
      */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
-        if ($this->displaytype == block_news_system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS
-                && $data['messagetype'] == block_news_message::MESSAGETYPE_EVENT) {
+        if ($this->displaytype == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS
+                && $data['messagetype'] == message::MESSAGETYPE_EVENT) {
             if ($data['eventstart'] < time()) {
                 $errors['eventstart'] = get_string('erroreventstart', 'block_news');
             }
