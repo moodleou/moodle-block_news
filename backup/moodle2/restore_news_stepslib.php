@@ -24,6 +24,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once($CFG->dirroot.'/blocks/news/lib.php');
 /**
  * Define the complete news structure for restore
@@ -48,25 +50,25 @@ class restore_news_block_structure_step extends restore_structure_step {
         global $DB;
 
         $data = (object)$data;
-        // For any reason (non multiple, dupe detected...) block not restored, return
+        // For any reason (non multiple, dupe detected...) block not restored, return.
         if (!$this->task->get_blockid()) {
             return;
         }
 
-        // new course startdate in case we need it
+        // New course startdate in case we need it.
         $newstartdate = (int)$DB->get_field('course', 'startdate',
             array('id' => $this->get_courseid()));
         $original = (int)$this->task->get_info()->original_course_startdate;
         $rollforward = $original != $newstartdate;
 
-        // restore thew news block instance custom data
+        // Restore thew news block instance custom data.
         if (isset($data->news['instance'])) {
             foreach ($data->news['instance'] as $instance) {
                 $instance = (object)$instance;
                 $oldid = $instance->id;
 
-                // we may need to reset message publish dates
-                // but it isn't necessary to the news block instance
+                // We may need to reset message publish dates
+                // but it isn't necessary to the news block instance.
 
                 $instance->blockinstanceid = $this->task->get_blockid();
                 $newid = $DB->insert_record('block_news', $instance);
@@ -74,7 +76,7 @@ class restore_news_block_structure_step extends restore_structure_step {
             }
         }
 
-        // restore news block feeds
+        // Restore news block feeds.
         if (isset($data->news['feeds']['feed'])) {
             foreach ($data->news['feeds']['feed'] as $feed) {
                 $feed = (object)$feed;
@@ -86,7 +88,7 @@ class restore_news_block_structure_step extends restore_structure_step {
             }
         }
 
-        // restore news block messages
+        // Restore news block messages.
         if (isset($data->news['messages']['message'])) {
             foreach ($data->news['messages']['message'] as $message) {
                 $message = (object)$message;
@@ -94,9 +96,9 @@ class restore_news_block_structure_step extends restore_structure_step {
 
                 // If not rollforward (full backup), restore all messages
                 // If rollforward, do not include messages which aren't set
-                // to repeat unless they are from feeds
+                // to repeat unless they are from feeds.
                 if (!$rollforward || ($message->messagerepeat || $message->newsfeedid)) {
-                    // reset the repeated date if need be
+                    // Reset the repeated date if need be.
                     if ($rollforward && !$message->newsfeedid) {
                         $offset = $newstartdate - $original;
                         $new = block_news_get_new_time((int)$message->messagedate, $offset);

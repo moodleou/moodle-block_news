@@ -59,11 +59,10 @@ if ($blockinstanceid == 0 && $shortname === '') {
     $username = optional_param('username', '', PARAM_ALPHANUMEXT);
 }
 
-$murl = new moodle_url($CFG->wwwroot.'/blocks/news/feed.php',
-                             array('blockinstanceid'=>$blockinstanceid));
+$murl = new moodle_url($CFG->wwwroot.'/blocks/news/feed.php', array('blockinstanceid' => $blockinstanceid));
 $PAGE->set_url($murl);
 
-// no login required
+// No login required.
 
 $context = context_block::instance($blockinstanceid);
 $PAGE->set_context($context);
@@ -72,10 +71,10 @@ if (!isset($CFG->enablerssfeeds) || !$CFG->enablerssfeeds) {
     exit;
 }
 
-// get ifmodified header if present
-$ifmodifiedsince=0;
+// Get ifmodified header if present.
+$ifmodifiedsince = 0;
 if (array_key_exists('HTTP_IF_MODIFIED_SINCE', $_SERVER)) {
-    $ifmodifiedsince=strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
+    $ifmodifiedsince = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
 }
 $groupingids = explode(',', $groupingids);
 // Remove any empty elements from clean param if non ints sent.

@@ -24,6 +24,8 @@
 
 namespace block_news\task;
 
+defined('MOODLE_INTERNAL') || die();
+
 use block_news\system;
 
 class process_feeds extends \core\task\scheduled_task {

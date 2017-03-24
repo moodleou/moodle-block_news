@@ -26,7 +26,7 @@
 
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
-    // must be included from a Moodle page
+    // Must be included from a Moodle page.
 }
 
 /**
@@ -49,19 +49,19 @@ class block_news_edit_form extends block_edit_form {
      * received in block_news::instance_config_save()
      */
     protected function specific_definition($mform) {
-        $blockinstanceid=$this->block->instance->id;
-        $bns=$this->block->bns;
-        $urls_txt='';
+        $blockinstanceid = $this->block->instance->id;
+        $bns = $this->block->bns;
+        $urlstxt = '';
 
-        // set feeds for text area
-        $frecs=$bns->get_feeds();
+        // Set feeds for text area.
+        $frecs = $bns->get_feeds();
         foreach ($frecs as $frec) {
-            $urls_txt.=$frec->feedurl;
-            $urls_txt.="\n";
+            $urlstxt .= $frec->feedurl;
+            $urlstxt .= "\n";
         }
 
         // Fields for editing block title and contents.
-         // 'Block settings'
+        // Block settings.
         $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
 
         $mform->addElement('text', 'config_title', get_string('configtitle', 'block_news'));
@@ -69,31 +69,31 @@ class block_news_edit_form extends block_edit_form {
         $mform->setDefault('config_title', $bns->get_title());
         $mform->addRule('config_title', null, 'maxlength', 40, 'server');
 
-        $choices_nm=array(
-                        '1'=>'Latest message only',
-                        '2'=>'2 most recent',
-                        '3'=>'3 most recent',
-                        '4'=>'4 most recent',
-                        '5'=>'5 most recent'
-                        );
+        $choicesnm = array(
+            '1' => 'Latest message only',
+            '2' => '2 most recent',
+            '3' => '3 most recent',
+            '4' => '4 most recent',
+            '5' => '5 most recent'
+        );
         $mform->addElement('select', 'config_nummessages',
-            get_string('confignummessages', 'block_news'), $choices_nm);
+            get_string('confignummessages', 'block_news'), $choicesnm);
         $mform->setDefault('config_nummessages', $bns->get_nummessages());
 
-        $choices_sl=array(
-                        '0'=>'None',
-                        '40'=>'Short',
-                        '100'=>'Medium',
-                        '500'=>'Long'
-                        );
+        $choicessl = array(
+            '0' => 'None',
+            '40' => 'Short',
+            '100' => 'Medium',
+            '500' => 'Long'
+        );
         $mform->addElement('select', 'config_summarylength',
-            get_string('configsummarylength', 'block_news'), $choices_sl);
+            get_string('configsummarylength', 'block_news'), $choicessl);
         $mform->setDefault('config_summarylength', $bns->get_summarylength());
 
         $mform->addElement('textarea', 'config_feedurls',
             get_string("configfeedurls", "block_news"), 'wrap="virtual" rows="5" cols="128"');
         $mform->setType('config_title', PARAM_TEXT);
-        $mform->setDefault('config_feedurls', $urls_txt);
+        $mform->setDefault('config_feedurls', $urlstxt);
 
         $mform->addElement('selectyesno', 'config_displaytype',
                 get_string('separateintoeventsandnewsitems', 'block_news'));
@@ -121,17 +121,16 @@ class block_news_edit_form extends block_edit_form {
 
 
     public function validation($data, $files) {
-        $errors= array();
+        $errors = array();
 
-        // now do feeds
-        // convert from textarea to array
-        $feeds = preg_split('/\R/', $data['config_feedurls']); // splits on any of \n \r\n \r
+        // Now do feeds.
+        // Convert from textarea to array.
+        $feeds = preg_split('/\R/', $data['config_feedurls']); // Splits on any of \n \r\n \r.
 
-        // just check length of each feed url (other cleanup done in block_news\system::save()
+        // Just check length of each feed url (other cleanup done in block_news\system::save().
         foreach ($feeds as $feed) {
             if (strlen(trim($feed)) > self::MAXURLLEN) {
-                $errors['config_feedurls'] =
-                                get_string('errorurltoolong', 'block_news', self::MAXURLLEN);
+                $errors['config_feedurls'] = get_string('errorurltoolong', 'block_news', self::MAXURLLEN);
                 break;
             }
         }
@@ -142,12 +141,12 @@ class block_news_edit_form extends block_edit_form {
 }
 
 
-// main
+// Main.
 
 $id                 = optional_param('m', 0, PARAM_INTEGER);
 $blockinstanceid    = optional_param('bi', 0, PARAM_INTEGER);
 
-require_login(); // redirect to login page if not logged in
+require_login(); // Redirect to login page if not logged in.
 
 $context = context_system::instance();
 

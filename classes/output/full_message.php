@@ -24,6 +24,8 @@
 
 namespace block_news\output;
 
+defined('MOODLE_INTERNAL') || die();
+
 use block_news\message;
 
 /**
