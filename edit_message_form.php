@@ -237,16 +237,17 @@ class block_news_edit_message_form extends moodleform {
         if (!empty($data['messageimage'])) {
             $imageerrors = '';
             $draftfiles = file_get_drafarea_files($data['messageimage']);
-            $image = reset($draftfiles->list); // There's only 1 file allowed, so this will give us the image.
-            if ($image->size > self::IMAGE_MAX_FILESIZE) {
-                $imageerrors .= get_string('errorimagesize', 'block_news', self::IMAGE_MAX_FILESIZE / 1024);
-            }
-            if ($image->image_width != self::IMAGE_WIDTH || $image->image_height != self::IMAGE_HEIGHT) {
-                $errorparts = (object) ['width' => self::IMAGE_WIDTH, 'height' => self::IMAGE_HEIGHT];
-                $imageerrors .= get_string('errorimagedimensions', 'block_news', $errorparts);
-            }
-            if (!empty($imageerrors)) {
-                $errors['messageimage'] = $imageerrors;
+            if ($image = reset($draftfiles->list)) { // There's only 1 file allowed, so this will give us the image.
+                if ($image->size > self::IMAGE_MAX_FILESIZE) {
+                    $imageerrors .= get_string('errorimagesize', 'block_news', self::IMAGE_MAX_FILESIZE / 1024);
+                }
+                if ($image->image_width != self::IMAGE_WIDTH || $image->image_height != self::IMAGE_HEIGHT) {
+                    $errorparts = (object) ['width' => self::IMAGE_WIDTH, 'height' => self::IMAGE_HEIGHT];
+                    $imageerrors .= get_string('errorimagedimensions', 'block_news', $errorparts);
+                }
+                if (!empty($imageerrors)) {
+                    $errors['messageimage'] = $imageerrors;
+                }
             }
         }
         return $errors;

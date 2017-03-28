@@ -98,6 +98,11 @@ abstract class renderable_message implements \renderable {
     public $deleteicon;
     /** @var \moodle_url URL for "delete" link */
     public $deleteurl;
+    /** @var array Action icons and URLs */
+    public $actions;
+    /** @var bool True if $actions isn't empty */
+    public $hasactions;
+
 
     /**
      * Set the edit icons and URLs based on the current user's permissions.

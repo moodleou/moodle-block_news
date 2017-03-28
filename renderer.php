@@ -26,6 +26,8 @@ use block_news\system;
 use block_news\message;
 use block_news\output\short_message;
 use block_news\output\full_message;
+use block_news\output\view_all_page;
+use block_news\output\view_page;
 
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
@@ -297,12 +299,23 @@ class block_news_renderer extends plugin_renderer_base {
     /**
      * Renders view_all_page component using template.
      *
-     * @param \block_news\output\view_all_page $page
+     * @param view_all_page $page
      * @return bool|string
      */
-    public function render_view_all_page(block_news\output\view_all_page $page) {
+    public function render_view_all_page(view_all_page $page) {
         $context = $page->export_for_template($this->output);
         return $this->output->render_from_template('block_news/view_all_page', $context);
+    }
+
+    /**
+     * Renders view_page component using template.
+     *
+     * @param view_page $page
+     * @return bool|string
+     */
+    public function render_view_page(view_page $page) {
+        $context = $page->export_for_template($this->output);
+        return $this->output->render_from_template('block_news/view_page', $context);
     }
 
     /**

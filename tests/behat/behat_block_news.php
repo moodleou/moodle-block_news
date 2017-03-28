@@ -71,7 +71,7 @@ class behat_block_news extends behat_base {
         if ($imagename === 'thumbnail.jpg') {
             $titlecontainer = "span[contains(@class, 'block_news_msg_title')][contains(text(), '$messagetitle')]/../../";
         } else {
-            $titlecontainer = "div[contains(@class, 'box title')][contains(text(), '$messagetitle')]/following-sibling::";
+            $titlecontainer = "*[contains(@class, 'title')][contains(text(), '$messagetitle')]/following-sibling::";
         }
         $xpath = "//" . $titlecontainer . "div[contains(@class, 'messageimage')]/img[contains(@src, '$imagename')]";
         $this->find('xpath', $xpath);

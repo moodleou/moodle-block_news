@@ -52,6 +52,8 @@ $string['pasteventsheading'] = 'Past events';
 $string['nonewsyet'] = 'No news messages have been posted to this website.';
 $string['noeventsyet'] = 'There are no upcoming events to display.';
 $string['nopastevents'] = 'There are no past events to display';
+$string['news'] = 'News';
+$string['events'] = 'Events';
 
 // Error messages.
 $string['erroremptymessage'] = 'Missing entry';
@@ -134,6 +136,8 @@ $string['rendermsghidden'] = 'This message has been hidden from students';
 $string['rendermsgfuture'] = 'This message does not display to students until {$a}';
 $string['rendermsgnext'] = 'Next (newer) message';
 $string['rendermsgprev'] = 'Previous (older) message';
+$string['rendereventnext'] = 'Next (listed) event';
+$string['rendereventprev'] = 'Previous (listed) event';
 $string['rendermsgview'] = '(View)';
 
 // Event render.

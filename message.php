@@ -24,6 +24,7 @@
 use block_news\system;
 use block_news\message;
 use block_news\output\full_message;
+use block_news\output\view_page;
 
 require_once(dirname(__FILE__) . '/../../config.php');
 require_once('lib.php');
@@ -150,9 +151,6 @@ if ($action == 'delete' && !$confirm) {
 
 } else {
 
-    // Normal display of a message.
-    block_news_output_hdr($title, $bns);
-
     $SESSION->news_block_views[$id] = true;
 
     if (has_capability('block/news:viewhidden', $blockcontext)) {
@@ -166,7 +164,17 @@ if ($action == 'delete' && !$confirm) {
 
     $image = $bns->get_images('messageimage', $bnm->get_id());
     $msgwidget = new full_message($bnm, $pn->previd, $pn->nextid, $bns, 'one', $image);
-    echo $output->render($msgwidget);
+
+    if ($bns->get_displaytype() == system::DISPLAY_DEFAULT) {
+        // Normal display of a message.
+        block_news_output_hdr($title, $bns);
+        echo $output->render($msgwidget);
+    } else {
+        $page = new view_page($msgwidget);
+        echo $OUTPUT->header();
+        echo $output->render($page);
+    }
+
 }
 
 echo $OUTPUT->footer();

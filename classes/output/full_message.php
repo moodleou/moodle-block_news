@@ -33,7 +33,7 @@ use block_news\message;
  *
  * @package block_news
  */
-class full_message extends renderable_message {
+class full_message extends renderable_message implements \templatable {
 
     /** @var string URL for the previous message */
     public $prevurl;
@@ -47,6 +47,22 @@ class full_message extends renderable_message {
     public $imageinfo;
     /** @var \moodle_url URL for message image */
     public $imageurl;
+    /** @var int Image width, for templates. */
+    public $imagewidth;
+    /** @var int Image height, for templates. */
+    public $imageheight;
+    /** @var bool Are there visibility notes to display? */
+    public $hasnotes;
+    /** @var bool Are there attachements? */
+    public $hasattachments;
+    /** @var array Attached files */
+    public $attachments;
+    /** @var string Rendered "previous" link */
+    public $prevlink;
+    /** @var string Rendered "next" link */
+    public $nextlink;
+    /** @var bool True if this is a news message, false if it's an event */
+    public $isnews;
 
     /**
      * Build full message data
@@ -80,6 +96,10 @@ class full_message extends renderable_message {
         $this->messagedate = userdate($bnm->get_messagedate(),
                 get_string('dateformat', 'block_news'));
         $this->messagevisible = $bnm->get_messagevisible();
+        $this->messagetype = $bnm->get_messagetype();
+        if ($this->messagetype == message::MESSAGETYPE_EVENT) {
+            $this->set_event_data($bnm);
+        }
         $usr = $bnm->get_user();
         if ($bnm->get_hideauthor() || $usr == null) {
             $this->author = '';
@@ -145,19 +165,26 @@ class full_message extends renderable_message {
             $this->eventday = strftime('%d', $this->eventstart);
             $this->eventmonth = strftime('%b', $this->eventstart);
             $this->eventdatetime = strftime($this->eventdatetimeformat, $this->eventstart);
+            $this->classes .= ' block_news_event ';
+            $fullnextlabel = 'rendereventnext';
+            $fullprevlabel = 'rendereventprev';
         } else {
             $this->isnews = true;
             $this->imagewidth = $this->imageinfo['width'];
             $this->imageheight = $this->imageinfo['height'];
+            $fullnextlabel = 'rendermsgnext';
+            $fullprevlabel = 'rendermsgprev';
         }
         $this->formattedmessage = format_text($this->message, $this->messageformat);
         if ($this->nexturl && $this->nexturl != 'end') {
-            $this->nextlink = link_arrow_right(get_string('rendermsgnext', 'block_news'),
-                    $this->nexturl);
+            $label = \html_writer::span(get_string('next'), 'block-news-mobile-nextprev')
+                    . \html_writer::span(get_string($fullnextlabel, 'block_news'), 'block-news-desktop-nextprev');
+            $this->nextlink = link_arrow_right($label, $this->nexturl);
         }
         if ($this->prevurl && $this->prevurl != 'end') {
-            $this->prevlink = link_arrow_left(get_string('rendermsgprev', 'block_news'),
-                    $this->prevurl);
+            $label = \html_writer::span(get_string('previous'), 'block-news-mobile-nextprev')
+                    . \html_writer::span(get_string($fullprevlabel, 'block_news'), 'block-news-desktop-nextprev');
+            $this->prevlink = link_arrow_left($label, $this->prevurl);
         }
 
         $fs = get_file_storage();

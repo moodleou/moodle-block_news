@@ -117,6 +117,33 @@
     margin: 0 5px 0 0;
 }
 
+/* View page in "news and events" mode */
+.path-blocks-news .block-news-view .block_news_message .author {
+    font-weight: normal;
+    font-size: 1.14285em;
+    margin-bottom: 0;
+}
+
+.path-blocks-news .block-news-view .block_news_message .title {
+    margin-bottom: 7px;
+}
+
+.block-news-view .messageimage {
+    margin-bottom: 45px;
+}
+
+.block-news-view .block-news-nextlink {
+    float: right;
+}
+
+.block-news-view .block-news-prevlink {
+    float: left;
+}
+
+.block-news-view .block-news-message-text {
+    max-width: 650px;
+}
+
 /* Set text area width of feed URL list 100%. */
 .mform #id_config_feedurls {
     width: 100%;
@@ -125,6 +152,19 @@
 .block_news_group_indication {
     font-size: 0.8em;
     font-style: italic;
+}
+
+.block-news-mobile-nextprev {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .block-news-desktop-nextprev {
+        display: none;
+    }
+    .block-news-mobile-nextprev {
+        display: inline;
+    }
 }
 
 /*

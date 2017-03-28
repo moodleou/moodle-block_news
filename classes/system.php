@@ -703,14 +703,15 @@ class system {
         $grouppings = $this->get_grouping_sql();
 
         $sql = 'SELECT id, messagedate
-                FROM {block_news_messages}
-                WHERE blockinstanceid = ? '
+                  FROM {block_news_messages}
+                 WHERE blockinstanceid = ?
+                   AND messagetype = ?'
                 . $groups['sql']
                 . $grouppings['sql']
                 . $sqlvh
                 . 'ORDER BY messagedate ASC';
 
-        $params = array($this->blockinstanceid);
+        $params = array($this->blockinstanceid, $bnm->get_messagetype());
         $params = array_merge($params, $groups['params'], $grouppings['params'], $paramsvh);
         $mrecs = $DB->get_records_sql($sql, $params);
         $pnid = -1;

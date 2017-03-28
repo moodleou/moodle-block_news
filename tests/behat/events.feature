@@ -153,3 +153,13 @@ Feature: Display events in news block
     And I should see "message3" in the "News and events" "block"
     And I should not see "message2" in the "News and events" "block"
     And "message3" "text" should appear before "message1" "text"
+
+  Scenario: Don't show byline on event pages
+    Given the following news messages exist on course "C1":
+      | title    | message      | messagetype | messagedate | eventstart |
+      | message1 | test message | 2           | 1483228800  | 2145974400 |
+    And I reload the page
+    And I click on "View" "link" in the "News and events" "block"
+    Then I should see "message1"
+    And I should see "test message"
+    And I should not see "by Admin User"

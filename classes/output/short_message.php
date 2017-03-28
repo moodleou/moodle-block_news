@@ -37,13 +37,6 @@ class short_message extends renderable_message implements \templatable {
 
     /** @var string Tags allowed for block news short message */
     const ALLOW_TAGS = '<a><br><p><div><span><ol><ul><li><strong><b><i><em>';
-
-    /** @var array Action icons and URLs */
-    public $actions;
-
-    /** @var bool True if $actions isn't empty */
-    public $hasactions;
-
     /**
      * Build short message data
      *
@@ -109,30 +102,7 @@ class short_message extends renderable_message implements \templatable {
         $this->messagetype = $bnm->get_messagetype();
         $this->fulleventdate = '';
         if ($this->messagetype == message::MESSAGETYPE_EVENT) {
-            $alldayevent = $bnm->get_alldayevent();
-            if ($alldayevent) {
-                $this->eventstart = $bnm->get_eventstart_local();
-                $this->eventdatetimeformat = '%F';
-                $this->eventend = null;
-            } else {
-                $this->eventstart = $bnm->get_eventstart();
-                $this->eventend = $bnm->get_eventend();
-                $this->eventdatetimeformat = '%FT%T';
-            }
-            $this->eventlocation = $bnm->get_eventlocation();
-
-            if ($alldayevent) {
-                $this->fulleventdate = userdate($this->eventstart, get_string('strftimedaydate', 'langconfig'));
-            } else {
-                $eventtime = (object) ['start' => '', 'end' => ''];
-                $eventtime->start = userdate($this->eventstart, get_string('strftimedaydatetime', 'langconfig'));
-                if (userdate($this->eventstart, '%Y%m%d') === userdate($this->eventend, '%Y%m%d')) {
-                    $eventtime->end = userdate($this->eventend, get_string('strftimetime', 'langconfig'));
-                } else {
-                    $eventtime->end = userdate($this->eventend, get_string('strftimedaydatetime', 'langconfig'));
-                }
-                $this->fulleventdate = get_string('fulleventdate', 'block_news', $eventtime);
-            }
+            $this->set_event_data($bnm);
         }
 
         if ($summarylength) {
@@ -154,20 +124,7 @@ class short_message extends renderable_message implements \templatable {
             $this->thumbheight = $this->thumbinfo['height'];
         }
         $this->formattedmessage = format_text($this->message, $this->messageformat);
-        $this->actions = [];
-        if (isset($this->hideurl) && isset($this->hideicon)) {
-            $this->actions[] = (object) ['icon' => $this->hideicon->export_for_template($output),
-                    'url' => $this->hideurl->out(false)];
-        }
-        if (isset($this->editurl) && isset($this->editicon)) {
-            $this->actions[] = (object) ['icon' => $this->editicon->export_for_template($output),
-                    'url' => $this->editurl->out(false)];
-        }
-        if (isset($this->deleteurl) && isset($this->deleteicon)) {
-            $this->actions[] = (object) ['icon' => $this->deleteicon->export_for_template($output),
-                    'url' => $this->deleteurl->out(false)];
-        }
-        $this->hasactions = !empty($this->actions);
+        $this->export_actions_for_template($output);
         return $this;
     }
 }

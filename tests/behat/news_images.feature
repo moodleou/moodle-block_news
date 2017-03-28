@@ -31,7 +31,7 @@ Feature: Display images in posts
     Then I should see "message2"
     And I should see image "kitten2.jpg" in news message "message2"
     And I should not see "message1"
-    When I follow "Previous (older) message"
+    When I follow "Previous"
     Then I should see "message1"
     And I should see image "kitten1.jpg" in news message "message1"
     And I should not see "message2"
