@@ -101,6 +101,7 @@ class block_news extends block_base {
             $newmsg = false;
 
             $thumbnails = $this->bns->get_images('thumbnail');
+            $images = $this->bns->get_images();
 
             if (empty($msgs)) {
                 $this->content->text .= get_string('nonewsyet', 'block_news');
@@ -126,7 +127,7 @@ class block_news extends block_base {
                         $newmsg = true;
                     }
 
-                    $msgwidget = new short_message($msg, $this->bns, $sumlen, $c, $thumbnails);
+                    $msgwidget = new short_message($msg, $this->bns, $sumlen, $c, $thumbnails, $images);
                     $this->content->text .= $output->render($msgwidget);
                     $c++;
                 }
@@ -145,7 +146,7 @@ class block_news extends block_base {
                     $this->content->text .= get_string('noeventsyet', 'block_news');
                 } else {
                     foreach ($events as $event) {
-                        $eventwidget = new short_message($event, $this->bns, $sumlen, $c, $thumbnails);
+                        $eventwidget = new short_message($event, $this->bns, $sumlen, $c, $thumbnails, $images);
                         $this->content->text .= $output->render($eventwidget);
                     }
                 }

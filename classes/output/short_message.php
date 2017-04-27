@@ -45,9 +45,10 @@ class short_message extends renderable_message implements \templatable {
      * @param int $summarylength Length of text displayed (0 = none)
      * @param int $count Sequence, eg 1 is first message in the block
      * @param array $thumbnails Thumbnail images for all messages, keyed by message ID.
+     * @param array $images Images for all messages, keyed by message ID.
      * @param null|string $mode Render mode, 'all' if rendering for the "View all" page.
      */
-    public function __construct(message $bnm, $bns, $summarylength, $count, array $thumbnails = [], $mode = null) {
+    public function __construct(message $bnm, $bns, $summarylength, $count, array $thumbnails = [], $images = [], $mode = null) {
         global $CFG;
 
         $this->classes = '';
@@ -98,6 +99,13 @@ class short_message extends renderable_message implements \templatable {
                     'thumbnail', $bnm->get_id(), $thumb->get_filename());
             $this->thumburl = new \moodle_url(implode('/', $pathparts));
         }
+        if (array_key_exists($bnm->get_id(), $images)) {
+            $image = $images[$bnm->get_id()];
+            $this->imageinfo = $image->get_imageinfo();
+            $pathparts = array('/pluginfile.php', $blockcontext->id, 'block_news',
+                    'messageimage', $bnm->get_id(), $image->get_filename());
+            $this->imageurl = new \moodle_url(implode('/', $pathparts));
+        }
 
         $this->messagetype = $bnm->get_messagetype();
         $this->fulleventdate = '';
@@ -122,6 +130,8 @@ class short_message extends renderable_message implements \templatable {
         } else {
             $this->thumbwidth = $this->thumbinfo['width'];
             $this->thumbheight = $this->thumbinfo['height'];
+            $this->imagewidth = $this->imageinfo['width'];
+            $this->imageheight = $this->imageinfo['height'];
         }
         $this->formattedmessage = format_text($this->message, $this->messageformat);
         $this->export_actions_for_template($output);

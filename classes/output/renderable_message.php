@@ -66,6 +66,14 @@ abstract class renderable_message implements \renderable {
     public $thumbwidth;
     /** @var int The height of the thumbnail image in pixels */
     public $thumbheight;
+    /** @var array Info for message image */
+    public $imageinfo;
+    /** @var \moodle_url URL for message image */
+    public $imageurl;
+    /** @var int Image width, for templates. */
+    public $imagewidth;
+    /** @var int Image height, for templates. */
+    public $imageheight;
     /** @var int The timestamp for the start of the event */
     public $eventstart;
     /** @var int The timestamp for the end of the event */

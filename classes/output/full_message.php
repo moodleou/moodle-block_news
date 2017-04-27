@@ -43,14 +43,6 @@ class full_message extends renderable_message implements \templatable {
     public $blockinstanceid;
     /** @var int Message ID */
     public $id;
-    /** @var array Info for message image */
-    public $imageinfo;
-    /** @var \moodle_url URL for message image */
-    public $imageurl;
-    /** @var int Image width, for templates. */
-    public $imagewidth;
-    /** @var int Image height, for templates. */
-    public $imageheight;
     /** @var bool Are there visibility notes to display? */
     public $hasnotes;
     /** @var bool Are there attachements? */
