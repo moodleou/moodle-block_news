@@ -84,7 +84,9 @@ class full_message extends renderable_message implements \templatable {
 
         $this->viewlink = $bnm->get_link();
 
-        $this->message = $bnm->get_message();
+        $blockcontext = \context_block::instance($bnm->get_blockinstanceid());
+        $this->message = file_rewrite_pluginfile_urls($bnm->get_message(), 'pluginfile.php',
+                $blockcontext->id, 'block_news', 'message', $bnm->get_id());
         $this->messagedate = userdate($bnm->get_messagedate(),
                 get_string('dateformat', 'block_news'));
         $this->messagevisible = $bnm->get_messagevisible();
