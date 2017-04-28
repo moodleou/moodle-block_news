@@ -59,6 +59,9 @@ class system {
     const ALL_NEWS_PAGE_SIZE = 9;
     /** @var int The number of event messages on a page of the View All screen */
     const ALL_EVENTS_PAGE_SIZE = 3;
+    /** @var int Max length for feed URLs */
+    const MAXURLLEN = 255;
+
 
     public static function get_message_sql_start() {
         return "SELECT {block_news_messages}.*, u.id AS u_id, " .
@@ -489,9 +492,20 @@ class system {
 
         $DB->update_record('block_news', $data);
 
+        if (isset($data->feedurls)) {
+            $this->save_feed_urls($data->feedurls);
+        }
+    }
+
+    /**
+     * Save multiline string of feed URLs to separate feed URL records.
+     *
+     * @param string $feedurls
+     */
+    public function save_feed_urls($feedurls) {
         // Now do feeds.
         // Convert from textarea to array.
-        $feeds = preg_split('/\R/', $data->feedurls); // Splits on any of \n \r\n \r.
+        $feeds = preg_split('/\R/', $feedurls); // Splits on any of \n \r\n \r.
 
         $feeds = array_values(array_unique($feeds)); // Remove any duplicate lines, reindex.
 
@@ -1362,6 +1376,30 @@ class system {
         } else {
             return get_string('msgblockviewall', 'block_news');
         }
+    }
+
+    /**
+     * Validate setting form data.
+     *
+     * @param array $data
+     * @return array Error messages, keyed by field.
+     */
+    public static function validate_form($data) {
+        $errors = array();
+
+        // Now do feeds.
+        // Convert from textarea to array.
+        $feeds = preg_split('/\R/', $data['config_feedurls']); // Splits on any of \n \r\n \r.
+
+        // Just check length of each feed url (other cleanup done in block_news\system::save().
+        foreach ($feeds as $feed) {
+            if (strlen(trim($feed)) > self::MAXURLLEN) {
+                $errors['config_feedurls'] = get_string('errorurltoolong', 'block_news', self::MAXURLLEN);
+                break;
+            }
+        }
+
+        return $errors;
     }
 
 } // End class.

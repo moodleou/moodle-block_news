@@ -48,6 +48,7 @@ $string['edit'] = 'Edit {$a}';
 $string['posted'] = 'Posted:';
 $string['newsheading'] = 'News';
 $string['eventsheading'] = 'Upcoming events';
+$string['editheading'] = 'News and events';
 $string['pasteventsheading'] = 'Past events';
 $string['nonewsyet'] = 'No news messages have been posted to this website.';
 $string['noeventsyet'] = 'There are no upcoming events to display.';

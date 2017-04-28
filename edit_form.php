@@ -29,14 +29,14 @@ if (!defined('MOODLE_INTERNAL')) {
     // Must be included from a Moodle page.
 }
 
+use block_news\system;
+
 /**
  * block edit form definition
  * @package blocks
  * @subpackage news
  */
 class block_news_edit_form extends block_edit_form {
-    const MAXURLLEN = 255;
-
     // Define option value for grouping support by grouping.
     const OPTIONVALUEBYGROUPING = 1;
 
@@ -121,21 +121,7 @@ class block_news_edit_form extends block_edit_form {
 
 
     public function validation($data, $files) {
-        $errors = array();
-
-        // Now do feeds.
-        // Convert from textarea to array.
-        $feeds = preg_split('/\R/', $data['config_feedurls']); // Splits on any of \n \r\n \r.
-
-        // Just check length of each feed url (other cleanup done in block_news\system::save().
-        foreach ($feeds as $feed) {
-            if (strlen(trim($feed)) > self::MAXURLLEN) {
-                $errors['config_feedurls'] = get_string('errorurltoolong', 'block_news', self::MAXURLLEN);
-                break;
-            }
-        }
-
-        return $errors;
+        return system::validate_form($data);
     }
 
 }

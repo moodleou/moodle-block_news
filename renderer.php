@@ -288,12 +288,15 @@ class block_news_renderer extends plugin_renderer_base {
      * Renders the 'add' link at bottom of block.
      *
      * @param int $blockinstanceid Instance id of block
+     * @param string $label Text to override the default label
      */
-    public function render_add($blockinstanceid) {
+    public function render_add($blockinstanceid, $label = null) {
+        if (is_null($label)) {
+            $label = get_string('msgblockadd', 'block_news');
+        }
         return $this->action_link(
                 new moodle_url('/blocks/news/edit.php', array('bi' => $blockinstanceid)),
-                get_string('msgblockadd', 'block_news'),
-                null, array('title' => get_string('msgblockaddalt', 'block_news')));
+                $label, null, array('title' => get_string('msgblockaddalt', 'block_news')));
     }
 
     /**
@@ -316,6 +319,36 @@ class block_news_renderer extends plugin_renderer_base {
     public function render_view_page(view_page $page) {
         $context = $page->export_for_template($this->output);
         return $this->output->render_from_template('block_news/view_page', $context);
+    }
+
+    /**
+     * Returns html for an edit form for display in the block.
+     *
+     * @param system $bns The block system object
+     * @return string
+     */
+    public function render_edit_form(system $bns) {
+        global $CFG;
+
+        $context = new \stdClass();
+
+        // Hidden inputs.
+        $context->sesskey = sesskey();
+        $context->bid = $bns->get_blockinstanceid();
+
+        $feeds = $bns->get_feeds();
+        $context->feedurls = '';
+        foreach ($feeds as $feed) {
+            $context->feedurls .= $feed->feedurl . "\n";
+        }
+
+        // Submit button.
+        $context->savelabel = get_string('savechanges');
+
+        // The main form.
+        $context->action = $CFG->wwwroot . '/blocks/news/savesettings.php';
+
+        return $this->render_from_template('block_news/editform', $context);
     }
 
     /**

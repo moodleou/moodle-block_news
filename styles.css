@@ -1,5 +1,6 @@
 .block .content .block_news_msglist > h3,
-.block .content .block_news_eventlist > h3 {
+.block .content .block_news_eventlist > h3,
+.block .content .block-news-editheading {
     color: #38254c;
     font-weight: normal;
     font-size: 2.14285em;
@@ -152,6 +153,12 @@
 .block_news_group_indication {
     font-size: 0.8em;
     font-style: italic;
+}
+
+/* Inline editing form */
+
+#block-news-feedurls {
+    width: 50%;
 }
 
 .block-news-mobile-nextprev {
