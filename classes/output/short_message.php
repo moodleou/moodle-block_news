@@ -36,7 +36,7 @@ use block_news\message;
 class short_message extends renderable_message implements \templatable {
 
     /** @var string Tags allowed for block news short message */
-    const ALLOW_TAGS = '<a><br><p><div><span><ol><ul><li><strong><b><i><em>';
+    const ALLOW_TAGS = '<a><br><p><div><span><ol><ul><li><strong><b><i><em><h1><h2><h3><h4><h5><h6><u><strike><sub><sup>';
     /**
      * Build short message data
      *
