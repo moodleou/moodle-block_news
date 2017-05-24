@@ -19,16 +19,17 @@
 
     Template which defines contents of an edit form within the block.
 }}
-<form class="newsblockform" method="post" action="{{action}}">
-    <div style="display:none;">
-        <input type="hidden" name="sesskey" value="{{sesskey}}" />
-        <input type="hidden" name="bid" value="{{bid}}" />
-    </div>
-    <div>
-        <label for="block-news-feedurls">{{#str}} configfeedurls, block_news {{/str}}</label>
-        <textarea id="block-news-feedurls" name="feedurls" rows="5">{{{feedurls}}}</textarea>
-    </div>
-    <div>
-        <input type="submit" value="{{savelabel}}" />
-    </div>
+<form id="newsblockform" class="newsblockform mform" method="post" action="{{action}}">
+    <input type="hidden" name="sesskey" value="{{sesskey}}" />
+    <input type="hidden" name="bid" value="{{bid}}" />
+    <fieldset id="newsblockform_fieldset" class="collapsible collapsed">
+        <legend class="ftoggler">{{#str}} configeditconfig, block_news {{/str}}</legend>
+        <div class="fcontainer">
+            <label for="block-news-feedurls">{{#str}} configfeedurls, block_news {{/str}}</label>
+            <textarea id="block-news-feedurls" name="feedurls" rows="5">{{{feedurls}}}</textarea>
+        </div>
+        <div class="fcontainer">
+            <input type="submit" value="{{savelabel}}" />
+        </div>
+    </fieldset>
 </form>

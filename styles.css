@@ -146,7 +146,8 @@
 }
 
 /* Set text area width of feed URL list 100%. */
-.mform #id_config_feedurls {
+.mform #id_config_feedurls,
+#block-news-feedurls {
     width: 100%;
 }
 
@@ -155,14 +156,13 @@
     font-style: italic;
 }
 
-/* Inline editing form */
-
-#block-news-feedurls {
-    width: 50%;
-}
-
 .block-news-mobile-nextprev {
     display: none;
+}
+
+#newsblockform {
+    margin-top: 14px;
+    width: 50%;
 }
 
 @media (max-width: 767px) {

@@ -87,6 +87,7 @@ $string['configgroupingsupport_help'] = 'Enable access restriction on the news m
 $string['configgroupingoptionnotenable'] = 'Not enabled';
 $string['configgroupingoptiongrouping'] = 'Grouping';
 $string['configgroupingoptiongroup'] = 'Group';
+$string['configeditconfig'] = 'Edit configuration';
 // Block.
 $string['msgblocknonews'] = 'There is no news yet';
 $string['msgblockadd'] = 'Add';

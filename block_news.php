@@ -75,119 +75,116 @@ class block_news extends block_base {
                 && has_capability('moodle/course:manageactivities', $context)
                 && strpos($this->page->bodyclasses, 'format-ousubject') !== false;
 
-        if ($isediting) {
-            // Show an editing form (avoids using the main block configuration form).
-            $html = $output->heading(get_string('editheading', 'block_news'), 3, 'block-news-editheading');
-            $addlink = $output->render_add($blockinstanceid, get_string('msgblockaddalt', 'block_news'));
-            $html .= $output->container($addlink, '', 'block_news_addmsg');
-            $html .= $output->render_edit_form($this->bns);
-            $this->content->text = $html;
+        // Show Add if permittted.
+        if (has_capability('block/news:add', $blockcontext)) {
+            $this->content->footer .= $output->container_start(null, 'block_news_addmsg');
+            $this->content->footer .= $output->render_add($blockinstanceid);
+            $this->content->footer .= $output->container_end();
+            $canaddnews = 'blocknewscanadd';// Extra class added on some links if edit permission.
         } else {
-            // Show Add if permittted.
-            if (has_capability('block/news:add', $blockcontext)) {
-                $this->content->footer .= $output->container_start(null, 'block_news_addmsg');
-                $this->content->footer .= $output->render_add($blockinstanceid);
-                $this->content->footer .= $output->container_end();
-                $canaddnews = 'blocknewscanadd';// Extra class added on some links if edit permission.
-            } else {
-                $canaddnews = null;
+            $canaddnews = null;
+        }
+        $nummsgs = $this->bns->get_nummessages();
+        if ($this->bns->get_displaytype() == system::DISPLAY_DEFAULT) {
+            $msgs = $this->bns->get_messages_limited($nummsgs);
+            $events = null;
+        } else {
+            $msgs = $this->bns->get_messages_limited($nummsgs, message::MESSAGETYPE_NEWS);
+            $events = $this->bns->get_messages_limited($nummsgs, message::MESSAGETYPE_EVENT);
+        }
+
+        $sumlen = $this->bns->get_summarylength();
+        if ($msgs || $events || $this->bns->get_displaytype() == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
+            $c = 1;
+            $this->content->text = $output->open_news_block_custom_wrapper();
+            $this->content->text .= $output->container_start('block_news_msglist');
+
+            if ($this->bns->get_displaytype() == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
+                $this->content->text .= $output->heading(get_string('newsheading', 'block_news'), 3);
             }
-            $nummsgs = $this->bns->get_nummessages();
-            if ($this->bns->get_displaytype() == system::DISPLAY_DEFAULT) {
-                $msgs = $this->bns->get_messages_limited($nummsgs);
-                $events = null;
+
+            $newmsg = false;
+
+            $thumbnails = $this->bns->get_images('thumbnail');
+            $images = $this->bns->get_images();
+
+            if (empty($msgs)) {
+                $this->content->text .= get_string('nonewsyet', 'block_news');
             } else {
-                $msgs = $this->bns->get_messages_limited($nummsgs, message::MESSAGETYPE_NEWS);
-                $events = $this->bns->get_messages_limited($nummsgs, message::MESSAGETYPE_EVENT);
-            }
-
-            $sumlen = $this->bns->get_summarylength();
-            if ($msgs || $events || $this->bns->get_displaytype() == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
-                $c = 1;
-                $this->content->text = $output->open_news_block_custom_wrapper();
-                $this->content->text .= $output->container_start('block_news_msglist');
-
-                if ($this->bns->get_displaytype() == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
-                    $this->content->text .= $output->heading(get_string('newsheading', 'block_news'), 3);
-                }
-
-                $newmsg = false;
-
-                $thumbnails = $this->bns->get_images('thumbnail');
-                $images = $this->bns->get_images();
-
-                if (empty($msgs)) {
-                    $this->content->text .= get_string('nonewsyet', 'block_news');
-                } else {
-                    foreach ($msgs as $msg) {
-                        // Check whether there are news posts the user is not likely to have seen.
-                        if (!empty($SESSION->news_block_views) &&
-                                !empty($SESSION->news_block_views[$msg->get_id()])
-                        ) {
-                            $courseaccess = time();
-                        } else {
-                            if (isset($USER->lastcourseaccess[$COURSE->id])) {
-                                $courseaccess = $USER->lastcourseaccess[$COURSE->id];
-                            } else {
-                                $courseaccess = false;
-                            }
-                        }
-
-                        $msgdate = $msg->get_messagedate();
-                        $msguserid = $msg->get_userid();
-
-                        if ($USER->id != $msguserid && (!$courseaccess || $msgdate > $courseaccess)) {
-                            $newmsg = true;
-                        }
-
-                        $msgwidget = new short_message($msg, $this->bns, $sumlen, $c, $thumbnails, $images);
-                        $this->content->text .= $output->render($msgwidget);
-                        $c++;
-                    }
-                }
-
-                if ($newmsg) {
-                    $this->title = $output->render_block_news_new_messages($this->title);
-                }
-
-                $this->content->text .= $output->container_end();
-
-                if ($this->bns->get_displaytype() == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
-                    $this->content->text .= $output->container_start('block_news_eventlist');
-                    $this->content->text .= $output->heading(get_string('eventsheading', 'block_news'), 3);
-                    if (empty($events)) {
-                        $this->content->text .= get_string('noeventsyet', 'block_news');
+                foreach ($msgs as $msg) {
+                    // Check whether there are news posts the user is not likely to have seen.
+                    if (!empty($SESSION->news_block_views) &&
+                            !empty($SESSION->news_block_views[$msg->get_id()])
+                    ) {
+                        $courseaccess = time();
                     } else {
-                        foreach ($events as $event) {
-                            $eventwidget = new short_message($event, $this->bns, $sumlen, $c, $thumbnails, $images);
-                            $this->content->text .= $output->render($eventwidget);
+                        if (isset($USER->lastcourseaccess[$COURSE->id])) {
+                            $courseaccess = $USER->lastcourseaccess[$COURSE->id];
+                        } else {
+                            $courseaccess = false;
                         }
                     }
-                    $this->content->text .= $output->container_end();
+
+                    $msgdate = $msg->get_messagedate();
+                    $msguserid = $msg->get_userid();
+
+                    if ($USER->id != $msguserid && (!$courseaccess || $msgdate > $courseaccess)) {
+                        $newmsg = true;
+                    }
+
+                    $msgwidget = new short_message($msg, $this->bns, $sumlen, $c, $thumbnails, $images);
+                    $this->content->text .= $output->render($msgwidget);
+                    $c++;
                 }
-                $this->content->text .= $output->close_news_block_custom_wrapper();
-                // Main footer.
-                $this->content->footer .= $output->container_start($canaddnews, 'block_news_viewall');
+            }
+
+            if ($newmsg) {
+                $this->title = $output->render_block_news_new_messages($this->title);
+            }
+
+            $this->content->text .= $output->container_end();
+
+            if ($this->bns->get_displaytype() == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
+                $this->content->text .= $output->container_start('block_news_eventlist');
+                $this->content->text .= $output->heading(get_string('eventsheading', 'block_news'), 3);
+                if (empty($events)) {
+                    $this->content->text .= get_string('noeventsyet', 'block_news');
+                } else {
+                    foreach ($events as $event) {
+                        $eventwidget = new short_message($event, $this->bns, $sumlen, $c, $thumbnails, $images);
+                        $this->content->text .= $output->render($eventwidget);
+                    }
+                }
+                $this->content->text .= $output->container_end();
+            }
+            $this->content->text .= $output->close_news_block_custom_wrapper();
+            // Main footer.
+            $this->content->footer .= $output->container_start($canaddnews, 'block_news_viewall');
+            $this->content->footer .= $output->render_view_all($blockinstanceid, $this->bns->get_viewall_label());
+            $this->content->footer .= $output->container_end();
+        } else {
+            $this->content->text = $output->container(
+                    get_string('msgblocknonews', 'block_news'), null, 'msgblocknonews');
+            if (has_capability('block/news:viewhidden', $blockcontext)) {
+                $this->content->footer .= $output->container_start(null, 'block_news_viewall');
                 $this->content->footer .= $output->render_view_all($blockinstanceid, $this->bns->get_viewall_label());
                 $this->content->footer .= $output->container_end();
-            } else {
-                $this->content->text = $output->container(
-                        get_string('msgblocknonews', 'block_news'), null, 'msgblocknonews');
-                if (has_capability('block/news:viewhidden', $blockcontext)) {
-                    $this->content->footer .= $output->container_start(null, 'block_news_viewall');
-                    $this->content->footer .= $output->render_view_all($blockinstanceid, $this->bns->get_viewall_label());
-                    $this->content->footer .= $output->container_end();
-                }
             }
+        }
 
-            // If feeds allowed on site, display icon.
-            if (isset($CFG->enablerssfeeds) && $CFG->enablerssfeeds) {
-                $this->content->footer .= $output->container_start($canaddnews, 'block_news_rss');
-                $pi = new pix_icon('i/rss', 'RSS');
-                $this->content->footer .= $output->action_icon(
-                        $this->bns->get_feed_url(), $pi, null, array('title' => 'RSS'));
-                $this->content->footer .= $output->container_end();
-            }
+        // If feeds allowed on site, display icon.
+        if (isset($CFG->enablerssfeeds) && $CFG->enablerssfeeds) {
+            $this->content->footer .= $output->container_start($canaddnews, 'block_news_rss');
+            $pi = new pix_icon('i/rss', 'RSS');
+            $this->content->footer .= $output->action_icon(
+                    $this->bns->get_feed_url(), $pi, null, array('title' => 'RSS'));
+            $this->content->footer .= $output->container_end();
+        }
+
+        if ($isediting) {
+            $this->content->footer .= $output->render_edit_form($this->bns);
+            $params = [['formid' => 'newsblockform']];
+            $this->page->requires->yui_module('moodle-form-shortforms', 'M.form.shortforms', $params);
         }
 
         return $this->content;

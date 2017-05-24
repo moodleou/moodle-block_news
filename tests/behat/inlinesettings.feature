@@ -1,4 +1,4 @@
-@ou @ou_vle @block @block_news
+@ou @ou_vle @block @block_news @javascript
 Feature: Inline settings form
   In order to edit settings when the full editing form is disabled
   As a website manager
@@ -21,17 +21,24 @@ Feature: Inline settings form
 
   Scenario: Show the editing form when editing mode is on
     Given I should see "news 1" in the "News and events" "block"
+    And I should see "upcoming 1" in the "News and events" "block"
+    And "Edit configuration" "fieldset" should not exist in the "News and events" "block"
     When I follow "Turn editing on"
-    Then I should not see "news 1" in the "News and events" "block"
-    And I should see "News and events" in the "News and events" "block"
+    Then I should see "news 1" in the "News and events" "block"
+    And I should see "upcoming 1" in the "News and events" "block"
     And "Add a message" "link" should exist in the "News and events" "block"
-    And I should see "Include messages from the listed feeds (URLs)" in the "News and events" "block"
+    And "Edit configuration" "fieldset" should exist in the "News and events" "block"
+    Then I should not see "Include messages from the listed feeds (URLs)" in the "News and events" "block"
+    When I click on "Edit configuration" "fieldset" in the "News and events" "block"
+    Then I should see "Include messages from the listed feeds (URLs)" in the "News and events" "block"
 
   Scenario: Enter and save feed URLs
     Given I follow "Turn editing on"
+    And I click on "Edit configuration" "fieldset" in the "News and events" "block"
     And the field "feedurls" matches value ""
     When I set the field "feedurls" to "http://example.com"
     And I click on "Save changes" "button" in the "News and events" "block"
+    And I click on "Edit configuration" "fieldset" in the "News and events" "block"
     Then the field "feedurls" matches value "http://example.com"
     When I follow "Turn editing off"
     And I follow "Turn editing on"
@@ -39,6 +46,7 @@ Feature: Inline settings form
 
   Scenario: Enter invalid URL
     Given I follow "Turn editing on"
+    And I click on "Edit configuration" "fieldset" in the "News and events" "block"
     When I set the field "feedurls" to "http://example.com/reallylongurlthatexceedsthe255characterlimitbyhavingastupidlylongbitattheendthatimmakingupasigoalongwowurlscanbereallylongcanttheylittlebitmorealmostthereokletsjustuserandomrubbishnowdsdgasdgawegtrebrbaerbeerbaerberhgfhgfhdgfhdfgdgfjdgfdfgerhge"
     And I click on "Save changes" "button" in the "News and events" "block"
     Then I should see "URLs limited to 255 characters"
@@ -56,4 +64,4 @@ Feature: Inline settings form
     And I add the "News" block
     And the news block for course "C2" is in news and events mode
     When I reload the page
-    Then I should not see "Include messages from the listed feeds (URLs)" in the "News and events" "block"
+    Then "Edit configuration" "fieldset" should not exist in the "News and events" "block"
