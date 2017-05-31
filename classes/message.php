@@ -471,7 +471,7 @@ class message {
 
         // Delete files.
         $fs = get_file_storage();
-        $fs->delete_area_files($context->id, 'block_news');
+        $fs->delete_area_files($context->id, 'block_news', false, $this->id);
     }
 
     /**
