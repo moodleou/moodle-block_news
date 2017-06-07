@@ -173,3 +173,12 @@
         display: inline;
     }
 }
+
+/*
+ * TEMPORARY: This option should be visible (even on non-ousubject sites)
+ * but because the feature is not fully implemented, we are hiding it.
+ * TODO This style should be removed by September release.
+ */
+body:not(.osep-courseformat-ousubject) #fitem_id_config_displaytype {
+    display: none;
+}
