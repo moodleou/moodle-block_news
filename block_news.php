@@ -30,7 +30,7 @@ require_once($CFG->dirroot . '/blocks/news/block_news_message.php');
  */
 class block_news extends block_base {
 
-    public $bns='';
+    public $bns = '';
 
     public function init() {
         $this->title = get_string('pluginname', 'block_news');
@@ -61,15 +61,15 @@ class block_news extends block_base {
             return $this->content;
         }
 
-        $blockinstanceid=$this->instance->id;
+        $blockinstanceid = $this->instance->id;
         $blockcontext = context_block::instance($blockinstanceid);
 
         $this->content = new stdClass;
 
-        $output = $PAGE->get_renderer('block_news'); //looks for class xxx_renderer
-        $this->content->footer='';
+        $output = $PAGE->get_renderer('block_news'); // Looks for class xxx_renderer.
+        $this->content->footer = '';
 
-        // show Add if permittted
+        // Show Add if permittted.
         if (has_capability('block/news:add', $blockcontext)) {
             $this->content->footer .= $output->container_start(null, 'block_news_addmsg');
             $this->content->footer .= $output->render_add($blockinstanceid);
@@ -78,19 +78,21 @@ class block_news extends block_base {
         } else {
             $canaddnews = null;
         }
-        $nummsgs=$this->bns->get_nummessages();
-        $msgs=$this->bns->get_messages_limited($nummsgs);
+        $nummsgs = $this->bns->get_nummessages();
+        $msgs = $this->bns->get_messages_limited($nummsgs);
 
-        $sumlen=$this->bns->get_summarylength();
+        $sumlen = $this->bns->get_summarylength();
         if ($msgs) {
-            $c=1;
+            $c = 1;
             $this->content->text = $output->open_news_block_custom_wrapper();
             $this->content->text .= $output->container_start('block_news_msglist');
 
             $newmsg = false;
 
+            $thumbnails = $this->bns->get_images('thumbnail');
+
             foreach ($msgs as $msg) {
-                //check whether there are news posts the user is not likely to have seen
+                // Check whether there are news posts the user is not likely to have seen.
                 if (!empty($SESSION->news_block_views) &&
                         !empty($SESSION->news_block_views[$msg->get_id()])) {
                     $courseaccess = time();
@@ -107,7 +109,7 @@ class block_news extends block_base {
                     $newmsg = true;
                 }
 
-                $msgwidget = new block_news_message_short($msg, $this->bns, $sumlen, $c);
+                $msgwidget = new block_news_message_short($msg, $this->bns, $sumlen, $c, $thumbnails);
                 $this->content->text .= $output->render($msgwidget);
                 $c++;
             }
@@ -118,7 +120,7 @@ class block_news extends block_base {
 
             $this->content->text .= $output->container_end();
             $this->content->text .= $output->close_news_block_custom_wrapper();
-            // main footer
+            // Main footer.
             $this->content->footer .= $output->container_start($canaddnews, 'block_news_viewall');
             $this->content->footer .= $output->render_view_all($blockinstanceid);
             $this->content->footer .= $output->container_end();
@@ -132,12 +134,12 @@ class block_news extends block_base {
             }
         }
 
-        // if feeds allowed on site, display icon
+        // If feeds allowed on site, display icon.
         if (isset($CFG->enablerssfeeds) && $CFG->enablerssfeeds) {
             $this->content->footer .= $output->container_start($canaddnews, 'block_news_rss');
             $pi = new pix_icon('i/rss', 'RSS');
             $this->content->footer .= $output->action_icon(
-                $this->bns->get_feed_url(), $pi, null, array('title'=>'RSS'));
+                $this->bns->get_feed_url(), $pi, null, array('title' => 'RSS'));
             $this->content->footer .= $output->container_end();
         }
 
@@ -155,18 +157,18 @@ class block_news extends block_base {
      * instance settings
      */
     public function specialization() {
-        $blockinstanceid=$this->instance->id;
-        $this->bns=block_news_system::get_block_settings($blockinstanceid);
+        $blockinstanceid = $this->instance->id;
+        $this->bns = block_news_system::get_block_settings($blockinstanceid);
 
-        // display title of this instance on config page (its put in block header and on
-        // block edit page header)
-        $t=$this->bns->get_title();
+        // Display title of this instance on config page (its put in block header and on
+        // block edit page header).
+        $t = $this->bns->get_title();
         if (!empty($t)) {
-            $this->title =$t;
+            $this->title = $t;
         }
     }
 
-    /*
+    /**
      *  store config data for instance
      */
     public function instance_config_save($data, $nolongerused = false) {
@@ -174,7 +176,7 @@ class block_news extends block_base {
 
         $this->bns->save($data);
 
-        // force some config data (necessary for backup/restore)
+        // Force some config data (necessary for backup/restore).
         $config = new stdClass;
         $config->title = $data->title;
         $config->id = $this->instance->id;
@@ -183,7 +185,7 @@ class block_news extends block_base {
     }
 
     public function instance_create() {
-        // force some initial data for the block
+        // Force some initial data for the block.
         $data = new stdClass();
         $data->title = get_string('defaultblocktitle', 'block_news');
         $data->feedurls = '';

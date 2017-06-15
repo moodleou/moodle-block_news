@@ -39,12 +39,19 @@ $string['dateformat'] = '%d %b %Y'; // http://php.net/manual/en/function.strftim
 $string['dateformatlong'] = '%d %b %Y %H:%M';
 $string['new'] = 'new';
 $string['subscribe'] = 'Subscribe';
+$string['newsitem'] = 'News item';
+$string['event'] = 'Event';
+$string['messagetype'] = 'Type';
+$string['messageimage'] = 'Image';
+$string['delete'] = 'Delete {$a}';
+$string['edit'] = 'Edit {$a}';
 
 // error messages
 $string['erroremptymessage'] = 'Missing entry';
 $string['errorperms'] = 'Sorry, insufficient permissions to complete this operation';
 $string['errortexttoolong'] = 'Text in this field is limited to {$a} characters';
 $string['errorurltoolong'] = 'URLs limited to {$a} characters';
+$string['errormessageaccessrestricted'] = 'Sorry, you are not a member of the group to view this message';
 $string['errornomsgfound'] = 'No message found, id = {$a}';
 $string['errornoupdatetime'] = 'Set minimum feed delay in Site Administration -> Plugins -> Blocks -> News';
 $string['errornomaxpercron'] = 'Set cron feed limit in Site Administration -> Plugins -> Blocks -> News';
@@ -61,8 +68,11 @@ $string['configsummarylength'] = 'Summary';
 $string['confighidetitles'] = 'Hide titles';
 $string['confighidelinks'] = 'Hide links';
 $string['configfeedurls'] = 'Include messages from the listed feeds (URLs)';
-$string['configgroupingsupport'] = 'Grouping support';
-$string['configgroupingsupport_help'] = 'Allows news items to be displayed only to members of a specified grouping.  Please note that this is to help in managing news items and is not a security feature (users can access the news items if determined to do so).';
+$string['configgroupingsupport'] = 'Enable message restriction';
+$string['configgroupingsupport_help'] = 'Enable access restriction on the news message. Not enabled: The access restriction will not be applied to the news message. Grouping: Allow only students who belong to a group within a specific grouping. Group: Allow only students who belong to a specific group, or all groups';
+$string['configgroupingoptionnotenable'] = 'Not enabled';
+$string['configgroupingoptiongrouping'] = 'Grouping';
+$string['configgroupingoptiongroup'] = 'Group';
 // block
 $string['msgblocknonews'] = 'There is no news yet';
 $string['msgblockadd'] = 'Add';
@@ -79,6 +89,7 @@ $string['verbosecron'] = 'List each feed as retrieved in cron';
 $string['verbosecron_info'] = 'If you turn this option on, all feeds being retrieved are shown in cron. Otherwise it only shows feeds which take longer than 5 seconds.';
 $string['settingshideauthor'] = 'Hide author';
 $string['settingshideauthor_info'] = 'Set default value for the hide author option when posting news.';
+$string['separateintoeventsandnewsitems'] = 'Separate into events and news items';
 
 // edit
 $string['msgeditpghdr'] = 'News';
@@ -90,6 +101,7 @@ $string['msgeditformat'] = 'Format';
 $string['msgeditmessagedate'] = 'Release date';
 $string['msgeditvisible'] = 'Visible';
 $string['msgeditgrouping'] = 'Grouping';
+$string['msgeditgroup'] = 'Group';
 $string['msgeditpublish'] = 'Publish';
 $string['msgeditrepeat'] = 'Repeated after roll-forward';
 $string['msgedithideauthor'] = 'Hide author';
@@ -101,6 +113,7 @@ $string['msgeditatspecdate'] = 'At specified date';
 $string['msgeditalreadypub'] = 'Already published';
 
 // message render
+$string['rendermsggroupindication'] = 'Not available unless: You belong to <strong>{$a}</strong>';
 $string['rendermsghidden'] = 'This message has been hidden from students';
 $string['rendermsgfuture'] = 'This message does not display to students until {$a}';
 $string['rendermsgnext'] = 'Next (newer) message';

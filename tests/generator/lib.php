@@ -24,6 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+global $CFG;
+require_once($CFG->dirroot . '/blocks/news/block_news_message.php');
+require_once($CFG->dirroot . '/blocks/news/edit_message_form.php');
+
 class block_news_generator extends testing_block_generator {
 
     protected function preprocess_record(stdClass $record, array $options) {
@@ -64,5 +68,104 @@ class block_news_generator extends testing_block_generator {
         }
 
         return $DB->insert_record('block_positions', $record);
+    }
+
+    /**
+     * Create New Block News
+     *
+     * @param stdclass $block
+     * @param stdclass $block
+     * @return bool|int
+     */
+    public function create_block_news_record($block, $record) {
+        global $DB;
+
+        $record->blockinstanceid = $block->id;
+
+        if (!isset($record->title)) {
+            $record->title = 'Block News Title';
+        }
+
+        if (!isset($record->nummessages)) {
+            $record->nummessages = 2;
+        }
+
+        if (!isset($record->summarylength)) {
+            $record->summarylength = 50;
+        }
+
+        return $DB->insert_record('block_news', $record, true);
+    }
+
+    /**
+     * Create New Block Message
+     *
+     * @param stdclass $block
+     * @param stdclass $block
+     * @return bool|int
+     */
+    public function create_block_new_message($block, $record) {
+        global $CFG, $DB;
+
+        $record->blockinstanceid = $block->id;
+
+        if (!isset($record->title)) {
+            $record->title = 'Unit Test message';
+        }
+        if (!isset($record->message)) {
+            $record->message = 'Message Text';
+        }
+        if (!isset($record->messageformat)) {
+            $record->messageformat = 1;
+        }
+        if (!isset($record->messagetype)) {
+            $record->messagetype = block_news_message::MESSAGETYPE_NEWS;
+        }
+        if (!isset($record->messageimage)) {
+            $record->messageimage = null;
+        }
+        if (!isset($record->newsfeedid)) {
+            $record->newsfeedid = 0;
+        }
+        if (!isset($record->messagevisable)) {
+            $record->messagevisible = 1;
+        }
+        if (!isset($record->messagedate)) {
+            $record->messagedate = time() - 3600;
+        }
+        if (!isset($record->hideauthor)) {
+            $record->hideauthor = 0;
+        }
+        if (!isset($record->messagerepeat)) {
+            $record->messagerepeat = 0;
+        }
+        if (!isset($record->timemodified)) {
+            $record->timemodified = time();
+        }
+        if (!isset($record->attachments)) {
+            $record->attachments = null;
+        }
+        $id = $DB->insert_record('block_news_messages', $record, true);
+
+        if (isset($record->image)) {
+            $imagepath = $CFG->dirroot . $record->image;
+            $fs = get_file_storage();
+            $fr = (object) [
+                'contextid' => context_block::instance($block->id)->id,
+                'component' => 'block_news',
+                'filearea' => 'messageimage',
+                'filepath' => '/',
+                'filename' => basename($record->image),
+                'itemid' => $id
+            ];
+            $fs->create_file_from_pathname($fr, $imagepath);
+            $thumbpath = tempnam(sys_get_temp_dir(), 'bnt');
+            \theme_osep\util::create_thumbnail($imagepath, $thumbpath, block_news_edit_message_form::THUMBNAIL_MAX_EDGE);
+            $fr->filearea = 'thumbnail';
+            $fr->filename = 'thumbnail.jpg';
+            $fs->create_file_from_pathname($fr, $thumbpath);
+            unlink($thumbpath);
+        }
+        return $id;
     }
 }

@@ -39,6 +39,12 @@ require_once('block_news_system.php');
 class block_news_edit_form extends block_edit_form {
     const MAXURLLEN = 255;
 
+    // Define option value for grouping support by grouping.
+    const OPTIONVALUEBYGROUPING = 1;
+
+    // Define option value for grouping support by group.
+    const OPTIONVALUEBYGROUP = 2;
+
     /**
      * standard config form function
      * all field names must be prefixed by 'config_' which is stripped off in data
@@ -91,16 +97,26 @@ class block_news_edit_form extends block_edit_form {
         $mform->setType('config_title', PARAM_TEXT);
         $mform->setDefault('config_feedurls', $urls_txt);
 
+        $mform->addElement('selectyesno', 'config_displaytype',
+                get_string('separateintoeventsandnewsitems', 'block_news'));
+        $mform->setDefault('config_displaytype', $bns->get_displaytype());
+
         $mform->addElement('selectyesno', 'config_hidetitles',
-            get_string('confighidetitles', 'block_news'));
+                get_string('confighidetitles', 'block_news'));
         $mform->setDefault('config_hidetitles', $bns->get_hidetitles());
 
         $mform->addElement('selectyesno', 'config_hidelinks',
             get_string('confighidelinks', 'block_news'));
         $mform->setDefault('config_hidelinks', $bns->get_hidelinks());
 
-        $mform->addElement('selectyesno', 'config_groupingsupport',
-            get_string('configgroupingsupport', 'block_news'));
+        $choicesgrouping = array(
+            '0' => get_string('configgroupingoptionnotenable', 'block_news'),
+            self::OPTIONVALUEBYGROUPING => get_string('configgroupingoptiongrouping', 'block_news'),
+            self::OPTIONVALUEBYGROUP => get_string('configgroupingoptiongroup', 'block_news')
+        );
+
+        $mform->addElement('select', 'config_groupingsupport',
+            get_string('configgroupingsupport', 'block_news'), $choicesgrouping);
         $mform->setDefault('config_groupingsupport', $bns->get_groupingsupport());
         $mform->addHelpButton('config_groupingsupport', 'configgroupingsupport', 'block_news');
     }

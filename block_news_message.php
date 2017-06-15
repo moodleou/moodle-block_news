@@ -24,7 +24,7 @@
 
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
-    // It must be included from a Moodle page
+    // It must be included from a Moodle page.
 }
 
 
@@ -36,6 +36,10 @@ if (!defined('MOODLE_INTERNAL')) {
  */
 class block_news_message {
 
+    const MESSAGETYPE_NEWS = 1;
+    const MESSAGETYPE_EVENT = 2;
+    const THUMBNAIL_JPG = 'thumbnail.jpg';
+
     protected $id;
     protected $blockinstanceid;
     protected $newsfeedid;
@@ -43,6 +47,7 @@ class block_news_message {
     protected $link;
     protected $message;
     protected $messageformat;
+    protected $messagetype;
     protected $messagedate;
     protected $messagerepeat;
     protected $messagevisible;
@@ -51,6 +56,7 @@ class block_news_message {
     protected $timemodified;
     protected $userid;
     protected $groupingid;
+    protected $groupid;
 
     protected $user;
 
@@ -61,7 +67,7 @@ class block_news_message {
      * @return object block_news_message
      */
     public function __construct($mrec) {
-        // assign the properties
+        // Assign the properties.
         $this->user = new stdClass;
         foreach ((array)$mrec as $field => $value) {
             if (property_exists($this, $field)) {
@@ -74,21 +80,21 @@ class block_news_message {
     }
 
     /**
-     * @return integer Message id
+     * @return int Message id
      */
     public function get_id() {
         return $this->id;
     }
 
     /**
-     * @return integer Block instance id
+     * @return int Block instance id
      */
     public function get_blockinstanceid() {
         return $this->blockinstanceid;
     }
 
     /**
-     * @return integer News feed id
+     * @return int News feed id
      */
     public function get_newsfeedid() {
         return $this->newsfeedid;
@@ -116,14 +122,21 @@ class block_news_message {
     }
 
     /**
-     * @return integer Message format
+     * @return int Message format
      */
     public function get_messageformat() {
         return $this->messageformat;
     }
 
     /**
-     * @return integer Message published date (seconds since start of epoch)
+     * @return int Message type (self::MESSAGETYPE_NEWS for news items and self::MESSAGETYPE_EVENT for events)
+     */
+    public function get_messagetype() {
+        return $this->messagetype;
+    }
+
+    /**
+     * @return int Message published date (seconds since start of epoch)
      */
     public function get_messagedate() {
         return $this->messagedate;
@@ -152,28 +165,35 @@ class block_news_message {
     }
 
     /**
-     * @return integer Publish status (0=Immediately, 1=At specified date, 2=Already published)
+     * @return int Publish status (0=Immediately, 1=At specified date, 2=Already published)
      */
     public function get_publish() {
         return $this->publish;
     }
 
     /**
-     * @return integer Internal id of message author
+     * @return int Internal id of message author
      */
     public function get_userid() {
         return $this->userid;
     }
 
     /**
-     * @return integer grouping id of the message
+     * @return int grouping id of the message
      */
     public function get_groupingid() {
         return $this->groupingid;
     }
 
     /**
-     * @return integer Time message record was last updated (seconds since epoch)
+     * @return int group id of the message
+     */
+    public function get_groupid() {
+        return $this->groupid;
+    }
+
+    /**
+     * @return int Time message record was last updated (seconds since epoch)
      */
     public function get_timemodified() {
         return $this->timemodified;
@@ -221,12 +241,12 @@ class block_news_message {
      * Create new message
      *
      * @param object $data
-     * @return integer $id or false
+     * @return int $id or false
      */
     public static function create($data) {
         global $DB, $USER, $COURSE;
 
-        /* the message property, from the form editor is:
+        /* The message property, from the form editor is:
         Array (
             [text] => <p>mmmmmm</p>
             [format] => 1
@@ -250,35 +270,38 @@ class block_news_message {
 
         MySQL generates a warning on an Array being passed in as a column string.
         So set the column as its text here, and overwrite with (rewritten) text
-        later (if rewritten to accommodate embedded images)
+        later (if rewritten to accommodate embedded images).
         */
-
-        // no extra handling/conversion for feed messages (->message is not an array)
+        // No extra handling/conversion for feed messages (->message is not an array).
         if ($data->newsfeedid != 0 ) {
             $id = $DB->insert_record('block_news_messages', $data, true);
             // No logging for feed messages.
             return $id;
         }
 
-        $temp_message=$data->message;
+        $tempmessage = $data->message;
         $data->message = $data->message['text'];
 
         $id = $DB->insert_record('block_news_messages', $data, true);
 
-        // save files
+        // Save files.
         $context = context_block::instance($data->blockinstanceid);
+        if (!empty($data->messageimage)) {
+            file_save_draft_area_files($data->messageimage, $context->id,
+                    'block_news', 'messageimage', $id, array('subdirs' => 0));
+        }
         if ($data->attachments) {
             file_save_draft_area_files($data->attachments, $context->id,
-                'block_news', 'attachment', $id, array('subdirs' => 0));
+                    'block_news', 'attachment', $id, array('subdirs' => 0));
         }
 
-        // embedded images (let function check if imgs etc are present or not)
-        $rw_message_text = file_save_draft_area_files($temp_message['itemid'],
-            $context->id, 'block_news', 'message', $id, array('subdirs' => 0),
-            $temp_message['text']);
+        // Embedded images (let function check if imgs etc are present or not).
+        $rwmessagetext = file_save_draft_area_files($tempmessage['itemid'],
+                $context->id, 'block_news', 'message', $id, array('subdirs' => 0),
+                $tempmessage['text']);
 
-        if ($rw_message_text != $temp_message['text']) {
-            $DB->set_field('block_news_messages', 'message', $rw_message_text, array('id' => $id));
+        if ($rwmessagetext != $tempmessage['text']) {
+            $DB->set_field('block_news_messages', 'message', $rwmessagetext, array('id' => $id));
         }
 
         $event = \block_news\event\message_created::create(array(
@@ -298,14 +321,17 @@ class block_news_message {
      */
     public function edit($data) {
         global $DB, $USER, $COURSE;
-
         $DB->update_record('block_news_messages', $data);
 
-        // save files.
+        // Save files.
         $context = context_block::instance($data->blockinstanceid);
+        if (!empty($data->messageimage)) {
+            file_save_draft_area_files($data->messageimage, $context->id, 'block_news',
+                    'messageimage', $data->id, array('subdirs' => 0));
+        }
         if ($data->attachments) {
             file_save_draft_area_files($data->attachments, $context->id, 'block_news',
-             'attachment', $data->id, array('subdirs' => 0));
+                    'attachment', $data->id, array('subdirs' => 0));
         }
         $data->message = file_save_draft_area_files($data->message['itemid'], $context->id,
              'block_news', 'message', $data->id, array('subdirs' => 0), $data->message['text']);

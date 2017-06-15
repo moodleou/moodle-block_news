@@ -223,11 +223,12 @@ function block_news_get_top_news_block($courseid) {
     $context = context_course::instance($courseid);
 
     // Get a list of news blocks sorted by weight, i.e. which one is at the top.
-    $sql = "SELECT bp.blockinstanceid
-              FROM {block_positions} bp
-              JOIN {block_instances} bi ON bi.id = bp.blockinstanceid
+    $sql = "SELECT bi.id,
+              CASE WHEN bp.id IS NOT NULL THEN bp.weight ELSE bi.defaultweight END as blockweight
+              FROM {block_instances} bi
+         LEFT JOIN {block_positions} bp ON bi.id = bp.blockinstanceid
              WHERE bi.parentcontextid = :parentcontextid AND bi.blockname = 'news'
-          ORDER BY bp.weight ASC";
+          ORDER BY blockweight, bi.id";
     $params = array('parentcontextid' => $context->id);
     $newsblocks = $DB->get_records_sql($sql, $params, 0, 1);
 
@@ -257,7 +258,7 @@ function block_news_get_groupingids($courseid, $userid) {
             $groupings[] = $grouping->id;
         }
 
-        return $groupings;
+        return implode(',', $groupings);
     }
 
     $sql = 'SELECT DISTINCT({groupings}.id)

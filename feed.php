@@ -47,9 +47,15 @@ if ($blockinstanceid == 0 && $shortname === '') {
 
     // Get the top news block instance id.
     $blockinstanceid = block_news_get_top_news_block($courseid);
+    if (empty($blockinstanceid)) {
+        throw new moodle_exception('News not enabled on this site');
+    }
 
     // Get the grouping ids.
     $groupingids = block_news_get_groupingids($courseid, $userid);
+} else if ($blockinstanceid) {
+    // Get the optional username. Support group restriction by bi and username passed.
+    $username = optional_param('username', '', PARAM_ALPHANUMEXT);
 }
 
 $murl = new moodle_url($CFG->wwwroot.'/blocks/news/feed.php',
@@ -73,7 +79,8 @@ if (array_key_exists('HTTP_IF_MODIFIED_SINCE', $_SERVER)) {
 $groupingids = explode(',', $groupingids);
 // Remove any empty elements from clean param if non ints sent.
 $groupingids = array_filter($groupingids);
-$atomxml=block_news_system::get_block_feed($blockinstanceid, $ifmodifiedsince, $groupingids);
+
+$atomxml = block_news_system::get_block_feed($blockinstanceid, $ifmodifiedsince, $groupingids, $username);
 
 if ($atomxml == false) {
     header("HTTP/1.0 304 Not Modified");

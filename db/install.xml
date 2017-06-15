@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/news/db" VERSION="20110719" COMMENT="XMLDB file for Moodle blocks/news"
+<XMLDB PATH="blocks/news/db" VERSION="20161110" COMMENT="XMLDB file for Moodle blocks/news"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -13,7 +13,8 @@
         <FIELD NAME="summarylength" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Length of summary in characters, or 0 if turned off" PREVIOUS="nummessages" NEXT="hidetitles"/>
         <FIELD NAME="hidetitles" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to hide message titles, 0 to show" PREVIOUS="summarylength" NEXT="hidelinks"/>
         <FIELD NAME="hidelinks" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to hide message links, 0 to show" PREVIOUS="hidetitles" NEXT="groupingsupport"/>
-        <FIELD NAME="groupingsupport" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to enable grouping support" PREVIOUS="hidelinks"/>
+        <FIELD NAME="groupingsupport" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to enable grouping support" PREVIOUS="hidelinks" NEXT="displaytype"/>
+        <FIELD NAME="displaytype" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Default display or Separate into events and news items" PREVIOUS="groupingsupport"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -54,7 +55,9 @@
         <FIELD NAME="hideauthor" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="1 if Hide author name is chosen" PREVIOUS="messagerepeat" NEXT="timemodified"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Time at which message was edited" PREVIOUS="hideauthor" NEXT="userid"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" COMMENT="ID of person who last edited the message, null for messages from feeds." PREVIOUS="timemodified" NEXT="groupingid"/>
-        <FIELD NAME="groupingid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" UNSIGNED="true" SEQUENCE="false" COMMENT="= id of a grouping containing this news item.  0 indicates all groupings." PREVIOUS="userid"/>
+        <FIELD NAME="groupingid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" UNSIGNED="true" SEQUENCE="false" COMMENT="= id of a grouping containing this news item.  0 indicates all groupings." PREVIOUS="userid" NEXT="groupid"/>
+        <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" UNSIGNED="true" SEQUENCE="false" COMMENT="= id of a group can access this news item.  0 indicates all groups." PREVIOUS="groupingid" NEXT="messagetype"/>
+        <FIELD NAME="messagetype" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Whether message is a 'news item' (1) or calendar event (2)" PREVIOUS="groupid"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="newsfeedid_fk"/>

@@ -24,6 +24,13 @@ http://www.someserver.org/blocks/news/feed.php?bi=32
 http://www.someserver.org/blocks/news/feed.php?bi=32&groupingsids=85
 http://www.someserver.org/blocks/news/feed.php?bi=32&groupingsids=85,125
 
+If Enable message restriction is set to Group, the user's groups will
+be get by username block instance id. The feed messages are restricted
+by groups.
+
+Examples
+http://www.someserver.org/blocks/news/feed.php?bi=32&username=fred1
+
 To obtain the feed of the uppermost news block on a course page for a
 specific user, you add a URL parameter for the username and one for the
 course short name.

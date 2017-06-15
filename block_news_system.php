@@ -23,7 +23,7 @@
  */
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
-    // It must be included from a Moodle page
+    // It must be included from a Moodle page.
 }
 require_once('block_news_message.php');
 require_once('atomlib.php');
@@ -38,8 +38,18 @@ require_once('lib.php');
  */
 class block_news_system {
 
-    // DAYSECS, used below, is defined in lib/moodlelib.php
-    const MAXSTDMSGS = 20; // maximum std feed messages to show (see generate_block_feed()
+    // DAYSECS, used below, is defined in lib/moodlelib.php.
+    const MAXSTDMSGS = 20; // Maximum std feed messages to show (see generate_block_feed().
+
+    // Define grouping support by grouping.
+    const RESTRICTBYGROUPING = 1;
+
+    // Define grouping support by group.
+    const RESTRICTBYGROUP = 2;
+
+    // Define display type (default or Separate into events and news items).
+    const DISPLAY_DEFAULT = 0;
+    const DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS = 1;
 
     public static function get_message_sql_start() {
         return "SELECT {block_news_messages}.*, u.id AS u_id, " .
@@ -57,6 +67,9 @@ class block_news_system {
     protected $hidelinks;
     protected $groupingsupport;
     protected $usergroupingids;
+    protected $usergroupids;
+    protected $username;
+    protected $displaytype = self::DISPLAY_DEFAULT;
 
     /**
      * Construct object
@@ -72,6 +85,7 @@ class block_news_system {
         $this->hidetitles = $bn->hidetitles;
         $this->hidelinks = $bn->hidelinks;
         $this->groupingsupport = $bn->groupingsupport;
+        $this->displaytype = $bn->displaytype;
     }
 
     /**
@@ -86,7 +100,7 @@ class block_news_system {
     public static function get_block_settings($blockinstanceid) {
         global $DB, $USER, $COURSE;
 
-        $bn = $DB->get_record('block_news', array('blockinstanceid'=>$blockinstanceid));
+        $bn = $DB->get_record('block_news', array('blockinstanceid' => $blockinstanceid));
 
         if (empty($bn)) {
             $bn = new StdClass;
@@ -97,6 +111,8 @@ class block_news_system {
             $bn->hidetitles = 0;
             $bn->hidelinks = 0;
             $bn->groupingsupport = 0;
+            $bn->username = '';
+            $bn->displaytype = self::DISPLAY_DEFAULT;
             $rid = $DB->insert_record('block_news', $bn, true);
             $bn->id = $rid;
         }
@@ -148,6 +164,15 @@ class block_news_system {
     }
 
     /**
+     * Gets display type for block (DISPLAY_xx constant).
+     *
+     * @return int Whether to display default or Separate into events and news items in block
+     */
+    public function get_displaytype() {
+        return $this->displaytype;
+    }
+
+    /**
      * @return boolean Whether to hide message links (from feed messages) in block
      */
     public function get_hidelinks() {
@@ -159,6 +184,13 @@ class block_news_system {
      */
     public function get_groupingsupport() {
         return $this->groupingsupport;
+    }
+
+    /**
+     * @return string Username to get groups when enable group restriction
+     */
+    public function get_username() {
+        return $this->username;
     }
 
     /**
@@ -181,7 +213,7 @@ class block_news_system {
 
         $context = context_course::instance($COURSE->id);
         if (has_capability('moodle/site:accessallgroups', $context)) {
-            //if the user has the allgroups capability they can see everything.
+            // If the user has the allgroups capability they can see everything.
             $g = groups_get_all_groupings($COURSE->id);
             $groupings = array();
             foreach ($g as $grouping) {
@@ -212,11 +244,77 @@ class block_news_system {
     }
 
     /**
+     * Get a list of the groups that apply in the current context for use when working
+     * out which messages to display.  This will be because the user is a member of particular
+     * groups and groups support is enabled or some groups have been specified in a
+     * querystring and specified using set_user_groupids().
+     *
+     * @param int $userid The user id to get the groups.
+     * @param int $courseid The course id to get the groups.     *
+     * @return array - array of the groupids (empty if none).
+     */
+    public function get_groupids($userid = 0, $courseid = 0) {
+        global $SESSION, $COURSE, $USER;
+        if (!empty($this->usergroupids)) {
+            return $this->usergroupids;
+        }
+
+        if (!empty($SESSION->block_news_user_groups[$COURSE->id])) {
+            return $SESSION->block_news_user_groups[$COURSE->id];
+        }
+
+        $userid = $userid ? $userid : $USER->id;
+        $courseid = $courseid ? $courseid : $COURSE->id;
+
+        $context = context_course::instance($COURSE->id);
+        if (has_capability('moodle/site:accessallgroups', $context)) {
+            // If the user has the allgroups capability they can see everything.
+            $g = groups_get_all_groups($COURSE->id);
+        } else {
+            $g = groups_get_all_groups($courseid, $userid);
+        }
+
+        $groups = array();
+        foreach ($g as $group) {
+            $groups[] = $group->id;
+        }
+        $SESSION->block_news_user_groups[$COURSE->id] = $groups;
+        return $groups;
+    }
+
+    /**
      * Sets the value of the user groupings ids class variable.
      * @param array $groupingsids
      */
     public function set_user_groupingids($groupingids) {
         $this->usergroupingids = $groupingids;
+    }
+
+    /**
+     * Sets the value of the user groups ids class variable.
+     *
+     * @param array $groupids
+     */
+    public function set_user_groupids($groupids) {
+        $this->usergroupids = $groupids;
+    }
+
+    /**
+     * Sets the value of the grouping support class variable.
+     *
+     * @param int $groupingsupport
+     */
+    public function set_groupingsupport($groupingsupport) {
+        $this->groupingsupport = $groupingsupport;
+    }
+
+    /**
+     * Sets the value of the username class variable.
+     *
+     * @param string $username
+     */
+    public function set_username($username) {
+        $this->username = $username;
     }
 
     /**
@@ -232,7 +330,8 @@ class block_news_system {
         $output['sql'] = '';
         $output['params'] = array();
 
-        if (!$this->get_groupingsupport()) {
+        // Return if config_groupingsupport is not grouping.
+        if ($this->get_groupingsupport() != self::RESTRICTBYGROUPING) {
             return $output;
         }
 
@@ -249,6 +348,42 @@ class block_news_system {
 
         $output['sql'] = ' AND groupingid ' . $sql .' ';
         $output['params'] = $groupings;
+
+        return $output;
+    }
+
+    /**
+     * Return SQL WHERE and clause and params to append to queries when group support
+     * is enabled.
+     *
+     * @return array - 'sql' (empty string if nothing to return)
+     * and 'params' (empty array if nothing).
+     */
+    public function get_group_sql() {
+        global $COURSE, $DB;
+
+        $output = array();
+        $output['sql'] = '';
+        $output['params'] = array();
+
+        // Return if config_groupingsupport is not group.
+        if ($this->get_groupingsupport() != self::RESTRICTBYGROUP) {
+            return $output;
+        }
+
+        $context = context_course::instance($COURSE->id);
+        if (has_capability('moodle/site:accessallgroups', $context)) {
+            return $output;
+        }
+
+        $groups = $this->get_groupids();
+
+        $groups[] = 0;
+
+        list($sql, $groups) = $DB->get_in_or_equal($groups);
+
+        $output['sql'] = ' AND groupid ' . $sql .' ';
+        $output['params'] = $groups;
 
         return $output;
     }
@@ -280,15 +415,15 @@ class block_news_system {
 
         $DB->update_record('block_news', $data);
 
-        // now do feeds
-        // convert from textarea to array
-        $feeds = preg_split('/\R/', $data->feedurls); // splits on any of \n \r\n \r
+        // Now do feeds.
+        // Convert from textarea to array.
+        $feeds = preg_split('/\R/', $data->feedurls); // Splits on any of \n \r\n \r.
 
-        $feeds = array_values(array_unique($feeds)); // remove any duplicate lines, reindex
+        $feeds = array_values(array_unique($feeds)); // Remove any duplicate lines, reindex.
 
-        // check each feed url - throw away any empty ones (length check done in edit_form.php)
-        $number_of_feeds = count($feeds);
-        for ($i = 0; $i < $number_of_feeds; $i++) {
+        // Check each feed url - throw away any empty ones (length check done in edit_form.php).
+        $numberoffeeds = count($feeds);
+        for ($i = 0; $i < $numberoffeeds; $i++) {
             if (isset($feeds[$i])) {
                 $feeds[$i] = trim($feeds[$i]);
                 if (strlen($feeds[$i]) == 0) {
@@ -328,16 +463,18 @@ class block_news_system {
         $bnms = array();
 
         $groupings = $this->get_grouping_sql();
+        $groups = $this->get_group_sql();
         $sql = self::get_message_sql_start() .
                 'WHERE blockinstanceid=?
                  AND messagevisible=1
                  AND messagedate <= ?'
-                .$groupings['sql'].
+                . $groupings['sql']
+                . $groups['sql'] .
                  'ORDER BY messagedate DESC
                  LIMIT '.$max;
 
         $params = array($this->blockinstanceid, time());
-        $params = array_merge($params, $groupings['params']);
+        $params = array_merge($params, $groupings['params'], $groups['params']);
         $mrecs = $DB->get_records_sql($sql, $params);
         foreach ($mrecs as $mrec) {
             $bnms[] = new block_news_message($mrec);
@@ -359,23 +496,26 @@ class block_news_system {
         $bnms = array();
 
         $groupings = $this->get_grouping_sql();
-        if ($viewhidden) { // see all dates, all visibilty
+        $groups = $this->get_group_sql();
+        if ($viewhidden) { // See all dates, all visibilty.
             $sql = self::get_message_sql_start() .
                     'WHERE blockinstanceid = ?'
-                    .$groupings['sql'].
+                    . $groupings['sql']
+                    . $groups['sql'] .
                     'ORDER BY messagedate DESC';
             $params = array($this->blockinstanceid);
-            $params = array_merge($params, $groupings['params']);
+            $params = array_merge($params, $groupings['params'], $groups['params']);
             $mrecs = $DB->get_records_sql($sql, $params);
-        } else {  // see past/present only and visible
-            $sql =  self::get_message_sql_start() .
+        } else {  // See past/present only and visible.
+            $sql = self::get_message_sql_start() .
                     'WHERE blockinstanceid = ?
                      AND messagevisible = 1
                      AND messagedate <= ?'
-                    .$groupings['sql'].
+                    . $groupings['sql']
+                    . $groups['sql'] .
                     'ORDER BY messagedate DESC';
             $params = array($this->blockinstanceid, time());
-            $params = array_merge($params, $groupings['params']);
+            $params = array_merge($params, $groupings['params'], $groups['params']);
             $mrecs = $DB->get_records_sql($sql, $params);
         }
 
@@ -399,7 +539,7 @@ class block_news_system {
         global $DB;
 
         $groupings = $this->get_grouping_sql();
-        if ($viewhidden) {  // see any date, any visibilty
+        if ($viewhidden) {  // See any date, any visibilty.
             $sql = self::get_message_sql_start() .
                   'WHERE blockinstanceid = ?
                    AND {block_news_messages}.id = ?'
@@ -408,7 +548,7 @@ class block_news_system {
             $params = array($this->blockinstanceid, $id);
             $params = array_merge($params, $groupings['params']);
             $mrec = $DB->get_record_sql($sql, $params);
-        } else {  // see past & present only and visible
+        } else {  // See past & present only and visible.
             $sql = self::get_message_sql_start() .
                   'WHERE blockinstanceid = ?
                    AND {block_news_messages}.id = ?
@@ -441,25 +581,33 @@ class block_news_system {
     public function get_message_pn($bnm, $viewhidden) {
         global $DB;
 
-        /* get all relevant messages into an array of ids (as sorted by messagedate asc)
+        /*
+         * Get all relevant messages into an array of ids (as sorted by messagedate asc)
          * indexed by a subscript. The offset of the current message id is found and
-         * the ids of the messages either side returned, or -1 if at end of list
+         * the ids of the messages either side returned, or -1 if at end of list.
          */
-        if ($viewhidden) {  // no date limit, all visibilty
-            $sql_vh = '';
+        if ($viewhidden) {  // No date limit, all visibilty.
+            $sqlvh = '';
+            $paramsvh = array();
         } else {
-            $sql_vh = '  AND messagevisible = 1
+            $sqlvh = '  AND messagevisible = 1
                          AND messagedate <= '.time().' ';
+            $paramsvh = array($bnm->get_messagedate());
         }
+
+        $groups = $this->get_group_sql();
 
         $sql = 'SELECT id, messagedate
                 FROM {block_news_messages}
                 WHERE blockinstanceid = ? '
-                . $sql_vh
+                . $groups['sql']
+                . $sqlvh
                 .'ORDER BY messagedate ASC';
 
-        $mrecs = $DB->get_records_sql($sql, array($this->blockinstanceid, $bnm->get_messagedate()));
-        $pn_id = -1;
+        $params = array($this->blockinstanceid);
+        $params = array_merge($params, $groups['params'], $paramsvh);
+        $mrecs = $DB->get_records_sql($sql, $params);
+        $pnid = -1;
         $i = 0;
         if (!empty($mrecs)) {
             foreach ($mrecs as $mrec) {
@@ -467,24 +615,24 @@ class block_news_system {
                 $i++;
             }
         } else {
-            print_error('errornomsgfound', 'block_news', $id);
+            print_error('errornomsgfound', 'block_news', '', $bnm->get_id());
         }
 
         $off = array_search($bnm->get_id(), $mida);
 
-        // next
+        // Next.
         $pn = new StdClass();
-        if ($off == count($mida)-1) {
+        if ($off == count($mida) - 1) {
             $pn->nextid = -1;
         } else {
-            $pn->nextid = $mida[$off+1];
+            $pn->nextid = $mida[$off + 1];
         }
 
-        //prev
+        // Prev.
         if ($off == 0) {
             $pn->previd = -1;
         } else {
-            $pn->previd = $mida[$off-1];
+            $pn->previd = $mida[$off - 1];
         }
 
         return $pn;
@@ -496,7 +644,7 @@ class block_news_system {
      * @return string - the url of the current news feed including grouping support
      */
     public function get_feed_url() {
-        global $CFG, $OUTPUT;
+        global $CFG, $OUTPUT, $USER;
 
         $feedurl = $CFG->wwwroot . '/blocks/news/feed.php?bi='.$this->blockinstanceid;
 
@@ -504,20 +652,29 @@ class block_news_system {
             return $feedurl;
         }
 
-        $groupings = $this->get_groupingids();
-        if (empty($groupings)) {
-            return $feedurl;
+        // Block news support grouping restriction. Pass groupingsids to URL.
+        if ($this->get_groupingsupport() == self::RESTRICTBYGROUPING) {
+            $groupings = $this->get_groupingids();
+            if (empty($groupings)) {
+                return $feedurl;
+            }
+
+            $feedurl .= '&groupingsids=';
+
+            $firstgrouping = true;
+            foreach ($groupings as $grouping) {
+                if (!$firstgrouping) {
+                    $feedurl .= ',';
+                }
+                $feedurl .= $grouping;
+                $firstgrouping = false;
+            }
         }
 
-        $feedurl .= '&groupingsids=';
-
-        $firstgrouping = true;
-        foreach ($groupings as $grouping) {
-            if (!$firstgrouping) {
-                $feedurl .= ',';
-            }
-            $feedurl .= $grouping;
-            $firstgrouping = false;
+        // Block news support group restriction. Pass username to URL.
+        if ($this->get_groupingsupport() == self::RESTRICTBYGROUP) {
+            $username = $this->username ? $this->username : $USER->username;
+            $feedurl .= '&username=' . $username;
         }
 
         return $feedurl;
@@ -530,40 +687,40 @@ class block_news_system {
     protected function set_feeds($feeds) {
         global $DB;
 
-        $frecs=array();
+        $frecs = array();
 
-        // get current feed records
-        $frecs=$DB->get_records('block_news_feeds',
-                                    array('blockinstanceid'=>$this->blockinstanceid));
+        // Get current feed records.
+        $frecs = $DB->get_records('block_news_feeds',
+                                    array('blockinstanceid' => $this->blockinstanceid));
 
         foreach ($frecs as $frec) {
-            $idx = array_search($frec->feedurl, $feeds); // needle, haystack
+            $idx = array_search($frec->feedurl, $feeds); // Needle, haystack.
             if ($idx !== false) {
-                // feed already present
-                // remove from requested list so we can add any left over, below
+                // Feed already present.
+                // remove from requested list so we can add any left over, below.
                 unset($feeds[$idx]);
             } else {
-                // an existing feed is not in requested list - remove
-                $DB->delete_records('block_news_feeds', array('id'=>$frec->id));
-                $DB->delete_records('block_news_messages', array('newsfeedid'=>$frec->id));
+                // An existing feed is not in requested list - remove.
+                $DB->delete_records('block_news_feeds', array('id' => $frec->id));
+                $DB->delete_records('block_news_messages', array('newsfeedid' => $frec->id));
 
-                // also clear cache
+                // Also clear cache.
                 $this->uncache_block_feed();
             }
         }
 
-        // handle the new ones
+        // Handle the new ones.
         foreach ($feeds as $feed) {
-            $frec=new StdClass();
-            $frec->blockinstanceid=$this->blockinstanceid;
-            $frec->feedurl=$feed;
-            $frec->currenthash='0';
-            $frec->feedupdated=0;
-            $frec->feederror='';
-            $fid=$DB->insert_record('block_news_feeds', $frec, true);
-            $frec->id=$fid;
+            $frec = new StdClass();
+            $frec->blockinstanceid = $this->blockinstanceid;
+            $frec->feedurl = $feed;
+            $frec->currenthash = '0';
+            $frec->feedupdated = 0;
+            $frec->feederror = '';
+            $fid = $DB->insert_record('block_news_feeds', $frec, true);
+            $frec->id = $fid;
 
-            // now get the messages
+            // Now get the messages.
             $this->update_feed($frec);
         }
 
@@ -579,7 +736,7 @@ class block_news_system {
 
         $frecs = array();
         $bnfrecs = $DB->get_records('block_news_feeds',
-            array('blockinstanceid'=>$this->blockinstanceid));
+            array('blockinstanceid' => $this->blockinstanceid));
 
         return $bnfrecs;
     }
@@ -592,17 +749,17 @@ class block_news_system {
     public function update_feed($fbrec) {
         global $DB;
 
-        // do whole process in a transaction
+        // Do whole process in a transaction.
         $transaction = $DB->start_delegated_transaction();
 
-        // re-get record
+        // Re-get record.
         $bnf = $DB->get_record('block_news_feeds', array('id' => $fbrec->id));
 
         $bnf->feederror = '';
         $bnf->feedupdated = time();
         $DB->update_record('block_news_feeds', $bnf);
 
-        // get the feed items
+        // Get the feed items.
         $fia = @$this->get_simplepie($fbrec->feedurl);
 
         if (isset($fia[0]->errortext)) {
@@ -611,50 +768,50 @@ class block_news_system {
             $transaction->allow_commit();
             return;
         }
-        // else OK
+        // Else OK.
 
-        // see if feed is different from the last time we did an update
+        // See if feed is different from the last time we did an update.
         $hash = sha1(serialize($fia));
 
         if ($hash != $bnf->currenthash) {
-            // delete existing
+            // Delete existing.
             $DB->delete_records('block_news_messages', array('newsfeedid' => $bnf->id));
 
-            // also clear cache
+            // Also clear cache.
             $this->uncache_block_feed();
 
-            // write new message
+            // Write new message.
             foreach ($fia as $fi) {
-                // add missing cols
+                // Add missing cols.
                 $fi->blockinstanceid = $fbrec->blockinstanceid;
                 $fi->newsfeedid = $bnf->id;
-                // title, message, link already set
-                // constrict title
+                // Title, message, link already set.
+                // constrict title.
                 $fi->title = core_text::substr($fi->title, 0, 255);
-                // put author at at start of message text, allow an empty element if no author
+                // Put author at at start of message text, allow an empty element if no author.
                 $fi->message = '<div class=author>'.$fi->author.' </div>'.$fi->message;
                 unset($fi->author);
                 $fi->messageformat = FORMAT_HTML;
-                // convert date-time string into unixdate (false/0 if error)
+                // Convert date-time string into unixdate (false/0 if error).
                 $fi->messagedate = strtotime($fi->date);
                 unset($fi->date);
                 $fi->messagerepeat = 0;
                 $fi->messagevisible = 1;
                 $fi->hideauthor = 0;
-                $fi->userid = null; // set to null for feed msgs
+                $fi->userid = null; // Set to null for feed msgs.
                 $fi->timemodified = time();
 
                 block_news_message::create($fi);
             }
 
-            // write new hash
+            // Write new hash.
             $bnf->currenthash = $hash;
             $DB->update_record('block_news_feeds', $bnf);
         }
-        // else do nothing more if hashes match
+        // Else do nothing more if hashes match.
 
-        $transaction->allow_commit(); // seal up
-        // Transactions are automatically rolled back if there is an error
+        $transaction->allow_commit(); // Seal up.
+        // Transactions are automatically rolled back if there is an error.
 
         return;
     }
@@ -674,9 +831,9 @@ class block_news_system {
         require_once($CFG->libdir.'/simplepie/moodle_simplepie.php');
         $feed = new moodle_simplepie($feedurl);
 
-        $feed->set_timeout = 10;//secs
+        $feed->set_timeout = 10; // Secs.
         if (isset($CFG->block_rss_client_timeout)) {
-            $feed->set_cache_duration($CFG->block_rss_client_timeout*60);
+            $feed->set_cache_duration($CFG->block_rss_client_timeout * 60);
         }
 
         if ($feed->error()) {
@@ -689,9 +846,9 @@ class block_news_system {
         if (isset($CFG->maxitemsperfeed) && is_numeric($CFG->maxitemsperfeed)) {
             $maxitems = $CFG->maxitemsperfeed;
         } else {
-            $maxitems = 0; // all
+            $maxitems = 0; // All.
         }
-        $feeditems = $feed->get_items(0, $maxitems); // offset, length (0=all)
+        $feeditems = $feed->get_items(0, $maxitems); // Offset, length (0=all).
 
         $fia = array();
         foreach ($feeditems as $item) {
@@ -722,17 +879,17 @@ class block_news_system {
     public static function get_feeds_to_update($max=1000) {
         global $DB;
 
-        // get value from system config_plugins table
+        // Get value from system config_plugins table.
         if (!$updatetime = get_config('block_news', 'block_news_updatetime') ) {
             print_error('errornoupdatetime', 'block_news');
         }
 
-        // now get the update control data
+        // Now get the update control data.
         $fbrecs = array();
         // The update_feed process then handles each feed in the list independently (ie does
         // a get on the url for each duplicate url) but http caching on server will avoid
         // fresh gets each time (could optimise by having update_feed do one get per url
-        // and then update all feed recs with same url)
+        // and then update all feed recs with same url).
         $sql = 'SELECT {block_news_feeds}.* FROM
                     (SELECT feedurl,min(feedupdated) AS lowestdate
                     FROM {block_news_feeds}
@@ -758,16 +915,19 @@ class block_news_system {
      * @param integer $blockinstanceid
      * @param integer $ifmodifiedsince If feed file generated less than n secs ago, no processing
      * @param array $groupingids Ids of groupings to be included in output.  null = all groupings.
+     * @param int $username The username to get the groups.
      * @return mixed boolean false or string feed xml
      */
     public static function get_block_feed($blockinstanceid,
                                           $ifmodifiedsince=0,
-                                          $groupingids = null) {
+                                          $groupingids = null,
+                                          $username = '') {
+        global $DB;
 
-        $fn =  self::get_feed_filename($blockinstanceid, $groupingids);
+        $fn = self::get_feed_filename($blockinstanceid, $groupingids, $username);
 
-        // if a cached file is present and its internal cache expire marker
-        // is within ifmodified time from client - return false (nothing)
+        // If a cached file is present and its internal cache expire marker
+        // is within ifmodified time from client - return false (nothing).
         $cacheexpires = 0;
         $cachefeedxml = '';
         if (file_exists($fn)) {
@@ -775,14 +935,14 @@ class block_news_system {
         }
 
         if ($cachefeedxml != '') {
-            // get custom 'expires': xxxxx news:expires="1234"
+            // Get custom 'expires': xxxxx news:expires="1234".
             $matches = null;
             if (preg_match('/news:expires="(.*)"/', $cachefeedxml, $matches) != 0) {
                 $cacheexpires = $matches[1];
             }
 
-            // if feed not expired, and file mod time < ifmodifiedsince, return false,
-            // else return cachedfeed
+            // If feed not expired, and file mod time < ifmodifiedsince, return false,
+            // else return cachedfeed.
             if ($cacheexpires == 0 || $cacheexpires > time()) {
                 $cachefmodified = filemtime($fn);
                 if ($cachefmodified < $ifmodifiedsince) {
@@ -793,12 +953,26 @@ class block_news_system {
             }
         }
 
-        // else generate feed
+        // Else generate feed.
         if (!$bns = self::get_block_settings($blockinstanceid)) {
             return false;
         }
 
         $bns->set_user_groupingids($groupingids);
+
+        // Block news use group restriction, return false if not pass userid, courseid.
+        if (($bns->get_groupingsupport() == $bns::RESTRICTBYGROUP)) {
+            if ($username) {
+                $userid = $DB->get_field('user', 'id', array('username' => $username), MUST_EXIST);
+                $bni = $DB->get_record('block_instances', array('id' => $blockinstanceid));
+                $context = context::instance_by_id($bni->parentcontextid);
+                $courseid = $context->instanceid;
+                $bns->set_user_groupids($bns->get_groupids($userid, $courseid));
+                $bns->set_username($username);
+            } else {
+                return false;
+            }
+        }
 
         $feedxml = $bns->generate_block_feed();
 
@@ -806,8 +980,8 @@ class block_news_system {
             return false;
         }
 
-        // and save it
-        check_dir_exists(dirname($fn), true, true); // creates all required paths if absent
+        // And save it.
+        check_dir_exists(dirname($fn), true, true); // Creates all required paths if absent.
         if (($ret = @file_put_contents($fn, $feedxml)) === false) {
             print_error('errorwritefile', 'block_news');
         }
@@ -830,24 +1004,23 @@ class block_news_system {
 
         $feedtitle = $csemod->cseshortname.' - ';
         $feedtitle .= (isset($csemod->modname) ? $csemod->modname.' - ' : '');
-        $feedtitle .= ($this->get_title() == '' ?
-                                get_string('pluginname', 'block_news') : $this->get_title());
+        $feedtitle .= ($this->get_title() == '' ? get_string('pluginname', 'block_news') : $this->get_title());
 
-        // work out if we're in a module or course and derive the feed hdr alternate link value
+        // Work out if we're in a module or course and derive the feed hdr alternate link value.
         if (isset($csemod->modname)) {
             $altpath = '/mod/'.$csemod->modtype.'/view.php?id='.$csemod->modid;
         } else {
             $altpath = '/course/view.php?id='.$csemod->cseid;
         }
 
-        // all msgs for this block instance in desc date order, newest (highest) first
+        // All msgs for this block instance in desc date order, newest (highest) first.
         $bnms = $this->get_messages_all(true);
         $earliestdate = 0;
         $now = time();
-        // to work out date when an update is definitely needed, get date of next future
-        // message (if any)
-        // for visible msgs, get oldest (lower) future date which is more than now
-        // overwrite date until now is reached
+        // To work out date when an update is definitely needed, get date of next future
+        // message (if any).
+        // For visible msgs, get oldest (lower) future date which is more than now
+        // overwrite date until now is reached.
         foreach ($bnms as $bnm) {
             if ($bnm->get_messagevisible()) {
                 if ($bnm->get_messagedate() <= $now) {
@@ -859,32 +1032,32 @@ class block_news_system {
         }
 
         if ($earliestdate != 0) {
-            // 'expires' as integer not rfc3332
+            // Use 'expires' as integer not rfc3332.
             $nsi = "\nxmlns:news=\"http://ns.open.ac.uk/vle/news\" news:expires=\""
             .$earliestdate."\"";
         } else {
             $nsi = '';
         }
 
-        // do header
+        // Do header.
         $uniqueid = $this->get_feed_url();
         $linkself = $this->get_feed_url();
         $linkalt = $CFG->wwwroot.$altpath;
         $header = atom_standard_header($nsi, $uniqueid, $linkself, $linkalt, time(),
         $feedtitle, null);
 
-        // generate Atom items
+        // Generate Atom items
         // in desc order of date from now (recent first)
         // include all posted in last day plus any others to make up MAXSTDMSGS
-        // (if posted-in-last-day < MAXSTDMSGS)
+        // (if posted-in-last-day < MAXSTDMSGS).
         $items = '';
         $c = 0;
-        $onedayago = $now-DAYSECS;
+        $onedayago = $now - DAYSECS;
         $items = array();
         foreach ($bnms as $bnm) {
-            // messagevisible && messagedate <= now
+            // Messagevisible && messagedate <= now.
             if ($bnm->is_visible_to_students()) {
-                // ie just last day, not future
+                // Ie just last day, not future.
                 if ($bnm->get_messagedate() > $onedayago) {
                     $items[] = $this->generate_atom_item($bnm);
                 } else if ($c < self::MAXSTDMSGS) {
@@ -894,11 +1067,11 @@ class block_news_system {
             }
         }
 
-        $body=atom_add_items($items);
+        $body = atom_add_items($items);
 
-        $footer=atom_standard_footer();
+        $footer = atom_standard_footer();
 
-        $feedxml=$header.$body.$footer;
+        $feedxml = $header.$body.$footer;
         return $feedxml;
     }
 
@@ -918,20 +1091,20 @@ class block_news_system {
 
         $it->id = $CFG->wwwroot."/blocks/news/message.php?m=" . $bnm->get_id();
 
-        $it->link = $it->id; // use url for both
+        $it->link = $it->id; // Use url for both.
 
         $it->pubdate = $bnm->get_messagedate();
-        // must contain an author so set to '-' if hiding or not set
+        // Must contain an author so set to '-' if hiding or not set.
         $user = $bnm->get_user();
         if (empty($user) || $bnm->get_hideauthor()) {
             $author = '-';
         } else {
-            $author = fullname($user); // applies Moodle system settings on hiding lastname etc
+            $author = fullname($user); // Applies Moodle system settings on hiding lastname etc.
         }
 
         $it->author = $author;
 
-        // convert any @@PLUGINFILE@@ links to real URLs
+        // Convert any @@PLUGINFILE@@ links to real URLs.
         $context = context_block::instance($bnm->get_blockinstanceid());
         $it->content = file_rewrite_pluginfile_urls($bnm->get_message(), 'pluginfile.php',
                              $context->id, 'block_news', 'message', $bnm->get_id(), null);
@@ -944,21 +1117,24 @@ class block_news_system {
      *  Custom file names
      *
      * @param integer $blockinstanceid
+     * @param string $groupingids
+     * @param string $username
      * @return string filename
      */
-    private static function get_feed_filename($blockinstanceid, $groupingids = null) {
+    private static function get_feed_filename($blockinstanceid, $groupingids = null, $username = '') {
         global $CFG;
 
-        if (empty($groupingids)) {
-            $filename = $blockinstanceid.'.atom';
-        } else {
-            $filename = $blockinstanceid;
+        $filename = $blockinstanceid;
+        if (!empty($groupingids)) {
             foreach ($groupingids as $grouping) {
-                $filename .= '-'.$grouping;
+                $filename .= '-' . $grouping;
             }
-            $filename .= '.atom';
         }
-        $ttnum = floor($blockinstanceid/10000);
+        if ($username) {
+            $filename .= '-' . $username;
+        }
+        $filename .= '.atom';
+        $ttnum = floor($blockinstanceid / 10000);
         $fn = $CFG->dataroot.'/cache/block_news/'.$ttnum.'/'.$filename;
 
         return $fn;
@@ -972,7 +1148,7 @@ class block_news_system {
      */
     public function uncache_block_feed() {
         $fn = self::get_feed_filename($this->blockinstanceid);
-        // check if exists as its possible it was never created
+        // Check if exists as its possible it was never created.
         if (file_exists($fn)) {
             if (unlink($fn) == false) {
                 throw new moodle_exception('cannotdeletefile');
@@ -980,4 +1156,52 @@ class block_news_system {
         }
     }
 
-} // end class
+    /**
+     * Get group indication text
+     *
+     * @param block_news_message $bnm Message
+     * @return string groupindication
+     */
+    public function get_group_indication($bnm) {
+        $groupindication = '';
+        // Set groupingsupport indication message.
+        if ($this->get_groupingsupport() == self::RESTRICTBYGROUPING) {
+            if ($bnm->get_groupingid()) {
+                $groupindication = get_string('rendermsggroupindication', 'block_news',
+                    groups_get_grouping_name($bnm->get_groupingid()));
+            }
+        }
+        if ($this->get_groupingsupport() == self::RESTRICTBYGROUP) {
+            if ($bnm->get_groupid()) {
+                $groupindication = get_string('rendermsggroupindication', 'block_news',
+                    groups_get_group_name($bnm->get_groupid()));
+            }
+        }
+
+        return $groupindication;
+    }
+
+    /**
+     * Get images for the current block instance
+     *
+     * This returns an array of all the image files for the current block instance, keyed by message ID.  This allows us to avoid
+     * having to call get_area_files() for each message when displaying several on a page.
+     *
+     * @param string $filearea The area to get images from, e.g. 'messageimage' or 'thumbnail'
+     * @param int|bool $itemid Optional, Restrict results to this message (if we're only displaying one)
+     * @return array stored_file objects, keyed by message ID.
+     */
+    public function get_images($filearea = 'messageimage', $itemid = false) {
+        $fs = get_file_storage();
+        $context = context_block::instance($this->blockinstanceid);
+        $imagefiles = $fs->get_area_files($context->id, 'block_news', $filearea, $itemid, 'itemid', false);
+        $imagesbyitemid = [];
+        if (!empty($imagefiles)) {
+            foreach ($imagefiles as $imagefile) {
+                $imagesbyitemid[$imagefile->get_itemid()] = $imagefile;
+            }
+        }
+        return $imagesbyitemid;
+    }
+
+} // End class.

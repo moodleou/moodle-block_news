@@ -26,7 +26,7 @@
 
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
-    // must be included from a Moodle page
+    // Must be included from a Moodle page.
 }
 
 require_once($CFG->libdir.'/formslib.php');
@@ -37,8 +37,19 @@ require_once($CFG->libdir.'/formslib.php');
   * @subpackage news
   */
 class block_news_edit_message_form extends moodleform {
-    protected $publishstate='';
-    protected $groupingsupport = 0;
+    /**
+     * Maximum width/height of thumbnail images.
+     * @var int
+     */
+    const THUMBNAIL_MAX_EDGE = 256;
+    const IMAGE_FILE_TYPES = array('.jpg', '.png');
+    const IMAGE_FILE_OPTIONS = array('subdirs' => 0, 'maxbytes' => 50 * 1024, 'areamaxbytes' => 50 * 1024,
+            'maxfiles' => 1, 'accepted_types' => self::IMAGE_FILE_TYPES);
+
+    protected $displaytype = 0;
+    protected $publishstate = '';
+    protected $groupingsupportbygrouping = 0;
+    protected $groupingsupportbygroup = 0;
 
     /**
      * Overide constructor to pass in publish radio button state before
@@ -47,8 +58,10 @@ class block_news_edit_message_form extends moodleform {
      * @param $publishstate
      */
     public function __construct($customdata) {
+        $this->displaytype = $customdata['displaytype'];
         $this->publishstate = $customdata['publishstate'];
-        $this->groupingsupport = $customdata['groupingsupport'];
+        $this->groupingsupportbygrouping = $customdata['groupingsupportbygrouping'];
+        $this->groupingsupportbygroup = $customdata['groupingsupportbygroup'];
         parent::__construct();
     }
 
@@ -58,7 +71,7 @@ class block_news_edit_message_form extends moodleform {
 
         $mform =& $this->_form;
 
-        // hiddens
+        // Hiddens.
         $mform->addElement('hidden', 'bi');
         $mform->setType('bi', PARAM_INT);
 
@@ -71,11 +84,11 @@ class block_news_edit_message_form extends moodleform {
         $mform->addElement('hidden', 'mode');
         $mform->setType('mode', PARAM_RAW);
 
-        // fileset header
+        // Fileset header.
         $mform->addElement('header', 'displayinfo', null);
 
         $mform->addElement('text', 'title', get_string('msgedittitle', 'block_news'),
-            array('size'=>'40'));
+            array('size' => '40'));
         $mform->setType('title', PARAM_TEXT);
         $mform->addRule('title', null, 'required', null, 'client');
         $mform->addRule('title', null, 'maxlength', 80, 'server');
@@ -87,11 +100,25 @@ class block_news_edit_message_form extends moodleform {
         $mform->addElement('filemanager', 'attachments',
             get_string('msgedithlpattach', 'block_news'), null, array('subdirs' => 0));
 
+        if ( $this->displaytype == block_news_system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS ) {
+            $messagetype = array(block_news_message::MESSAGETYPE_NEWS => get_string('newsitem', 'block_news'),
+                    block_news_message::MESSAGETYPE_EVENT => get_string('event', 'block_news'));
+
+            $mform->addElement('select', 'messagetype', get_string('messagetype', 'block_news'), $messagetype);
+            $mform->setDefault('messagetype', block_news_message::MESSAGETYPE_NEWS);
+        }
+
+        if (theme_osep\util::is_osep_design($COURSE)) {
+            $mform->addElement('filemanager', 'messageimage', get_string('messageimage', 'block_news'),
+                    null, self::IMAGE_FILE_OPTIONS);
+        }
+
         $mform->addElement('selectyesno', 'messagevisible',
-                                                 get_string('msgeditvisible', 'block_news'));
+                get_string('msgeditvisible', 'block_news'));
         $mform->setDefault('messagevisible', 1);
 
-        if ($this->groupingsupport) {
+        // If config_groupingsupport is grouping.
+        if ($this->groupingsupportbygrouping) {
             $groupingsdata = groups_get_all_groupings($COURSE->id);
             if ($groupingsdata != false) {
                 $groupings["0"] = get_string('allparticipants');
@@ -104,11 +131,26 @@ class block_news_edit_message_form extends moodleform {
             }
         }
 
-        // publish radio buttons - content determined by value passed in constructor
-        $attributes=array('class'=>'publish_radioopt');
-        $radioarray=array();
-        if ($this->publishstate == "ap") { // already publsihed
-            // leave out 'immediately'
+        // If config_groupingsupport is group.
+        if ($this->groupingsupportbygroup) {
+            $groupsdata = groups_get_all_groups($COURSE->id);
+            $groups = array();
+            if ($groupsdata != false) {
+                $groups[0] = get_string('allparticipants');
+                foreach ($groupsdata as $group) {
+                    $groups[$group->id] = $group->name;
+                }
+                $mform->addElement('select', 'groupid',
+                    get_string('msgeditgroup', 'block_news'), $groups);
+                $mform->setDefault('groupid', 0);
+            }
+        }
+
+        // Publish radio buttons - content determined by value passed in constructor.
+        $attributes = array('class' => 'publish_radioopt');
+        $radioarray = array();
+        if ($this->publishstate == "ap") { // Already publsihed.
+            // Leave out 'immediately'.
             $radioarray[] = $mform->createElement('radio', 'publish', '',
                 get_string('msgeditatspecdate', 'block_news'), 1, $attributes);
             $radioarray[] = $mform->createElement('radio', 'publish', '',
@@ -118,15 +160,15 @@ class block_news_edit_message_form extends moodleform {
                 get_string('msgeditimmediately', 'block_news'), 0, $attributes);
             $radioarray[] = $mform->createElement('radio', 'publish', '',
                 get_string('msgeditatspecdate', 'block_news'), 1, $attributes);
-            // leave out 'already published'
+            // Leave out 'already published'.
         }
         $mform->addGroup($radioarray, 'radioar',
             get_string('msgeditpublish', 'block_news'),
             array(' '), false);
 
-        // add date_time selector in optional area
+        // Add date_time selector in optional area.
         $mform->addElement('date_time_selector', 'messagedate',
-                    get_string('msgeditmessagedate', 'block_news'), array('optional'=>false));
+                    get_string('msgeditmessagedate', 'block_news'), array('optional' => false));
         $mform->disabledIf('messagedate', 'publish', 'neq', 1);
         $mform->setAdvanced('optional');
 
