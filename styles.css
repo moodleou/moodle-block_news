@@ -165,6 +165,10 @@
     width: 50%;
 }
 
+.block_news .menu .menu-action-text img.smallicon {
+    display: none;
+}
+
 @media (max-width: 767px) {
     .block-news-desktop-nextprev {
         display: none;
