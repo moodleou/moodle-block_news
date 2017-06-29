@@ -58,7 +58,6 @@ class block_news_edit_message_form extends moodleform {
 
     protected $displaytype = 0;
     protected $publishstate = '';
-    protected $groupingsupportbygrouping = 0;
     protected $groupingsupportbygroup = 0;
 
     /**
@@ -70,14 +69,13 @@ class block_news_edit_message_form extends moodleform {
     public function __construct($customdata) {
         $this->displaytype = $customdata['displaytype'];
         $this->publishstate = $customdata['publishstate'];
-        $this->groupingsupportbygrouping = $customdata['groupingsupportbygrouping'];
         $this->groupingsupportbygroup = $customdata['groupingsupportbygroup'];
         parent::__construct();
     }
 
 
     public function definition() {
-        global $COURSE;
+        global $COURSE, $PAGE;
 
         $mform =& $this->_form;
 
@@ -145,32 +143,34 @@ class block_news_edit_message_form extends moodleform {
                 get_string('msgeditvisible', 'block_news'));
         $mform->setDefault('messagevisible', 1);
 
-        // If config_groupingsupport is grouping.
-        if ($this->groupingsupportbygrouping) {
-            $groupingsdata = groups_get_all_groupings($COURSE->id);
-            if ($groupingsdata != false) {
-                $groupings["0"] = get_string('allparticipants');
-                foreach ($groupingsdata as $grouping) {
-                    $groupings[$grouping->id] = $grouping->name;
-                }
-                $mform->addElement('select', 'groupingid',
-                    get_string('msgeditgrouping', 'block_news'), $groupings);
-                $mform->setDefault('groupingid', 0);
-            }
-        }
-
         // If config_groupingsupport is group.
         if ($this->groupingsupportbygroup) {
-            $groupsdata = groups_get_all_groups($COURSE->id);
-            $groups = array();
-            if ($groupsdata != false) {
-                $groups[0] = get_string('allparticipants');
-                foreach ($groupsdata as $group) {
-                    $groups[$group->id] = $group->name;
+            $groupingsdata = groups_get_all_groupings($COURSE->id);
+            $groupings = [];
+            $groupinggroups = [];
+            foreach ($groupingsdata as $grouping) {
+                $groupsdata = groups_get_all_groups($COURSE->id, 0, $grouping->id);
+                $groupinggroups[] = (object) ['id' => $grouping->id, 'groupids' => array_keys($groupsdata)];
+                $groupings[$grouping->id] = $grouping->name;
+            }
+            $groups = groups_get_all_groups($COURSE->id);
+            $groupoptions = [];
+            if (!empty($groups)) {
+                $groupoptions[0] = get_string('allparticipants');
+                foreach ($groups as $group) {
+                    $groupoptions[$group->id] = $group->name;
                 }
-                $mform->addElement('select', 'groupid',
-                    get_string('msgeditgroup', 'block_news'), $groups);
+                $mform->addElement('select', 'groupids',
+                        get_string('msgeditgroup', 'block_news'), $groupoptions,
+                        ['multiple' => true]);
                 $mform->setDefault('groupid', 0);
+                if (!empty($groupings)) {
+                    $groupings[0] = '';
+                    ksort($groupings);
+                    $mform->addElement('select', 'grouping',
+                            get_string('msgeditselectgrouping', 'block_news'), $groupings);
+                    $PAGE->requires->js_call_amd('block_news/groupings', 'init', [$groupinggroups]);
+                }
             }
         }
 
@@ -248,6 +248,11 @@ class block_news_edit_message_form extends moodleform {
                 if (!empty($imageerrors)) {
                     $errors['messageimage'] = $imageerrors;
                 }
+            }
+        }
+        if (!empty($data['groupids'])) {
+            if (in_array('0', $data['groupids']) && count($data['groupids']) > 1) {
+                $errors['groupids'] = get_string('errorinvalidgroups', 'block_news');
             }
         }
         return $errors;

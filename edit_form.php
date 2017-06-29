@@ -37,9 +37,6 @@ use block_news\system;
  * @subpackage news
  */
 class block_news_edit_form extends block_edit_form {
-    // Define option value for grouping support by grouping.
-    const OPTIONVALUEBYGROUPING = 1;
-
     // Define option value for grouping support by group.
     const OPTIONVALUEBYGROUP = 2;
 
@@ -109,7 +106,6 @@ class block_news_edit_form extends block_edit_form {
 
         $choicesgrouping = array(
             '0' => get_string('configgroupingoptionnotenable', 'block_news'),
-            self::OPTIONVALUEBYGROUPING => get_string('configgroupingoptiongrouping', 'block_news'),
             self::OPTIONVALUEBYGROUP => get_string('configgroupingoptiongroup', 'block_news')
         );
 

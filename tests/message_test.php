@@ -60,7 +60,8 @@ class message_testcase extends \advanced_testcase {
 
         $mrec1 = $DB->get_record('block_news_messages', ['id' => $mid1]);
 
-        $message1 = new message($mrec1);
+        $groupids = $DB->get_fieldset_select('block_news_message_groups', 'groupid', 'messageid = ?', [$mrec1->id]);
+        $message1 = new message($mrec1, $groupids);
         $message1->delete();
 
         // Assert that the message and associated file has been deleted.

@@ -74,6 +74,7 @@ $string['erroreventstart'] = 'Event start must be in the future';
 $string['erroreventend'] = 'Event end must be after event start';
 $string['errorimagesize'] = 'The message image must be less than {$a}KB.';
 $string['errorimagedimensions'] = 'The message image must be exactly {$a->width}x{$a->height} pixels.';
+$string['errorinvalidgroups'] = 'You cannot select "All participants" as well as specific groups.';
 
 // Block config.
 $string['configtitle'] = 'Block title';
@@ -116,7 +117,7 @@ $string['msgeditmessage'] = 'Text';
 $string['msgeditformat'] = 'Format';
 $string['msgeditmessagedate'] = 'Release date';
 $string['msgeditvisible'] = 'Visible';
-$string['msgeditgrouping'] = 'Grouping';
+$string['msgeditselectgrouping'] = 'Select all groups in grouping';
 $string['msgeditgroup'] = 'Group';
 $string['msgeditpublish'] = 'Publish';
 $string['msgeditrepeat'] = 'Repeated after roll-forward';
@@ -133,7 +134,7 @@ $string['msgeditalldayevent'] = 'All day event';
 $string['msgediteventlocation'] = 'Event location';
 
 // Message render.
-$string['rendermsggroupindication'] = 'Not available unless: You belong to <strong>{$a}</strong>';
+$string['rendermsggroupindication'] = 'Not available unless you belong to one of the following groups: <strong>{$a}</strong>';
 $string['rendermsghidden'] = 'This message has been hidden from students';
 $string['rendermsgfuture'] = 'This message does not display to students until {$a}';
 $string['rendermsgnext'] = 'Next (newer) message';

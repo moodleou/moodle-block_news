@@ -40,11 +40,12 @@ $mode            = optional_param('mode', '', PARAM_TEXT); // Where from: all|on
 if ($id) {
     $action = EDIT;
     $sql = system::get_message_sql_start() .
-        'WHERE {block_news_messages}.id = ?';
+        'WHERE m.id = ?';
     $mrec = $DB->get_record_sql($sql, array('id' => $id));
 
     $blockinstanceid = $mrec->blockinstanceid;
-    $bnm = new message($mrec);
+    $groupids = $DB->get_fieldset_select('block_news_message_groups', 'groupid', 'messageid = ?', [$mrec->id]);
+    $bnm = new message($mrec, $groupids);
     $title = get_string('editmessage', 'block_news') . ': ' . $bnm->get_title();
     $url = new moodle_url('/blocks/news/edit.php', array('m' => $id));
     $publishstate = ($bnm->get_messagedate() > time() ? 'asd' : 'ap');
@@ -95,11 +96,7 @@ if ($mode == 'all') {
 }
 
 $customdata['publishstate'] = $publishstate;
-$customdata['groupingsupportbygrouping'] = 0;
 $customdata['groupingsupportbygroup'] = 0;
-if ($bns->get_groupingsupport() == $bns::RESTRICTBYGROUPING) {
-    $customdata['groupingsupportbygrouping'] = 1;
-}
 if ($bns->get_groupingsupport() == $bns::RESTRICTBYGROUP) {
     $customdata['groupingsupportbygroup'] = 1;
 }
@@ -136,7 +133,7 @@ if ($formdata = $mform->get_data()) {
     }
     // Set internal newsfeedid.
     if (!isset($formdata->newsfeedid)) {
-        $formdata->newsfeedid = 0;
+        $formdata->newsfeedid = null;
     }
     // Set userid to current user.
     $formdata->userid = $USER->id;
@@ -214,8 +211,7 @@ if ($action == EDIT) {
     $toform['messagedate'] = $bnm->get_messagedate();
     $toform['messagerepeat'] = $bnm->get_messagerepeat();
     $toform['hideauthor'] = $bnm->get_hideauthor();
-    $toform['groupingid'] = $bnm->get_groupingid();
-    $toform['groupid'] = $bnm->get_groupid();
+    $toform['groupids'] = $bnm->get_groupids();
     $toform['eventstart'] = $bnm->get_eventstart();
     $toform['alldayevent'] = $bnm->get_alldayevent();
     $toform['eventend'] = $bnm->get_eventend();

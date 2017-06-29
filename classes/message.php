@@ -57,8 +57,7 @@ class message {
     protected $publish;
     protected $timemodified;
     protected $userid;
-    protected $groupingid;
-    protected $groupid;
+    protected $groupids;
     protected $eventstart;
     protected $eventend;
     protected $eventlocation;
@@ -69,8 +68,9 @@ class message {
      * Constructor
      *
      * @param \stdClass $mrec Database record for the message.
+     * @param int[] $groupids IDs of groups to restrict this message to.
      */
-    public function __construct($mrec) {
+    public function __construct($mrec, $groupids = []) {
         // Assign the properties.
         $this->user = new \stdClass;
         foreach ((array) $mrec as $field => $value) {
@@ -83,6 +83,7 @@ class message {
                 }
             }
         }
+        $this->groupids = $groupids;
     }
 
     /**
@@ -213,21 +214,12 @@ class message {
     }
 
     /**
-     * Get the grouping ID of the message.
-     *
-     * @return int grouping id of the message
-     */
-    public function get_groupingid() {
-        return $this->groupingid;
-    }
-
-    /**
      * Get the group ID of the message.
      *
-     * @return int group id of the message
+     * @return int[] group ids of the message
      */
-    public function get_groupid() {
-        return $this->groupid;
+    public function get_groupids() {
+        return $this->groupids;
     }
 
     /**
@@ -376,7 +368,7 @@ class message {
         later (if rewritten to accommodate embedded images).
         */
         // No extra handling/conversion for feed messages (->message is not an array).
-        if ($data->newsfeedid != 0) {
+        if (!empty($data->newsfeedid)) {
             $id = $DB->insert_record('block_news_messages', $data, true);
             // No logging for feed messages.
             return $id;
@@ -388,6 +380,8 @@ class message {
         $data = self::set_alldayevent($data);
 
         $id = $DB->insert_record('block_news_messages', $data, true);
+
+        self::create_messagegroups($data, $id);
 
         // Save files.
         $context = \context_block::instance($data->blockinstanceid);
@@ -428,6 +422,9 @@ class message {
         global $DB;
         $data = self::set_alldayevent($data);
         $DB->update_record('block_news_messages', $data);
+
+        $DB->delete_records('block_news_message_groups', ['messageid' => $data->id]);
+        self::create_messagegroups($data, $data->id);
 
         // Save files.
         $context = \context_block::instance($data->blockinstanceid);
@@ -489,5 +486,22 @@ class message {
             $data->eventend = null;
         }
         return $data;
+    }
+
+    /**
+     * Create message group records
+     *
+     * @param \stdClass $data Submitted form data, contaning groupids array.
+     * @param int $id message record ID.
+     */
+    private static function create_messagegroups($data, $id) {
+        global $DB;
+        if (!empty($data->groupids)) {
+            foreach ($data->groupids as $groupid) {
+                if (!empty($groupid)) {
+                    $DB->insert_record('block_news_message_groups', (object) ['messageid' => $id, 'groupid' => $groupid]);
+                }
+            }
+        }
     }
 }

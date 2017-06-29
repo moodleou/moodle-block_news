@@ -25,6 +25,8 @@
 defined('MOODLE_INTERNAL') || die();
 require_once(__DIR__ . '/../lib.php');
 
+use \block_news\system;
+
 /**
  * PHPUnit tests for new news feed functions.
  *
@@ -33,6 +35,28 @@ require_once(__DIR__ . '/../lib.php');
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_news_newsfeed_testcase extends advanced_testcase {
+
+    private $groupings = [];
+    private $groups = [];
+    private $generator;
+
+    /**
+     * Create two groupings containing a group each, and add the user to both groups.
+     *
+     * @param $course
+     * @param $user
+     */
+    private function create_groupings($course, $user) {
+        $this->groupings[1] = $this->generator->create_grouping(['courseid' => $course->id]);
+        $this->groupings[2] = $this->generator->create_grouping(['courseid' => $course->id]);
+        $this->groups[1] = $this->generator->create_group(['courseid' => $course->id]);
+        $this->groups[2] = $this->generator->create_group(['courseid' => $course->id]);
+        $this->generator->create_grouping_group(['groupingid' => $this->groupings[1]->id, 'groupid' => $this->groups[1]->id]);
+        $this->generator->create_grouping_group(['groupingid' => $this->groupings[2]->id, 'groupid' => $this->groups[2]->id]);
+        $this->generator->create_group_member(['userid' => $user->id, 'groupid' => $this->groups[1]->id]);
+        $this->generator->create_group_member(['userid' => $user->id, 'groupid' => $this->groups[2]->id]);
+    }
+
     public function test_newsfeed_by_course_shortname() {
         global $DB;
 
@@ -120,5 +144,57 @@ class block_news_newsfeed_testcase extends advanced_testcase {
         // Check admin grouping ids.
         $groupingids = block_news_get_groupingids($course->id, $USER->id);
         $this->assertEquals($grouping1->id . ',' . $grouping2->id, $groupingids);
+    }
+
+    public function test_get_feed_by_grouping() {
+        $this->resetAfterTest(true);
+
+        $this->generator = $this->getDataGenerator();
+        $newsgenerator = $this->getDataGenerator()->get_plugin_generator('block_news');
+        // Create a course.
+        $course = $this->generator->create_course();
+
+        $block = $newsgenerator->create_instance([], ['courseid' => $course->id]);
+        $bns = system::get_block_settings($block->id);
+        $bns->save((object) ['groupingsupport' => system::RESTRICTBYGROUP]);
+        // We need a user enrolled on the course.
+        $user1 = $this->generator->create_user();
+        $this->generator->enrol_user($user1->id, $course->id);
+        $this->create_groupings($course, $user1);
+        $newsgenerator->create_block_new_message($block, ['title' => 'Group1 Message', 'timemodified' => time() - 8],
+                [$this->groups[1]->id]);
+        $newsgenerator->create_block_new_message($block, ['title' => 'Group2 Message', 'timemodidied' => time() - 6],
+                [$this->groups[2]->id]);
+        $newsgenerator->create_block_new_message($block, ['title' => 'All groups Message', 'timemodified' => time() - 4],
+                [$this->groups[1]->id, $this->groups[2]->id]);
+        $newsgenerator->create_block_new_message($block, ['title' => 'No groups Message', 'timemodified' => time() - 2]);
+
+        // Get posts visible to grouping 1.
+        $feed1 = system::get_block_feed($block->id, 0, [$this->groupings[1]->id]);
+        $this->assertContains('<title>Group1 Message</title>', $feed1);
+        $this->assertNotContains('<title>Group2 Message</title>', $feed1);
+        $this->assertContains('<title>All groups Message</title>', $feed1);
+        $this->assertContains('<title>No groups Message</title>', $feed1);
+
+        // Get posts visible to grouping 2.
+        $feed2 = system::get_block_feed($block->id, 0, [$this->groupings[2]->id]);
+        $this->assertNotContains('<title>Group1 Message</title>', $feed2);
+        $this->assertContains('<title>Group2 Message</title>', $feed2);
+        $this->assertContains('<title>All groups Message</title>', $feed2);
+        $this->assertContains('<title>No groups Message</title>', $feed2);
+
+        // Get posts visible to grouping 1 and grouping 2.
+        $feed3 = system::get_block_feed($block->id, 0, [$this->groupings[1]->id, $this->groupings[2]->id]);
+        $this->assertContains('<title>Group1 Message</title>', $feed3);
+        $this->assertContains('<title>Group2 Message</title>', $feed3);
+        $this->assertContains('<title>All groups Message</title>', $feed3);
+        $this->assertContains('<title>No groups Message</title>', $feed3);
+
+        // Get all posts visible to user1 - this should be the same as above as this will get all the groups user1 can view.
+        $feed4 = system::get_block_feed($block->id, 0, [], $user1->username);
+        $this->assertContains('<title>Group1 Message</title>', $feed4);
+        $this->assertContains('<title>Group2 Message</title>', $feed4);
+        $this->assertContains('<title>All groups Message</title>', $feed4);
+        $this->assertContains('<title>No groups Message</title>', $feed4);
     }
 }

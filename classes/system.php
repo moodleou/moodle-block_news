@@ -64,10 +64,11 @@ class system {
 
 
     public static function get_message_sql_start() {
-        return "SELECT {block_news_messages}.*, u.id AS u_id, " .
+        return "SELECT DISTINCT m.*, u.id AS u_id, " .
                 get_all_user_name_fields(true, 'u', null, 'u_') .
-                " FROM {block_news_messages}
-             LEFT JOIN {user} u ON {block_news_messages}.userid = u.id ";
+                " FROM {block_news_messages} m
+             LEFT JOIN {user} u ON m.userid = u.id
+             LEFT JOIN {block_news_message_groups} g ON m.id = g.messageid ";
     }
 
     protected $id;
@@ -224,54 +225,14 @@ class system {
     }
 
     /**
-     * Get a list of the groupsings that apply in the current context for use when working
-     * out which messages to display.  This will be because the user is a member of particular
-     * groupings and groupings support is enabled or some groupings have been specified in a
-     * querystring and specified using set_user_groupingids().
+     * Get a list of groupingids to restrict messages by, if previously set by set_user_groupingids.
+     *
+     * Retained for compatibility with legacy feed URLs.
      *
      * @return array - array of the groupingids (empty if none).
      */
     public function get_groupingids() {
-        global $SESSION, $COURSE, $USER, $DB;
-
-        if (!empty($this->usergroupingids)) {
-            return $this->usergroupingids;
-        }
-
-        if (!empty($SESSION->block_news_user_groupings[$COURSE->id])) {
-            return $SESSION->block_news_user_groupings[$COURSE->id];
-        }
-
-        $context = \context_course::instance($COURSE->id);
-        if (has_capability('moodle/site:accessallgroups', $context)) {
-            // If the user has the allgroups capability they can see everything.
-            $g = groups_get_all_groupings($COURSE->id);
-            $groupings = array();
-            foreach ($g as $grouping) {
-                $groupings[] = $grouping->id;
-            }
-            $SESSION->block_news_user_groupings[$COURSE->id] = $groupings;
-            return $groupings;
-        }
-
-        $sql = 'SELECT DISTINCT({groupings}.id)
-                FROM {user}
-                INNER JOIN {groups_members}
-                ON {user}.id = {groups_members}.userid
-                INNER JOIN {groupings_groups}
-                ON {groups_members}.groupid = {groupings_groups}.groupid
-                INNER JOIN {groupings}
-                ON {groupings_groups}.groupingid = {groupings}.id
-                WHERE {user}.id = ?
-                AND {groupings}.courseid = ?';
-        $results = $DB->get_records_sql($sql, array($USER->id, $COURSE->id));
-
-        $groupings = array();
-        foreach ($results as $result) {
-            $groupings[] = $result->id;
-        }
-        $SESSION->block_news_user_groupings[$COURSE->id] = $groupings;
-        return $groupings;
+        return empty($this->usergroupingids) ? [] : $this->usergroupingids;
     }
 
     /**
@@ -350,49 +311,14 @@ class system {
     }
 
     /**
-     * Return SQL WHERE and clause and params to append to queries when grouping support
-     * is enabled.
-     *
-     * @return array - 'sql' (empty string if nothing to return)
-     * and 'params' (empty array if nothing).
-     */
-    public function get_grouping_sql() {
-        global $COURSE, $DB;
-
-        $output = array();
-        $output['sql'] = '';
-        $output['params'] = array();
-
-        // Return if config_groupingsupport is not grouping.
-        if ($this->get_groupingsupport() != self::RESTRICTBYGROUPING) {
-            return $output;
-        }
-
-        $context = \context_course::instance($COURSE->id);
-        if (has_capability('moodle/site:accessallgroups', $context)) {
-            return $output;
-        }
-
-        $groupings = $this->get_groupingids();
-
-        $groupings[] = 0;
-
-        list($sql, $groupings) = $DB->get_in_or_equal($groupings);
-
-        $output['sql'] = ' AND groupingid ' . $sql . ' ';
-        $output['params'] = $groupings;
-
-        return $output;
-    }
-
-    /**
      * Return SQL WHERE and clause and params to append to queries when group support
      * is enabled.
      *
+     * @param int[] $groupingids Optional array of groupingids, to get the groups for groupings instead of from $this->groupids.
      * @return array - 'sql' (empty string if nothing to return)
      * and 'params' (empty array if nothing).
      */
-    public function get_group_sql() {
+    public function get_group_sql($groupingids = []) {
         global $COURSE, $DB;
 
         $output = array();
@@ -409,14 +335,24 @@ class system {
             return $output;
         }
 
-        $groups = $this->get_groupids();
+        if (empty($groupingids)) {
+            $groups = $this->get_groupids();
+            if (!empty($groups)) {
+                list($sql, $params) = $DB->get_in_or_equal($groups);
+            }
+        } else {
+            list($insql, $params) = $DB->get_in_or_equal($groupingids);
+            $sql = "IN (
+                SELECT grp.id
+                  FROM {groups} grp
+                  JOIN {groupings_groups} gg ON gg.groupid = grp.id
+                 WHERE gg.groupingid " . $insql . ")";
+        }
 
-        $groups[] = 0;
-
-        list($sql, $groups) = $DB->get_in_or_equal($groups);
-
-        $output['sql'] = ' AND groupid ' . $sql . ' ';
-        $output['params'] = $groups;
+        if (isset($sql) && isset($params)) {
+            $output['sql'] = ' AND (g.id IS NULL OR g.groupid ' . $sql . ') ';
+            $output['params'] = $params;
+        }
 
         return $output;
     }
@@ -548,24 +484,23 @@ class system {
         global $DB;
         $bnms = array();
 
-        $groupings = $this->get_grouping_sql();
         $groups = $this->get_group_sql();
         $restricttype = $this->get_type_sql($type);
         $sql = self::get_message_sql_start() .
                 'WHERE blockinstanceid=?
                  AND messagevisible=1
                  AND messagedate <= ?'
-                . $groupings['sql']
                 . $groups['sql']
                 . $restricttype['sql'] .
                 'ORDER BY eventstart ASC, messagedate DESC
                  LIMIT ' . $max;
 
         $params = array($this->blockinstanceid, time());
-        $params = array_merge($params, $groupings['params'], $groups['params'], $restricttype['params']);
+        $params = array_merge($params, $groups['params'], $restricttype['params']);
         $mrecs = $DB->get_records_sql($sql, $params);
+        $groupids = $this->get_groupids_by_message(array_keys($mrecs));
         foreach ($mrecs as $mrec) {
-            $bnms[] = new message($mrec);
+            $bnms[] = new message($mrec, $groupids[$mrec->id]);
         }
 
         return $bnms;
@@ -596,24 +531,22 @@ class system {
             }
         }
 
-        $groupings = $this->get_grouping_sql();
-        $groups = $this->get_group_sql();
+        $groups = $this->get_group_sql($this->get_groupingids());
         $restricttype = $this->get_type_sql($type, $pastevents);
         $hidden = $this->get_hidden_sql($viewhidden);
 
         $sql = self::get_message_sql_start() .
                 'WHERE blockinstanceid = ?'
                 . $hidden['sql']
-                . $groupings['sql']
                 . $groups['sql']
                 . $restricttype['sql']
                 . $orderby . ' ' . $limit;
         $params = array($this->blockinstanceid);
-        $params = array_merge($params, $hidden['params'], $groupings['params'], $groups['params'], $restricttype['params']);
+        $params = array_merge($params, $hidden['params'], $groups['params'], $restricttype['params']);
         $mrecs = $DB->get_records_sql($sql, $params);
-
+        $groupids = $this->get_groupids_by_message(array_keys($mrecs));
         foreach ($mrecs as $mrec) {
-            $bnms[] = new message($mrec);
+            $bnms[] = new message($mrec, $groupids[$mrec->id]);
         }
 
         return $bnms;
@@ -629,20 +562,19 @@ class system {
      */
     public function get_message_count($viewhidden, $type, $pastevents = false) {
         global $DB;
-        $groupings = $this->get_grouping_sql();
         $groups = $this->get_group_sql();
         $restricttype = $this->get_type_sql($type, $pastevents);
         $hidden = $this->get_hidden_sql($viewhidden);
 
-        $sql = "SELECT COUNT(*)
-                  FROM {block_news_messages}
+        $sql = "SELECT COUNT(DISTINCT m.id)
+                  FROM {block_news_messages} m
+             LEFT JOIN {block_news_message_groups} g ON m.id = g.messageid
                  WHERE blockinstanceid = ? " .
                 $hidden['sql'] .
-                $groupings['sql'] .
                 $groups['sql'] .
                 $restricttype['sql'];
         $params = array($this->blockinstanceid);
-        $params = array_merge($params, $hidden['params'], $groupings['params'], $groups['params'], $restricttype['params']);
+        $params = array_merge($params, $hidden['params'], $groups['params'], $restricttype['params']);
         return $DB->count_records_sql($sql, $params);
     }
 
@@ -657,31 +589,27 @@ class system {
     public function get_message($id, $viewhidden) {
         global $DB;
 
-        $groupings = $this->get_grouping_sql();
         if ($viewhidden) {  // See any date, any visibilty.
             $sql = self::get_message_sql_start() .
                     'WHERE blockinstanceid = ?
-                   AND {block_news_messages}.id = ?'
-                    . $groupings['sql'];
+                   AND {block_news_messages}.id = ?';
 
             $params = array($this->blockinstanceid, $id);
-            $params = array_merge($params, $groupings['params']);
             $mrec = $DB->get_record_sql($sql, $params);
         } else {  // See past & present only and visible.
             $sql = self::get_message_sql_start() .
                     'WHERE blockinstanceid = ?
                    AND {block_news_messages}.id = ?
                    AND messagevisible = 1
-                   AND messagedate <= ?'
-                    . $groupings['sql'];
+                   AND messagedate <= ?';
 
             $params = array($this->blockinstanceid, $id, time());
-            $params = array_merge($params, $groupings['params']);
             $mrec = $DB->get_record_sql($sql, $params);
         }
 
         if (!empty($mrec)) {
-            return new message($mrec);
+            $groupids = $DB->get_fieldset_select('block_news_message_groups', 'groupid', 'messageid = ?', [$mrec->id]);
+            return new message($mrec, $groupids);
         } else {
             print_error('errornomsgfound', 'block_news', $id);
         }
@@ -714,19 +642,18 @@ class system {
         }
 
         $groups = $this->get_group_sql();
-        $grouppings = $this->get_grouping_sql();
 
-        $sql = 'SELECT id, messagedate
-                  FROM {block_news_messages}
+        $sql = 'SELECT DISTINCT m.id, messagedate
+                  FROM {block_news_messages} m
+             LEFT JOIN {block_news_message_groups} g ON m.id = g.messageid
                  WHERE blockinstanceid = ?
                    AND messagetype = ?'
                 . $groups['sql']
-                . $grouppings['sql']
                 . $sqlvh
                 . 'ORDER BY messagedate ASC';
 
         $params = array($this->blockinstanceid, $bnm->get_messagetype());
-        $params = array_merge($params, $groups['params'], $grouppings['params'], $paramsvh);
+        $params = array_merge($params, $groups['params'], $paramsvh);
         $mrecs = $DB->get_records_sql($sql, $params);
         $pnid = -1;
         $i = 0;
@@ -770,33 +697,18 @@ class system {
 
         $feedurl = $CFG->wwwroot . '/blocks/news/feed.php?bi=' . $this->blockinstanceid;
 
-        if (!$this->get_groupingsupport()) {
+        if (!$this->get_groupingsupport() == self::RESTRICTBYGROUP) {
             return $feedurl;
         }
 
-        // Block news support grouping restriction. Pass groupingsids to URL.
-        if ($this->get_groupingsupport() == self::RESTRICTBYGROUPING) {
-            $groupings = $this->get_groupingids();
-            if (empty($groupings)) {
-                return $feedurl;
-            }
-
-            $feedurl .= '&groupingsids=';
-
-            $firstgrouping = true;
-            foreach ($groupings as $grouping) {
-                if (!$firstgrouping) {
-                    $feedurl .= ',';
-                }
-                $feedurl .= $grouping;
-                $firstgrouping = false;
-            }
-        }
-
-        // Block news support group restriction. Pass username to URL.
-        if ($this->get_groupingsupport() == self::RESTRICTBYGROUP) {
+        $groupings = $this->get_groupingids();
+        if (empty($groupings)) {
+            // Pass username to URL.
             $username = $this->username ? $this->username : $USER->username;
             $feedurl .= '&username=' . $username;
+        } else {
+            // Pass groupingsids to URL.
+            $feedurl .= '&groupingsids=' . implode(',',  $groupings);
         }
 
         return $feedurl;
@@ -1080,7 +992,7 @@ class system {
         $bns->set_user_groupingids($groupingids);
 
         // Block news use group restriction, return false if not pass userid, courseid.
-        if (($bns->get_groupingsupport() == $bns::RESTRICTBYGROUP)) {
+        if (($bns->get_groupingsupport() == $bns::RESTRICTBYGROUP && empty($groupingids))) {
             if ($username) {
                 $userid = $DB->get_field('user', 'id', array('username' => $username), MUST_EXIST);
                 $bni = $DB->get_record('block_instances', array('id' => $blockinstanceid));
@@ -1282,16 +1194,11 @@ class system {
     public function get_group_indication($bnm) {
         $groupindication = '';
         // Set groupingsupport indication message.
-        if ($this->get_groupingsupport() == self::RESTRICTBYGROUPING) {
-            if ($bnm->get_groupingid()) {
-                $groupindication = get_string('rendermsggroupindication', 'block_news',
-                        groups_get_grouping_name($bnm->get_groupingid()));
-            }
-        }
         if ($this->get_groupingsupport() == self::RESTRICTBYGROUP) {
-            if ($bnm->get_groupid()) {
-                $groupindication = get_string('rendermsggroupindication', 'block_news',
-                        groups_get_group_name($bnm->get_groupid()));
+            $messagegroups = $bnm->get_groupids();
+            if (!empty($messagegroups)) {
+                $groupnames = implode(', ', array_map('groups_get_group_name', $messagegroups));
+                $groupindication = get_string('rendermsggroupindication', 'block_news', $groupnames);
             }
         }
 
@@ -1330,19 +1237,18 @@ class system {
      */
     public function count_messages($viewhidden, $type = null) {
         global $DB;
-        $groupings = $this->get_grouping_sql();
         $groups = $this->get_group_sql();
         $restricttype = $this->get_type_sql($type);
         $hidden = $this->get_hidden_sql($viewhidden);
-        $sql = "SELECT COUNT(*)
-                  FROM {block_news_messages}
+        $sql = "SELECT COUNT(DISTINCT m.id)
+                  FROM {block_news_messages} m
+             LEFT JOIN {block_news_message_groups} g ON m.id = g.messageid
                  WHERE blockinstanceid = ? "
                 . $hidden['sql']
-                . $groupings['sql']
                 . $groups['sql']
                 . $restricttype['sql'];
         $params = [$this->blockinstanceid];
-        $params = array_merge($params, $hidden['params'], $groupings['params'], $groups['params'], $restricttype['params']);
+        $params = array_merge($params, $hidden['params'], $groups['params'], $restricttype['params']);
         return $DB->count_records_sql($sql, $params);
     }
 
@@ -1400,6 +1306,25 @@ class system {
         }
 
         return $errors;
+    }
+
+    /**
+     * Find all messagegroups for the specified messages, and return them as a list of groupids keyed by messageid.
+     *
+     * @param int[] $messageids
+     * @return array Array of groupids, keyed by message ID.
+     */
+    public function get_groupids_by_message(array $messageids) {
+        global $DB;
+        $groupids = array_fill_keys($messageids, []);
+        if (!empty($messageids)) {
+            list($sql, $params) = $DB->get_in_or_equal($messageids);
+            $messagegroups = $DB->get_records_select('block_news_message_groups', 'messageid ' . $sql, $params);
+            foreach ($messagegroups as $messagegroup) {
+                $groupids[$messagegroup->messageid][] = $messagegroup->groupid;
+            }
+        }
+        return $groupids;
     }
 
 } // End class.
