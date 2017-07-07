@@ -171,16 +171,9 @@ if ($action == 'delete' && !$confirm) {
     $image = $bns->get_images('messageimage', $bnm->get_id());
     $msgwidget = new full_message($bnm, $pn->previd, $pn->nextid, $bns, 'one', $image);
 
-    if ($bns->get_displaytype() == system::DISPLAY_DEFAULT) {
-        // Normal display of a message.
-        block_news_output_hdr($title, $bns);
-        echo $output->render($msgwidget);
-    } else {
-        $page = new view_page($msgwidget);
-        echo $OUTPUT->header();
-        echo $output->render($page);
-    }
-
+    $page = new view_page($msgwidget);
+    echo $OUTPUT->header();
+    echo $output->render($page);
 }
 
 echo $OUTPUT->footer();

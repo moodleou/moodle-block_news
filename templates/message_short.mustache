@@ -70,18 +70,13 @@
             </div>
         {{/thumburl}}
         <h1>
-            {{#link}}<a href="{{link}}">{{/link}}
-            <span class="block_news_msg_title">{{title}}</span>
-            {{#link}}</a>{{/link}}
+            <a href="{{viewlink}}"><span class="block_news_msg_title">{{title}}</span></a>
         </h1>
         <span class="block_news_msg_messagedate">{{#str}} posted, block_news {{/str}} {{messagedate}}</span>
         {{#author}}
             <div class="block_news_msg_author">{{author}}</div>
         {{/author}}
         <div class="block_news_msg_message">{{{formattedmessage}}}</div>
-        <div class="link">
-            {{> block_news/message_link}}
-        </div>
         <div class="block_news_group_indication">{{{groupindication}}}</div>
         {{#hasactions}}
             <div class="box editicons">

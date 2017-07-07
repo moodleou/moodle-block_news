@@ -69,7 +69,7 @@ class behat_block_news extends behat_base {
      */
     public function i_should_see_image_in_news_message($imagename, $messagetitle) {
         if ($imagename === 'thumbnail.jpg') {
-            $titlecontainer = "span[contains(@class, 'block_news_msg_title')][contains(text(), '$messagetitle')]/../../";
+            $titlecontainer = "span[contains(@class, 'block_news_msg_title')][contains(text(), '$messagetitle')]/../../../";
         } else {
             $titlecontainer = "*[contains(@class, 'title')][contains(text(), '$messagetitle')]/following-sibling::";
         }
@@ -95,6 +95,18 @@ class behat_block_news extends behat_base {
         $blockinstance->title = 'News and events';
         $DB->update_record('block_news', $blockinstance);
         rebuild_course_cache($course->id);
+    }
+
+    /**
+     * Set the feedurls setting to a fixture file, using the wwwroot URLs.
+     *
+     * @When /^I set the news block feedurls field to fixture file "([^"]+)"$/
+     * @param string $filename XML file in blocks/news/tests/fixtures
+     */
+    public function i_set_the_news_block_feedurls_field_to_fixture_file($filename) {
+        global $CFG;
+        $url = $CFG->wwwroot . '/blocks/news/tests/fixtures/' . $filename;
+        $this->execute("behat_forms::i_set_the_field_to", ['id_config_feedurls', $url]);
     }
 }
 

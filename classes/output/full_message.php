@@ -55,6 +55,10 @@ class full_message extends renderable_message implements \templatable {
     public $nextlink;
     /** @var bool True if this is a news message, false if it's an event */
     public $isnews;
+    /** @var string Source URL for the message (if from a feed) */
+    public $link;
+    /** @var \pix_icon Icon to display with link */
+    public $linkicon;
 
     /**
      * Build full message data
@@ -202,6 +206,8 @@ class full_message extends renderable_message implements \templatable {
         }
         $this->hasattachments = !empty($this->attachments);
         $this->hasnotes = !empty($this->notes);
+        $linkicon = new \pix_icon('icon', '', 'mod_url', ['class' => 'iconlarge']);
+        $this->linkicon = $linkicon->export_for_template($output);
         $this->export_actions_for_template($output);
         return $this;
     }

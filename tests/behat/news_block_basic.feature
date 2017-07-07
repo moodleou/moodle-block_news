@@ -108,8 +108,8 @@ Feature: Basic usage of news block
     And I should not see "Short message"
 
     # Hide the 'Third message'.
-    When I click on "hide" "link" in the "//div[contains(@class, 'block_news_message')][1]" "xpath_element"
-    Then "show" "link" should exist in the "//div[contains(@class, 'block_news_message')][1]" "xpath_element"
+    When I click on "hide" "link" in the ".block_news_message" "css_element"
+    Then "show" "link" should exist in the ".block_news_message" "css_element"
 
     # Add another message
     When I press "Add a new message"
@@ -196,3 +196,19 @@ Feature: Basic usage of news block
     # On main page either.
     When I follow "C1"
     Then I should not see "ANNE" in the "(new News block)" "block"
+
+  @javascript
+  Scenario: Add a feed in the news block settings
+    Given I log in as "admin"
+    And I am on site homepage
+    And I follow "Course 1"
+    And I turn editing mode on
+    And I add the "News" block
+    And I configure the "(new News block)" block
+    When I set the news block feedurls field to fixture file "feed.xml"
+    And I press "Save changes"
+    Then I should see "Fourth message" in the "(new News block) (new)" "block"
+    When I follow "Fourth message"
+    Then I should see "Fourth message"
+    And "View original message" "link" should exist
+    And the "href" attribute of "View original message" "link" should contain "blocks/news/message.php?m=575003"

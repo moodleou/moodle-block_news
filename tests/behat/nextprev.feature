@@ -28,7 +28,7 @@ Feature: Next/Previous message navigation
       | news 2 | news 2  | news        | 1487952036  |
       | news 3 | news 3  | news        | 1487952037  |
     And I reload the page
-    And I click on "View" "link" in the "block_news" "block"
+    And I click on "news 3" "link" in the "block_news" "block"
     And I should see "news 3"
     And "Previous" "link" should exist
     And "Next" "link" should not exist
@@ -52,7 +52,7 @@ Feature: Next/Previous message navigation
       | news 3  | news 3  | news        | 1487952039  |            |
       | event 3 | event 3 | event       | 1487952040  | 2145916801 |
     And I reload the page
-    And I click on "View" "link" in the "block_news" "block"
+    And I click on "news 3" "link" in the "block_news" "block"
     And I should see "news 3"
     And "Previous" "link" should exist
     And "Next" "link" should not exist
@@ -65,7 +65,7 @@ Feature: Next/Previous message navigation
     And "Previous" "link" should not exist
     And "Next" "link" should exist
     When I follow "C1"
-    And I click on "View" "link" in the ".block_news_event" "css_element"
+    And I click on "event 3" "link" in the ".block_news_event" "css_element"
     And I should see "event 3"
     And "Previous" "link" should exist
     And "Next" "link" should not exist

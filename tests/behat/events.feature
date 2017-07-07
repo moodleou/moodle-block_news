@@ -176,7 +176,7 @@ Feature: Display events in news block
       | title    | message      | messagetype | messagedate | eventstart |
       | message1 | test message | 2           | 1483228800  | 2145974400 |
     And I reload the page
-    And I click on "View" "link" in the "News and events" "block"
+    And I click on "message1" "link" in the "News and events" "block"
     Then I should see "message1"
     And I should see "test message"
     And I should not see "by Admin User"

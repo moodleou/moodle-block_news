@@ -74,44 +74,35 @@
 }
 
 /* view full message */
-.block_news_message .main, .block_news_top, .block_news_nonews {
+.block_news_message,
+.block_news_top,
+.block_news_nonews {
     max-width: 500px;
-    border: solid black 1px;
     margin: 10px 0;
     padding: 10px;
 }
 
-.block_news_top{
-    height: 23px;
+.block_news_message {
+    border-top: 1px solid #dadad9;
 }
 
 .block_news_top .singlebutton {
-    /* force reduced height (which doesnt actually affect button height)
-    to avoid RSS button being artifically displaced */
-    height: 5px;
-    width: 200px;
+    width: calc(100% - 24px);
+    display: inline-block;
     margin: 0;
 }
 
 .block_news_top #block_news_rss_all {
-    float: right;
+    width: 16px;
+    display: inline-block;
 }
 
 .block_news_message .msghide {
     color: gray;
 }
 
-.block_news_message .title, .block_news_message .messagedate {
-    float: left;
-}
-
 .block_news_message .link {
     clear: left;
-}
-
-.block_news_message .title {
-    font-weight: bold;
-    margin-left: 10px
 }
 
 .block_news_message .author {
@@ -121,6 +112,10 @@
 
 .block_news_message .message {
     padding-top: 5px;
+}
+
+.block-news-message-text {
+    margin-bottom: 15px;
 }
 
 .block_news_message .messageimage img,
@@ -161,6 +156,10 @@
 
 .block-news-view .block-news-message-text {
     max-width: 650px;
+}
+
+.block-news-message-extlink .iconlarge {
+    margin-right: 8px;
 }
 
 /* Set text area width of feed URL list 100%. */

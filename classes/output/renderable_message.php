@@ -38,8 +38,6 @@ abstract class renderable_message implements \renderable {
     public $title;
     /** @var string Additional CSS classes for message wrapper */
     public $classes;
-    /** @var string Source URL for the message (if from a feed) */
-    public $link;
     /** @var string URL to view the whole message */
     public $viewlink;
     /** @var string Message text */

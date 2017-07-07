@@ -142,6 +142,7 @@ $string['rendermsgprev'] = 'Previous (older) message';
 $string['rendereventnext'] = 'Next (listed) event';
 $string['rendereventprev'] = 'Previous (listed) event';
 $string['rendermsgview'] = '(View)';
+$string['rendermsgextlink'] = 'View original message';
 
 // Event render.
 $string['fulleventdate'] = '{$a->start} to {$a->end}';
