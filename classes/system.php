@@ -425,7 +425,6 @@ class system {
         global $DB;
 
         $data->id = $this->id;
-        $data->timemodified = time();
 
         $DB->update_record('block_news', $data);
 

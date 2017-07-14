@@ -223,36 +223,6 @@ class block_news_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Returns html for an edit form for display in the block.
-     *
-     * @param system $bns The block system object
-     * @return string
-     */
-    public function render_edit_form(system $bns) {
-        global $CFG;
-
-        $context = new \stdClass();
-
-        // Hidden inputs.
-        $context->sesskey = sesskey();
-        $context->bid = $bns->get_blockinstanceid();
-
-        $feeds = $bns->get_feeds();
-        $context->feedurls = '';
-        foreach ($feeds as $feed) {
-            $context->feedurls .= $feed->feedurl . "\n";
-        }
-
-        // Submit button.
-        $context->savelabel = get_string('savechanges');
-
-        // The main form.
-        $context->action = $CFG->wwwroot . '/blocks/news/savesettings.php';
-
-        return $this->render_from_template('block_news/editform', $context);
-    }
-
-    /**
      * Called prior to header outputs
      * Should not return anything
      *

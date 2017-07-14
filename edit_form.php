@@ -41,6 +41,20 @@ class block_news_edit_form extends block_edit_form {
     const OPTIONVALUEBYGROUP = 2;
 
     /**
+     * Overridden constructor to support ajaxformdata.
+     *
+     * @param mixed|null $actionurl
+     * @param mixed|null $block
+     * @param string $page
+     * @param array|null $ajaxformdata
+     */
+    public function __construct($actionurl, $block, $page, array $ajaxformdata = null) {
+        parent::__construct($actionurl, $block, $page);
+        $this->_ajaxformdata = $ajaxformdata;
+        $this->_process_submission('');
+    }
+
+    /**
      * standard config form function
      * all field names must be prefixed by 'config_' which is stripped off in data
      * received in block_news::instance_config_save()
@@ -121,15 +135,3 @@ class block_news_edit_form extends block_edit_form {
     }
 
 }
-
-
-// Main.
-
-$id                 = optional_param('m', 0, PARAM_INTEGER);
-$blockinstanceid    = optional_param('bi', 0, PARAM_INTEGER);
-
-require_login(); // Redirect to login page if not logged in.
-
-$context = context_system::instance();
-
-$mform =& $this->_form;

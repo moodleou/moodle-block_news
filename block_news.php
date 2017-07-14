@@ -181,12 +181,6 @@ class block_news extends block_base {
             $this->content->footer .= $output->container_end();
         }
 
-        if ($isediting) {
-            $this->content->footer .= $output->render_edit_form($this->bns);
-            $params = [['formid' => 'newsblockform']];
-            $this->page->requires->yui_module('moodle-form-shortforms', 'M.form.shortforms', $params);
-        }
-
         return $this->content;
     }
 
