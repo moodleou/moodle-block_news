@@ -84,7 +84,7 @@ function atom_standard_header($nsi, $uniqueid, $linkself, $linkalt, $updated,
             format_string($site->fullname));
 
         //write image info
-        $atompix = $OUTPUT->pix_url('i/rsssitelogo');
+        $atompix = $OUTPUT->image_url('i/rsssitelogo');
 
         //write the info
         $result .= atom_full_tag('logo', 1, false, $atompix);
