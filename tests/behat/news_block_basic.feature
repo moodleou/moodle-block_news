@@ -20,7 +20,7 @@ Feature: Basic usage of news block
   Scenario: Basic usage of news block
     # Add news block.
     When I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I turn editing mode on
     And I add the "News" block
     Then I should see "(new News block)"
@@ -37,13 +37,13 @@ Feature: Basic usage of news block
     # Check student can view it.
     When I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "My first message"
 
   Scenario: Test post and view multiple messages, summaries
     # Add block.
     Given I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I turn editing mode on
     And I add the "News" block
 
@@ -123,7 +123,7 @@ Feature: Basic usage of news block
     # Go back in as a student and check the hide part worked.
     When I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "Fourth message"
     And I should not see "Third message"
     And I should see "Medium message"
@@ -131,7 +131,7 @@ Feature: Basic usage of news block
   Scenario: Test block options
     # Add block.
     Given I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I turn editing mode on
     And I add the "News" block
 
@@ -170,7 +170,7 @@ Feature: Basic usage of news block
   Scenario: Test author name option
     # Add block.
     Given I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I turn editing mode on
     And I add the "News" block
 
@@ -201,7 +201,7 @@ Feature: Basic usage of news block
   Scenario: Add a feed in the news block settings
     Given I log in as "admin"
     And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I turn editing mode on
     And I add the "News" block
     And I configure the "(new News block)" block

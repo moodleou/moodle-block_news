@@ -35,7 +35,7 @@ Feature: News message restriction by grouping or group
       | GROUPING1 | GROUP1 |
     # Add block.
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I turn editing mode on
     And I add the "News" block
 
@@ -68,13 +68,13 @@ Feature: News message restriction by grouping or group
     # Student 1 in grouping 1 see the message 1.
     And I log out
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "Short message title 1"
 
     # Student 2 do not see the message 1.
     And I log out
     When I log in as "student2"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should not see "Short message title 1"
 
   Scenario: Set Enable message restriction in Block News configuration to Group and set Group to a
@@ -101,11 +101,11 @@ Feature: News message restriction by grouping or group
     # Student 1 in group 1 do not see the message 2.
     And I log out
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should not see "Short message title 2"
 
     # Student 2 see the message 2.
     And I log out
     When I log in as "student2"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "Short message title 2"

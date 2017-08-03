@@ -11,7 +11,7 @@ Feature: Inline settings form
     And I log in as "admin"
     And I am on site homepage
     And I am using the OSEP theme
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And the news block for course "C1" is in news and events mode
     And the following news messages exist on course "C1":
       | title      | message    | messagetype | messagedate | eventstart |
@@ -59,7 +59,7 @@ Feature: Inline settings form
       | Course 2 | C2        | 0        | topics |
     And I log in as "admin"
     And I am on site homepage
-    And I follow "Course 2"
+    And I am on "Course 2" course homepage
     And I turn editing mode on
     And I add the "News" block
     And the news block for course "C2" is in news and events mode

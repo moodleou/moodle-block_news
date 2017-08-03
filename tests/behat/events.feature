@@ -16,7 +16,7 @@ Feature: Display events in news block
       | ukuser | C1     | student |
     And I log in as "admin"
     And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I turn editing mode on
     And I add the "News" block
     And the news block for course "C1" is in news and events mode
@@ -135,7 +135,7 @@ Feature: Display events in news block
     And I log out
     # View the event as a user in the UK (8 hours behind).
     And I log in as "ukuser"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "01" in the ".block_news_event time" "css_element"
     And I should see "Jan" in the ".block_news_event time" "css_element"
     And I should see "message1" in the "News and events" "block"
