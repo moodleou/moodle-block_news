@@ -200,7 +200,6 @@ Feature: Basic usage of news block
   @javascript
   Scenario: Add a feed in the news block settings
     Given I log in as "admin"
-    And I am on site homepage
     And I am on "Course 1" course homepage
     And I turn editing mode on
     And I add the "News" block

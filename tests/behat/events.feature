@@ -15,7 +15,6 @@ Feature: Display events in news block
       | user   | course | role    |
       | ukuser | C1     | student |
     And I log in as "admin"
-    And I am on site homepage
     And I am on "Course 1" course homepage
     And I turn editing mode on
     And I add the "News" block

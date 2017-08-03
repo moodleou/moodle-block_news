@@ -58,7 +58,6 @@ Feature: Inline settings form
       | fullname | shortname | category | format |
       | Course 2 | C2        | 0        | topics |
     And I log in as "admin"
-    And I am on site homepage
     And I am on "Course 2" course homepage
     And I turn editing mode on
     And I add the "News" block

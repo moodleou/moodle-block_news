@@ -9,7 +9,6 @@ Feature: Usage of settings and checking the message_form in block
       | fullname | shortname | category |
       | Course 1 | C1        | 0        |
     And I log in as "admin"
-    And I am on site homepage
     And I am on "Course 1" course homepage
     And I turn editing mode on
     And I add the "News" block
