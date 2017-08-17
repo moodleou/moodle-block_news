@@ -175,4 +175,43 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
         $this->assertEquals(1, count($msgs));
         $this->assertTrue(in_array($this->group1->id, $msgs[0]->get_groupids()));
     }
+
+    public function test_remove_deleted_message_groups() {
+
+        global $COURSE, $DB;
+
+        $this->setUser($this->user->id);
+        $COURSE->id = $this->course->id;
+
+        // Create the generator object.
+        $generator = $this->getDataGenerator()->get_plugin_generator('block_news');
+
+        // Create news blocks.
+        $nblock = $generator->create_instance(array(), array('courseid' => $this->course->id));
+
+        // Create 2 news messages in news blocks. Add message to group.
+        $message1 = new stdClass();
+        $message1id = $generator->create_block_new_message($nblock, $message1, [$this->group1->id, $this->group2->id]);
+
+        $bns = system::get_block_settings($nblock->id);
+        $bns->set_groupingsupport(2);
+        $msgs = $bns->get_messages_all(1);
+        $groupindication = $bns->get_group_indication($msgs[0]);
+        $this->assertTrue($DB->record_exists('block_news_message_groups',
+                ['messageid' => $message1id, 'groupid' => $this->group1->id]));
+        $this->assertTrue($DB->record_exists('block_news_message_groups',
+                ['messageid' => $message1id, 'groupid' => $this->group2->id]));
+        $this->assertEquals(get_string('rendermsggroupindication', 'block_news', $this->group1->name . ', ' . $this->group2->name),
+                $groupindication);
+
+        // Delete the group and check that the message group is removed when we get the group indication.
+        groups_delete_group($this->group1->id);
+        $groupindication = $bns->get_group_indication($msgs[0]);
+        $this->assertFalse($DB->record_exists('block_news_message_groups',
+                ['messageid' => $message1id, 'groupid' => $this->group1->id]));
+        $this->assertTrue($DB->record_exists('block_news_message_groups',
+                ['messageid' => $message1id, 'groupid' => $this->group2->id]));
+        $this->assertEquals(get_string('rendermsggroupindication', 'block_news', $this->group2->name),
+                $groupindication);
+    }
 }

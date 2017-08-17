@@ -1186,6 +1186,29 @@ class system {
     }
 
     /**
+     * Return an array of group names for the provided group IDs where the group still exists.
+     *
+     * When the group does not still exist, references to it will be removed from block_news_message_groups.
+     *
+     * @param int[] $groupids
+     * @return string[] Group names
+     */
+    private function get_active_group_names($groupids) {
+        global $DB;
+        list($insql, $params) = $DB->get_in_or_equal($groupids);
+        $groups = $DB->get_records_select('groups', 'id ' . $insql, $params, 'name ASC');
+        $missinggroups = array_diff($groupids, array_keys($groups));
+        if (!empty($missinggroups)) {
+            list($deleteinsql, $deleteparams) = $DB->get_in_or_equal($missinggroups);
+            $DB->delete_records_select('block_news_message_groups', 'groupid ' . $deleteinsql, $deleteparams);
+        }
+        $groupnames = array_map(function($group) {
+            return $group->name;
+        }, $groups);
+        return $groupnames;
+    }
+
+    /**
      * Get group indication text
      *
      * @param message $bnm Message
@@ -1197,7 +1220,7 @@ class system {
         if ($this->get_groupingsupport() == self::RESTRICTBYGROUP) {
             $messagegroups = $bnm->get_groupids();
             if (!empty($messagegroups)) {
-                $groupnames = implode(', ', array_map('groups_get_group_name', $messagegroups));
+                $groupnames = implode(', ', $this->get_active_group_names($messagegroups));
                 $groupindication = get_string('rendermsggroupindication', 'block_news', $groupnames);
             }
         }
