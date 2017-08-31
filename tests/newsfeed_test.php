@@ -57,8 +57,7 @@ class block_news_newsfeed_testcase extends advanced_testcase {
         $this->generator->create_group_member(['userid' => $user->id, 'groupid' => $this->groups[2]->id]);
     }
 
-    public function test_newsfeed_by_course_shortname() {
-        global $DB;
+    public function test_get_top_news_block() {
 
         $this->resetAfterTest(true);
 
@@ -196,5 +195,46 @@ class block_news_newsfeed_testcase extends advanced_testcase {
         $this->assertContains('<title>Group2 Message</title>', $feed4);
         $this->assertContains('<title>All groups Message</title>', $feed4);
         $this->assertContains('<title>No groups Message</title>', $feed4);
+    }
+
+    public function test_process_internal_feed_extras() {
+        $this->resetAfterTest(true);
+
+        $message = <<<EOT
+<div xmlns="http://www.w3.org/1999/xhtml">
+ <div class="block_news-extras">
+  <div class="box messageimage"><img class="block_news-main-msg-image" src="img700x330.jpg"/></div>
+ </div>
+ <p>News message includes an <img src="small.jpg"/> inline image (and an image above).</p>
+</div>
+EOT;
+        list($msg, $imgurl, $type, $loc, $start, $end) = system::process_internal_feed_extras($message);
+        $this->assertNotContains('block_news-extras', $msg);
+        $this->assertContains('News message includes', $msg);
+        $this->assertEquals('img700x330.jpg', $imgurl);
+        $this->assertEquals('', $type);
+        $this->assertEquals('', $loc);
+        $this->assertEquals('', $start);
+        $this->assertEquals('', $end);
+
+        $message = <<<EOT
+<div xmlns="http://www.w3.org/1999/xhtml">
+ <div class="block_news-extras">
+  <div class="block_news-event-type">2</div>
+  <div class="block_news-event-location">Milton Keynes</div>
+  <div class="block_news-event-start">1506812411</div>
+  <div class="block_news-event-end">1507312411</div>
+ </div>
+ <p>Event message includes an <img src="small.jpg"/> inline image (but no image above).</p>
+</div>
+EOT;
+        list($msg, $imgurl, $type, $loc, $start, $end) = system::process_internal_feed_extras($message);
+        $this->assertNotContains('block_news-extras', $msg);
+        $this->assertContains('Event message includes', $msg);
+        $this->assertEquals('', $imgurl);
+        $this->assertEquals(block_news\message::MESSAGETYPE_EVENT, $type);
+        $this->assertEquals('Milton Keynes', $loc);
+        $this->assertEquals('1506812411', $start);
+        $this->assertEquals('1507312411', $end);
     }
 }

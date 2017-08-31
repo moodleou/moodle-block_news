@@ -196,18 +196,3 @@ Feature: Basic usage of news block
     # On main page either.
     When I follow "C1"
     Then I should not see "ANNE" in the "(new News block)" "block"
-
-  @javascript
-  Scenario: Add a feed in the news block settings
-    Given I log in as "admin"
-    And I am on "Course 1" course homepage
-    And I turn editing mode on
-    And I add the "News" block
-    And I configure the "(new News block)" block
-    When I set the news block feedurls field to fixture file "feed.xml"
-    And I press "Save changes"
-    Then I should see "Fourth message" in the "(new News block) (new)" "block"
-    When I follow "Fourth message"
-    Then I should see "Fourth message"
-    And "View original message" "link" should exist
-    And the "href" attribute of "View original message" "link" should contain "blocks/news/message.php?m=575003"

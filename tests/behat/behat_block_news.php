@@ -108,5 +108,20 @@ class behat_block_news extends behat_base {
         $url = $CFG->wwwroot . '/blocks/news/tests/fixtures/' . $filename;
         $this->execute("behat_forms::i_set_the_field_to", ['id_config_feedurls', $url]);
     }
+
+    /**
+     * Set the feedurls setting to another local course's feed.
+     *
+     * @When /^I set the news block feedurls field to another course "([^"]+)" feed$/
+     * @param string $courseshortname
+     */
+    public function i_set_the_news_block_feedurls_field_to_another_course_feed($courseshortname) {
+        global $DB, $CFG;
+        $course = $DB->get_record('course', ['shortname' => $courseshortname], '*', MUST_EXIST);
+        $context = context_course::instance($course->id);
+        $blockinstance = $DB->get_record('block_instances', ['parentcontextid' => $context->id, 'blockname' => 'news']);
+        $feedurl = $CFG->wwwroot . '/blocks/news/feed.php?bi=' . $blockinstance->id;
+        $this->execute("behat_forms::i_set_the_field_to", ['id_config_feedurls', $feedurl]);
+    }
 }
 

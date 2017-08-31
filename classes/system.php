@@ -781,7 +781,7 @@ class system {
      * @param \stdClass $fbrec block_news_feeds
      */
     public function update_feed($fbrec) {
-        global $DB;
+        global $DB, $CFG;
 
         // Do whole process in a transaction.
         $transaction = $DB->start_delegated_transaction();
@@ -814,6 +814,9 @@ class system {
             // Also clear cache.
             $this->uncache_block_feed();
 
+            $context = \context_block::instance($bnf->blockinstanceid);
+            $bns = system::get_block_settings($bnf->blockinstanceid);
+
             // Write new message.
             foreach ($fia as $fi) {
                 // Add missing cols.
@@ -822,6 +825,28 @@ class system {
                 // Title, message, link already set.
                 // constrict title.
                 $fi->title = \core_text::substr($fi->title, 0, 255);
+                $extraimageurl = false;
+                if (strpos($fi->message, '<div class="block_news-extras">') !== false) {
+                    // For internal feeds gather and strip out the extra internal information.
+                    list($msg, $extraimageurl, $type, $loc, $start, $end) = system::process_internal_feed_extras($fi->message);
+                    // Skip importing any messages of type event if the block does not allow events.
+                    if ($type && $bns->get_displaytype() == system::DISPLAY_DEFAULT) {
+                        continue;
+                    }
+                    $fi->message = $msg;
+                    if ($type) {
+                        $fi->messagetype = message::MESSAGETYPE_EVENT;
+                    }
+                    if ($loc) {
+                        $fi->eventlocation = $loc;
+                    }
+                    if ($start) {
+                        $fi->eventstart = strtotime($start);
+                    }
+                    if ($end) {
+                        $fi->eventend = strtotime($end);
+                    }
+                }
                 // Put author at at start of message text, allow an empty element if no author.
                 $fi->message = '<div class=author>' . $fi->author . ' </div>' . $fi->message;
                 unset($fi->author);
@@ -835,7 +860,30 @@ class system {
                 $fi->userid = null; // Set to null for feed msgs.
                 $fi->timemodified = time();
 
-                message::create($fi);
+                $id = message::create($fi);
+
+                if ($extraimageurl && substr_count($extraimageurl, $CFG->wwwroot . '/pluginfile.php/')) {
+                    // The image exists on this server so just copy it to this blocks images.
+                    list($contextid, $component, $filearea, $itemid, $filename) =
+                            explode('/', str_replace($CFG->wwwroot . '/pluginfile.php/', '', $extraimageurl));
+                    $fs = get_file_storage();
+                    $imgfile = $fs->get_file($contextid, $component, $filearea, $itemid, '/', $filename);
+                    if ($imgfile) {
+                        // Create the main image.
+                        $newimgfile = array('contextid' => $context->id, 'itemid' => $id);
+                        $fs->create_file_from_storedfile($newimgfile, $imgfile);
+                        // Create a thumbnail as well.
+                        $thumbnail = array(
+                                'contextid' => $context->id,
+                                'component' => $component,
+                                'filearea'  => 'thumbnail',
+                                'itemid'    => $id,
+                                'filepath'  => '/',
+                                'filename'  => message::THUMBNAIL_JPG
+                        );
+                        $fs->convert_image($thumbnail, $imgfile, '340', null, true, null);
+                    }
+                }
             }
 
             // Write new hash.
@@ -848,6 +896,46 @@ class system {
         // Transactions are automatically rolled back if there is an error.
 
         return;
+    }
+
+    /**
+     * For internal feeds only gather any extras information and strip this data
+     * from the message content.
+     * @param $message
+     * @return array
+     */
+    public static function process_internal_feed_extras($message) {
+        $imgurl = $type = $location = $start = $end = '';
+        // Unfortunately because we are just parsing snippets of a feed here the
+        // message nearly always throws a warning during load.
+        libxml_use_internal_errors(true);
+        $doc = new \DOMDocument();
+        $doc->loadHTML('<html>' . $message .'</html>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+        $xpath = new \DOMXpath($doc);
+        if (strpos($message, 'block_news-main-msg-image')) {
+            $imgurl = $xpath->evaluate("string(//img[@class='block_news-main-msg-image']/@src)");
+        }
+        if (strpos($message, 'block_news-event-type')) {
+            $node = $xpath->query("//div[@class='block_news-event-type']")[0];
+            $type = $node->nodeValue;
+        }
+        if (strpos($message, 'block_news-event-location')) {
+            $node = $xpath->query("//div[@class='block_news-event-location']")[0];
+            $location = $node->nodeValue;
+        }
+        if (strpos($message, 'block_news-event-start')) {
+            $node = $xpath->query("//div[@class='block_news-event-start']")[0];
+            $start = $node->nodeValue;
+        }
+        if (strpos($message, 'block_news-event-end')) {
+            $node = $xpath->query("//div[@class='block_news-event-end']")[0];
+            $end = $node->nodeValue;
+        }
+        $node = $xpath->query("//div[@class='block_news-extras']")[0];
+        $node->parentNode->removeChild($node);
+        $message = str_replace(array('<html>','</html>') , '' , $doc->saveHTML());
+        return [$message, $imgurl, $type, $location, $start, $end];
     }
 
     /**
@@ -1134,9 +1222,46 @@ class system {
 
         $it->author = $author;
 
-        // Convert any @@PLUGINFILE@@ links to real URLs.
         $context = \context_block::instance($bnm->get_blockinstanceid());
-        $it->content = file_rewrite_pluginfile_urls($bnm->get_message(), 'pluginfile.php',
+        $it->content = '';
+
+        // Add the message image, if exists, into the content.
+        $images = $this->get_images();
+        $started = false;
+        if (array_key_exists($bnm->get_id(), $images)) {
+            $it->content .= \html_writer::start_div('block_news-extras');
+            $started = true;
+            $it->content .= \html_writer::start_div('box messageimage');
+            $image = $images[$bnm->get_id()];
+            $pathparts = array('/pluginfile.php', $context->id, 'block_news',
+                    'messageimage', $bnm->get_id(), $image->get_filename());
+            $imageurl = new \moodle_url(implode('/', $pathparts));
+            $it->content .= \html_writer::img($imageurl->out(), '', ['class' => 'block_news-main-msg-image']);
+            $it->content .= \html_writer::end_div();
+        }
+        // Add event dates.
+        if ($bnm->get_messagetype() == $bnm::MESSAGETYPE_EVENT) {
+            if (!$started) {
+                $it->content .= \html_writer::start_div('block_news-extras');
+                $started = true;
+            }
+            $it->content .= \html_writer::div(get_string('event', 'block_news'), 'block_news-event-type');
+            $it->content .= \html_writer::div($bnm->get_eventlocation(), 'block_news-event-location');
+            $it->content .= \html_writer::div(
+                    strftime(get_string('dateformatlong', 'block_news'), $bnm->get_eventstart()),
+                    'block_news-event-start');
+            if ($bnm->get_eventend()) {
+                $it->content .= \html_writer::div(
+                        strftime(get_string('dateformatlong', 'block_news'), $bnm->get_eventend()),
+                        'block_news-event-end');
+            }
+        }
+        if ($started) {
+            $it->content .= \html_writer::end_div();
+        }
+
+        // Convert any @@PLUGINFILE@@ links to real URLs.
+        $it->content .= file_rewrite_pluginfile_urls($bnm->get_message(), 'pluginfile.php',
                 $context->id, 'block_news', 'message', $bnm->get_id(), null);
 
         return $it;
