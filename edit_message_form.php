@@ -95,6 +95,13 @@ class block_news_edit_message_form extends moodleform {
         // Fileset header.
         $mform->addElement('header', 'displayinfo', null);
 
+        if ( $this->displaytype == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS ) {
+            $messagetype = array(message::MESSAGETYPE_NEWS => get_string('newsitem', 'block_news'),
+                    message::MESSAGETYPE_EVENT => get_string('event', 'block_news'));
+            $mform->addElement('select', 'messagetype', get_string('messagetype', 'block_news'), $messagetype);
+            $mform->setDefault('messagetype', message::MESSAGETYPE_NEWS);
+        }
+
         $mform->addElement('text', 'title', get_string('msgedittitle', 'block_news'),
             array('size' => '40'));
         $mform->setType('title', PARAM_TEXT);
@@ -105,16 +112,7 @@ class block_news_edit_message_form extends moodleform {
             array('cols' => 50, 'rows' => 30), array('maxfiles' => EDITOR_UNLIMITED_FILES));
         $mform->addRule('message', null, 'required', null, 'client');
 
-        $mform->addElement('filemanager', 'attachments',
-            get_string('msgedithlpattach', 'block_news'), null, array('subdirs' => 0));
-
         if ( $this->displaytype == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS ) {
-            $messagetype = array(message::MESSAGETYPE_NEWS => get_string('newsitem', 'block_news'),
-                    message::MESSAGETYPE_EVENT => get_string('event', 'block_news'));
-
-            $mform->addElement('select', 'messagetype', get_string('messagetype', 'block_news'), $messagetype);
-            $mform->setDefault('messagetype', message::MESSAGETYPE_NEWS);
-
             $mform->addElement('date_time_selector', 'eventstart',
                     get_string('msgediteventstart', 'block_news'), array('optional' => false));
             $mform->disabledIf('eventstart', 'messagetype', 'neq', message::MESSAGETYPE_EVENT);
@@ -135,6 +133,8 @@ class block_news_edit_message_form extends moodleform {
             $mform->setType('eventlocation', PARAM_TEXT);
         }
 
+        $mform->addElement('filemanager', 'attachments',
+                get_string('msgedithlpattach', 'block_news'), null, array('subdirs' => 0));
         $mform->addElement('filemanager', 'messageimage', get_string('messageimage', 'block_news'),
                 null, self::IMAGE_FILE_OPTIONS);
         $mform->disabledIf('messageimage', 'messagetype', 'eq', message::MESSAGETYPE_EVENT);
