@@ -118,6 +118,11 @@
     margin-bottom: 15px;
 }
 
+.block_news_event .block-news-message-text {
+    clear: left;
+    padding-top: 10px;
+}
+
 .block_news_message .messageimage img,
 .block_news .messageimage img {
     max-width: 100%;
