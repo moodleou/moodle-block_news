@@ -112,6 +112,8 @@ class news_feedupdate_test extends UnitTestCaseUsingDatabase {
         $instance->pagetypepatter = 'course-view-*';
         $instance->defaultregion = 'side-post';
         $instance->defaultweight = 7;
+        $instance->timecreated = time();
+        $instance->timemodified = time();
         $this->testdb->insert_record('block_instances', $instance);
         $this->instance = $instance;
     }
