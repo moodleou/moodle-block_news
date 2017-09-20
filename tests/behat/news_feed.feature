@@ -78,4 +78,12 @@ Feature: Usage of news block feeds
     And I should see image "thumbnail.jpg" in news message "Message 1"
     And I should see "Event 1"
     And I should see "Milton Keynes"
-    And I should see "Sunday, 31 January 2021, 12:00 AM to Wednesday, 1 January 2025, 8:00 AM"
+    And I should see "Sunday, 31 January 2021, 5:46 PM to Wednesday, 1 January 2025, 8:00 AM"
+
+  Scenario: Check author in the feed
+    Given I configure the "News and events (new)" block
+    When I set the news block feedurls field to fixture file "feed2.xml"
+    And I press "Save changes"
+    Then I should see "Authorless message"
+    And I should see "No author here"
+    And I should not see "-" in the "(new News block) (new)" "block"

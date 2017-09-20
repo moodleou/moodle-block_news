@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>http://example.com/blocks/news/feed.php?bi=188007</id>
+    <updated>2017-07-10T18:03:28+08:00</updated>
+    <title>News block RSS feed title</title>
+    <link href="http://example.com/blocks/news/feed.php?bi=188007" rel="self"></link>
+    <link href="http://example.com/course/view.php?id=100000" rel="alternate"></link>
+    <generator>Moodle</generator>
+    <rights>&#169; 2017 Acceptance test site</rights>
+    <logo>http://example.com/theme/image.php/boost/core/1499431930/i/rsssitelogo</logo>
+    <entry>
+        <title>Authorless message</title>
+        <link href="http://example.com/blocks/news/message.php?m=575001" rel="alternate"></link>
+        <updated>2017-07-10T17:58:14+08:00</updated>
+        <author><name>-</name></author>
+        <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">No author here</div></content>
+        <id>http://example.com/blocks/news/message.php?m=575001</id>
+    </entry>
+</feed>

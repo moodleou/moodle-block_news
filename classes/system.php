@@ -847,8 +847,10 @@ class system {
                         $fi->eventend = strtotime($end);
                     }
                 }
-                // Put author at at start of message text, allow an empty element if no author.
-                $fi->message = '<div class=author>' . $fi->author . ' </div>' . $fi->message;
+                // Put author in at start of message text, if author isnt empty.
+                if (!empty($fi->author) && $fi->author !== '-') {
+                    $fi->message = '<div class="author">' . $fi->author . '</div>' . $fi->message;
+                }
                 unset($fi->author);
                 $fi->messageformat = FORMAT_HTML;
                 // Convert date-time string into unixdate (false/0 if error).

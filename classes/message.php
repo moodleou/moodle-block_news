@@ -137,6 +137,8 @@ class message {
      * @return string Message text
      */
     public function get_message() {
+        $this->message = str_replace("<div class=author></div>", "", $this->message);
+        $this->message = str_replace("<div class=author>-</div>", "", $this->message);
         return $this->message;
     }
 
