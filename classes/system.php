@@ -373,10 +373,11 @@ class system {
             if ($type == message::MESSAGETYPE_EVENT) {
                 if ($pastevents) {
                     // Show events that have already happened.
-                    $sql .= 'AND eventstart < ? ';
+                    $sql .= 'AND COALESCE(eventend, eventstart) < ? ';
                 } else {
                     // Automatically exclude events that happened before midnight this morning (according to server time).
-                    $sql .= 'AND eventstart > ? ';
+                    // But include events that have an end date that have not yet passed.
+                    $sql .= 'AND COALESCE(eventend, eventstart) >= ? ';
                 }
                 $date = new \DateTime(null, \core_date::get_server_timezone_object());
                 $date->setTime(0, 0);
@@ -523,12 +524,11 @@ class system {
         global $DB;
         $bnms = array();
         $orderby = 'ORDER BY ' . $order;
-        $limit = '';
+        $limitfrom = 0;
+        $limitnum = 0;
         if (!is_null($pagenumber) && !is_null($pagesize)) {
-            $limit = 'LIMIT ' . $pagesize;
-            if ($pagenumber > 0) {
-                $limit .= ' OFFSET ' . ($pagesize * $pagenumber);
-            }
+            $limitfrom = $pagesize * $pagenumber;
+            $limitnum = $pagesize;
         }
 
         $groups = $this->get_group_sql($this->get_groupingids());
@@ -540,10 +540,10 @@ class system {
                 . $hidden['sql']
                 . $groups['sql']
                 . $restricttype['sql']
-                . $orderby . ' ' . $limit;
+                . $orderby;
         $params = array($this->blockinstanceid);
         $params = array_merge($params, $hidden['params'], $groups['params'], $restricttype['params']);
-        $mrecs = $DB->get_records_sql($sql, $params);
+        $mrecs = $DB->get_records_sql($sql, $params, $limitfrom, $limitnum);
         $groupids = $this->get_groupids_by_message(array_keys($mrecs));
         foreach ($mrecs as $mrec) {
             $bnms[] = new message($mrec, $groupids[$mrec->id]);

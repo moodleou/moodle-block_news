@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 class message_testcase extends \advanced_testcase {
 
     /** @var object News block instance */
-    private $block;
+    private $blockinstance;
     /** @var \block_news_generator Data generator */
     private $generator;
 
@@ -45,17 +45,17 @@ class message_testcase extends \advanced_testcase {
         // Create the generator object.
         $this->generator = $this->getDataGenerator()->get_plugin_generator('block_news');
 
-        $this->block = $this->generator->create_instance(
-                [], ['courseid' => $course->id, 'displaytype' => system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS]);
+        // Create a news block instance on the course.
+        $this->blockinstance = $this->generator->create_instance([], ['courseid' => $course->id]);
     }
 
     public function test_delete() {
         global $DB;
         $fs = get_file_storage();
-        $blockcontext = \context_block::instance($this->block->id);
-        $mid1 = $this->generator->create_block_new_message($this->block,
+        $blockcontext = \context_block::instance($this->blockinstance->id);
+        $mid1 = $this->generator->create_block_new_message($this->blockinstance,
                 (object) ['image' => '/blocks/news/tests/fixtures/kitten1.jpg']);
-        $mid2 = $this->generator->create_block_new_message($this->block,
+        $mid2 = $this->generator->create_block_new_message($this->blockinstance,
                 (object) ['image' => '/blocks/news/tests/fixtures/kitten2.jpg']);
 
         $mrec1 = $DB->get_record('block_news_messages', ['id' => $mid1]);
@@ -71,6 +71,54 @@ class message_testcase extends \advanced_testcase {
         // Assert that the other message and assocaited file are intact.
         $this->assertTrue($DB->record_exists('block_news_messages', ['id' => $mid2]));
         $this->assertNotEmpty($fs->get_area_files($blockcontext->id, 'block_news', 'messageimage', $mid2));
+    }
+
+    public function test_get_messages_all() {
+        // Create a news block that displays separate news and events.
+        $this->generator->create_block_news_record(
+                $this->blockinstance,
+                (object)['displaytype' => system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS]);
+        // Set up a series of events with various start dates but no end date (all day events).
+        $record = (object)['messagetype' => 'event',
+                'eventstart' => time(),
+                'eventend' => null,
+                'eventlocation' => 'Milton Keynes'];
+        $today = $this->generator->create_block_new_message($this->blockinstance, $record);
+        $record->eventstart = time() - 86410; // Starts yesterday (plus 10 seconds)
+        $yesterday = $this->generator->create_block_new_message($this->blockinstance, $record);
+        $record->eventstart = time() + 86410;
+        $tomorrow = $this->generator->create_block_new_message($this->blockinstance, $record);
+        $bns = system::get_block_settings($this->blockinstance->id);
+        $order = 'eventstart ASC, messagedate DESC';
+        // Check events for display in upcoming events.
+        $results1 = $bns->get_messages_all(false,null, null, 2, $order, false);
+        $this->assertTrue(count($results1) == 2);
+        $this->assertEquals($today, $results1[0]->get_id());
+        $this->assertEquals($tomorrow, $results1[1]->get_id());
+        // Check events for display in past events.
+        $results2 = $bns->get_messages_all(false,null, null, 2, $order, true);
+        $this->assertTrue(count($results2) == 1);
+        $this->assertEquals($yesterday, $results2[0]->get_id());
+        // Now check events with end dates.
+        $record->eventstart = time() + 10; // Different from $today's start time.
+        $record->eventend = time() + 3600; // One hour.
+        $todayon = $this->generator->create_block_new_message($this->blockinstance, $record);
+        $record->eventstart = time() - 86420; //Starts yesterday, ends today.
+        $yesterdayon = $this->generator->create_block_new_message($this->blockinstance, $record);
+        $record->eventend = time() - 86400; //Starts yesterday, ended yesterday.
+        $yesterdayended = $this->generator->create_block_new_message($this->blockinstance, $record);
+        // Check events for display in upcoming events.
+        $results1 = $bns->get_messages_all(false,null, null, 2, $order, false);
+        $this->assertTrue(count($results1) == 4);
+        $this->assertEquals($yesterdayon, $results1[0]->get_id());
+        $this->assertEquals($today, $results1[1]->get_id());
+        $this->assertEquals($todayon, $results1[2]->get_id());
+        $this->assertEquals($tomorrow, $results1[3]->get_id());
+        // Check events for display in past events.
+        $results2 = $bns->get_messages_all(false,null, null, 2, $order, true);
+        $this->assertTrue(count($results2) == 2);
+        $this->assertEquals($yesterdayended, $results2[0]->get_id());
+        $this->assertEquals($yesterday, $results2[1]->get_id());
     }
 }
 
