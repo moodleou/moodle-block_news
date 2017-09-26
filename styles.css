@@ -7,10 +7,13 @@
     margin-top: 0px;
     margin-bottom: 5px;
 }
+.block .content .block_news_msglist > h3 {
+    margin-bottom: 0px;
+}
 
 .block_news_msg h1 {
     font-size: 1.0em;
-    margin: 18px 0 0 0;
+    margin: 15px 0 0 0;
     line-height: 1.2;
 }
 
@@ -20,7 +23,6 @@
 
 .block_news_msg .block_news_msg_title {
     font-weight: bold;
-    margin-bottom: 5px;
 }
 
 .block_news_msg .block_news_msg_author {
@@ -48,6 +50,9 @@
     font-weight: bold;
 }
 
+.osep-courseformat-oustudyplan .block_news #block_news_addmsg {
+    display: block;
+}
 
 /* add/edit message */
 #page-blocks-news-edit #mform1 .daterepeat_off {
@@ -127,6 +132,7 @@
 .block_news .messageimage img {
     max-width: 100%;
     height: auto;
+    margin-top: 14px;
 }
 
 .block_news_message #editicons #hideurl,
@@ -202,13 +208,4 @@
     #page-blocks-news-edit #fitem_id_grouping {
         width: 100%;
     }
-}
-
-/*
- * TEMPORARY: This option should be visible (even on non-ousubject sites)
- * but because the feature is not fully implemented, we are hiding it.
- * TODO This style should be removed by September release.
- */
-body:not(.osep-courseformat-ousubject) #fitem_id_config_displaytype {
-    display: none;
 }

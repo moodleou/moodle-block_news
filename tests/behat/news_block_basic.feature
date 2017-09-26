@@ -167,6 +167,7 @@ Feature: Basic usage of news block
     # Check: Short (40 character) summaries.
     And I should not see "JACKPOT"
 
+  @javascript
   Scenario: Test author name option
     # Add block.
     Given I log in as "teacher1"

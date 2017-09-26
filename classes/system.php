@@ -426,6 +426,13 @@ class system {
 
         $data->id = $this->id;
 
+        if (isset($data->displaytype) && ($data->displaytype == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS)) {
+            // Force default (new News block) to 'News and events'.
+            if ($data->title == get_string('defaultblocktitle', 'block_news')) {
+                $data->title = get_string('newsandeventsblocktitle', 'block_news');
+            }
+        }
+
         $DB->update_record('block_news', $data);
 
         if (isset($data->feedurls)) {
