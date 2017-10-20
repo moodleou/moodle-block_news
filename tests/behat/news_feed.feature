@@ -37,7 +37,7 @@ Feature: Usage of news block feeds
     Given I configure the "News and events (new)" block
     When I set the news block feedurls field to fixture file "feed.xml"
     And I press "Save changes"
-    Then I should see "Fourth message" in the "(new News block) (new)" "block"
+    Then I should see "Fourth message" in the "News and events (new)" "block"
     When I follow "Fourth message"
     Then I should see "Fourth message"
     And "View original message" "link" should exist
@@ -74,7 +74,7 @@ Feature: Usage of news block feeds
     And I configure the "(new News block)" block
     And I set the news block feedurls field to another course "C1" feed
     And I press "Save changes"
-    Then I should see "Message 1" in the "(new News block) (new)" "block"
+    Then I should see "Message 1" in the "News and events (new)" "block"
     And I should see image "thumbnail.jpg" in news message "Message 1"
     And I should see "Event 1"
     And I should see "Milton Keynes"
@@ -86,4 +86,4 @@ Feature: Usage of news block feeds
     And I press "Save changes"
     Then I should see "Authorless message"
     And I should see "No author here"
-    And I should not see "-" in the "(new News block) (new)" "block"
+    And I should not see "-" in the "News and events (new)" "block"
