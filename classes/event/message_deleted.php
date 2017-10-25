@@ -41,7 +41,7 @@ class message_deleted extends \core\event\base {
     }
 
     public function get_url() {
-        return new \moodle_url('/blocks/news/all.php', array('bi' => $this->context->instanceid));
+        return new \moodle_url('/blocks/news/all.php', array('bi' => $this->contextinstanceid));
     }
 
     public function get_legacy_logdata() {
