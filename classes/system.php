@@ -831,7 +831,7 @@ class system {
                 $fi->newsfeedid = $bnf->id;
                 // Title, message, link already set.
                 // constrict title.
-                $fi->title = \core_text::substr($fi->title, 0, 255);
+                $fi->title = \core_text::substr(html_entity_decode($fi->title), 0, 255);
                 $extraimageurl = false;
                 if (strpos($fi->message, '<div class="block_news-extras">') !== false) {
                     // For internal feeds gather and strip out the extra internal information.
