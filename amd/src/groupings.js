@@ -28,32 +28,32 @@ define(['jquery'], function($) {
         groupSelect: null,
         allOption: null,
 
+
         /**
-         * Store the group IDs against the relevant grouping options, and attach event listeners.
+         * Setup for group IDs against relevant grouping options,
+         * and attach event listeners.
          *
-         * @param {Array} groupingGroups
          */
-        init: function(groupingGroups) {
+        init: function() {
             t.groupingSelect = $('#id_grouping');
             t.groupSelect = $('#id_groupids');
             t.allOption = t.groupSelect.find('option[value="0"]');
-            groupingGroups.forEach(function(grouping) {
-                var groupingOption = t.groupingSelect.find('option[value="' + grouping.id + '"]');
-                groupingOption.data('groups', grouping.groupids);
-            });
+
             t.groupingSelect.on('change', t.selectGroups);
             t.groupSelect.on('change', t.clearGroupings);
             $('#fitem_id_grouping').css('display', 'inline-block');
         },
 
         /**
-         * Select the group options linked to a grouping
+         * Fetch the groups linked in a grouping directly from the HTML Selector.
          *
          * @param {Event} e
          */
         selectGroups: function(e) {
             var grouping = $(e.currentTarget).find('option:selected');
-            var groups = grouping.data('groups');
+            // Read data from the groupinggroups attribute of the element.
+            var groupingGroups = t.groupingSelect.data("groupinggroups");
+            var groups = groupingGroups[grouping.val()];
             t.groupSelect.val([]);
             if (groups) {
                 groups.forEach(function(groupid) {

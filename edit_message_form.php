@@ -150,7 +150,8 @@ class block_news_edit_message_form extends moodleform {
             $groupinggroups = [];
             foreach ($groupingsdata as $grouping) {
                 $groupsdata = groups_get_all_groups($COURSE->id, 0, $grouping->id);
-                $groupinggroups[] = (object) ['id' => $grouping->id, 'groupids' => array_keys($groupsdata)];
+                // Simplify grouping groups data array, for JS functionality on the DOM element.
+                $groupinggroups[$grouping->id] = array_keys($groupsdata);
                 $groupings[$grouping->id] = $grouping->name;
             }
             $groups = groups_get_all_groups($COURSE->id);
@@ -167,9 +168,13 @@ class block_news_edit_message_form extends moodleform {
                 if (!empty($groupings)) {
                     $groupings[0] = '';
                     ksort($groupings);
+                    // Use a data attribute to add grouping groups array to the DOM.
+                    $strparams = json_encode($groupinggroups);
                     $mform->addElement('select', 'grouping',
-                            get_string('msgeditselectgrouping', 'block_news'), $groupings);
-                    $PAGE->requires->js_call_amd('block_news/groupings', 'init', [$groupinggroups]);
+                            get_string('msgeditselectgrouping', 'block_news'),
+                            $groupings, ['data-groupinggroups' => $strparams]);
+
+                    $PAGE->requires->js_call_amd('block_news/groupings', 'init');
                 }
             }
         }
