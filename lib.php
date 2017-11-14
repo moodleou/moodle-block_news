@@ -34,6 +34,9 @@ if (!defined('MOODLE_INTERNAL')) {
 /**
  * Standard attachments handler
  *
+ * This code is used when users view messages in the VLE.
+ * When they view images in feeds, images.php is used instead.
+ *
  * @param course $course
  * @param $birecordorcm
  * @param $context
@@ -48,13 +51,10 @@ function block_news_pluginfile($course, $birecordorcm, $context, $filearea, $arg
         send_file_not_found();
     }
 
-    require_course_login($course);
-
     $fs = get_file_storage();
 
     $filename = array_pop($args);
     $newsid = (int)array_shift($args);
-    $filepath = $args ? '/'.implode('/', $args).'/' : '/';
     $relativepath = implode('/', $args);
     $fullpath = "/$context->id/block_news/$filearea/$newsid/$relativepath$filename";
     if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {

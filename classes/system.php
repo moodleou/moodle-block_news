@@ -871,27 +871,8 @@ class system {
 
                 $id = message::create($fi);
 
-                if ($extraimageurl && substr_count($extraimageurl, $CFG->wwwroot . '/pluginfile.php/')) {
-                    // The image exists on this server so just copy it to this blocks images.
-                    list($contextid, $component, $filearea, $itemid, $filename) =
-                            explode('/', str_replace($CFG->wwwroot . '/pluginfile.php/', '', $extraimageurl));
-                    $fs = get_file_storage();
-                    $imgfile = $fs->get_file($contextid, $component, $filearea, $itemid, '/', $filename);
-                    if ($imgfile) {
-                        // Create the main image.
-                        $newimgfile = array('contextid' => $context->id, 'itemid' => $id);
-                        $fs->create_file_from_storedfile($newimgfile, $imgfile);
-                        // Create a thumbnail as well.
-                        $thumbnail = array(
-                                'contextid' => $context->id,
-                                'component' => $component,
-                                'filearea'  => 'thumbnail',
-                                'itemid'    => $id,
-                                'filepath'  => '/',
-                                'filename'  => message::THUMBNAIL_JPG
-                        );
-                        $fs->convert_image($thumbnail, $imgfile, '340', null, true, null);
-                    }
+                if ($extraimageurl) {
+                    $this->store_message_images($extraimageurl, $context, $id);
                 }
             }
 
@@ -903,8 +884,6 @@ class system {
 
         $transaction->allow_commit(); // Seal up.
         // Transactions are automatically rolled back if there is an error.
-
-        return;
     }
 
     /**
@@ -919,7 +898,8 @@ class system {
         // message nearly always throws a warning during load.
         libxml_use_internal_errors(true);
         $doc = new \DOMDocument();
-        $doc->loadHTML('<html>' . $message .'</html>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        $doc->loadHTML('<html><head><meta content="text/html; charset=utf-8" http-equiv="Content-Type"></head>' .
+                $message . '</html>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
         $xpath = new \DOMXpath($doc);
         if (strpos($message, 'block_news-main-msg-image')) {
@@ -945,6 +925,66 @@ class system {
         $node->parentNode->removeChild($node);
         $message = str_replace(array('<html>','</html>') , '' , $doc->saveHTML());
         return [$message, $imgurl, $type, $location, $start, $end];
+    }
+
+    /**
+     * Stores message images from a url.
+     *
+     * @param string $url Extra message image url
+     * @param $context
+     * @param int $id Message id
+     */
+    private function store_message_images($url, $context, $id) {
+        global $CFG;
+        if (substr_count($url, $CFG->wwwroot . '/blocks/news/images.php/')) {
+            // The image exists on this server so just copy it to this blocks images.
+            list($contextid, $component, $filearea, $itemid, $filename) =
+                    explode('/', str_replace($CFG->wwwroot . '/blocks/news/images.php/', '', $url));
+            $fs = get_file_storage();
+            $imgfile = $fs->get_file($contextid, $component, $filearea, $itemid, '/', $filename);
+            if ($imgfile) {
+                // Create the main image.
+                $newimgfile = array('contextid' => $context->id, 'itemid' => $id);
+                $fs->create_file_from_storedfile($newimgfile, $imgfile);
+                // Create a thumbnail as well.
+                $thumbnail = [
+                        'contextid' => $context->id,
+                        'component' => $component,
+                        'filearea'  => 'thumbnail',
+                        'itemid'    => $id,
+                        'filepath'  => '/',
+                        'filename'  => message::THUMBNAIL_JPG
+                ];
+                $fs->convert_image($thumbnail, $imgfile, '340', null, true, null);
+            }
+        } else if (substr_count($url, '/blocks/news/images.php/')) {
+            // The image is on another server.
+            $tmpfile = tempnam($CFG->tempdir, 'blocknewstempimage');
+            $ok = download_file_content($url, null, null, false, 5, 5, false, $tmpfile);
+            if ($ok) {
+                $filename = substr($url, strrpos($url, '/') + 1);
+                $fs = get_file_storage();
+                $newimginfo = [
+                        'contextid' => $context->id,
+                        'component' => 'block_news',
+                        'filearea' => 'messageimage',
+                        'itemid' => $id,
+                        'filepath' => '/',
+                        'filename' => $filename
+                ];
+                $imgfile = $fs->create_file_from_pathname($newimginfo, $tmpfile);
+                unlink($tmpfile);
+                $thumbnail = [
+                        'contextid' => $context->id,
+                        'component' => 'block_news',
+                        'filearea' => 'thumbnail',
+                        'itemid' => $id,
+                        'filepath' => '/',
+                        'filename' => message::THUMBNAIL_JPG
+                ];
+                $fs->convert_image($thumbnail, $imgfile, '340', null, true, null);
+            }
+        }
     }
 
     /**
@@ -1242,7 +1282,7 @@ class system {
             $started = true;
             $it->content .= \html_writer::start_div('box messageimage');
             $image = $images[$bnm->get_id()];
-            $pathparts = array('/pluginfile.php', $context->id, 'block_news',
+            $pathparts = array('/blocks/news/images.php', $context->id, 'block_news',
                     'messageimage', $bnm->get_id(), $image->get_filename());
             $imageurl = new \moodle_url(implode('/', $pathparts));
             $it->content .= \html_writer::img($imageurl->out(), '', ['class' => 'block_news-main-msg-image']);
@@ -1270,7 +1310,7 @@ class system {
         }
 
         // Convert any @@PLUGINFILE@@ links to real URLs.
-        $it->content .= file_rewrite_pluginfile_urls($bnm->get_message(), 'pluginfile.php',
+        $it->content .= file_rewrite_pluginfile_urls($bnm->get_message(), 'blocks/news/images.php',
                 $context->id, 'block_news', 'message', $bnm->get_id(), null);
 
         return $it;
