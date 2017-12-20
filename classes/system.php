@@ -1344,16 +1344,22 @@ class system {
     }
 
     /**
-     * Delete the feed file associated with this blockinstance
+     * Delete all the cached feed files associated with this block instance.
      *
      * @throws \moodle_exception if error
      */
     public function uncache_block_feed() {
-        $fn = self::get_feed_filename($this->blockinstanceid);
-        // Check if exists as its possible it was never created.
-        if (file_exists($fn)) {
-            if (unlink($fn) == false) {
-                throw new \moodle_exception('cannotdeletefile');
+        // Get base filename., but insert a * metacharacter.
+        $filepattern = preg_replace('~\.atom$~', '*.atom',
+                self::get_feed_filename($this->blockinstanceid));
+
+        // Glob for the files. Treat error (false) same as no results.
+        $result = glob($filepattern);
+        if ($result) {
+            foreach ($result as $filename) {
+                if (unlink($filename) == false) {
+                    throw new \moodle_exception('cannotdeletefile');
+                }
             }
         }
     }
