@@ -58,12 +58,6 @@ class short_message extends renderable_message implements \templatable {
             $this->title = $bnm->get_title();
         }
 
-        if ($bns->get_hidelinks()) {
-            $this->link = '';
-        } else {
-            $this->link = $bnm->get_link();
-        }
-
         $this->viewlink = $CFG->wwwroot . '/blocks/news/message.php?m=' . $bnm->get_id();
 
         $this->messagedate = userdate($bnm->get_messagedate(),

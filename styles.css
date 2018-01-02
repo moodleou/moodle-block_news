@@ -54,46 +54,55 @@
     color: gray;
 }
 
+#page-blocks-news-edit #fitem_id_groupids,
+#page-blocks-news-edit #fitem_id_grouping {
+    width: 49%;
+    vertical-align: top;
+}
+
+#page-blocks-news-edit #fitem_id_groupids select,
+#page-blocks-news-edit #fitem_id_grouping select {
+    max-width: 100%;
+}
+
+#page-blocks-news-edit #fitem_id_groupids {
+    display: inline-block;
+}
+
+#page-blocks-news-edit #fitem_id_grouping {
+    display: none;
+}
 
 /* view full message */
-.block_news_message .main, .block_news_top, .block_news_nonews {
+.block_news_message,
+.block_news_top,
+.block_news_nonews {
     max-width: 500px;
-    border: solid black 1px;
     margin: 10px 0;
     padding: 10px;
 }
 
-.block_news_top{
-    height: 23px;
+.block_news_message {
+    border-top: 1px solid #dadad9;
 }
 
 .block_news_top .singlebutton {
-    /* force reduced height (which doesnt actually affect button height)
-    to avoid RSS button being artifically displaced */
-    height: 5px;
-    width: 200px;
+    width: calc(100% - 24px);
+    display: inline-block;
     margin: 0;
 }
 
 .block_news_top #block_news_rss_all {
-    float: right;
+    width: 16px;
+    display: inline-block;
 }
 
 .block_news_message .msghide {
     color: gray;
 }
 
-.block_news_message .title, .block_news_message .messagedate {
-    float: left;
-}
-
 .block_news_message .link {
     clear: left;
-}
-
-.block_news_message .title {
-    font-weight: bold;
-    margin-left: 10px
 }
 
 .block_news_message .author {
@@ -103,6 +112,10 @@
 
 .block_news_message .message {
     padding-top: 5px;
+}
+
+.block-news-message-text {
+    margin-bottom: 15px;
 }
 
 .block_news_message .messageimage img,
@@ -145,6 +158,10 @@
     max-width: 650px;
 }
 
+.block-news-message-extlink .iconlarge {
+    margin-right: 8px;
+}
+
 /* Set text area width of feed URL list 100%. */
 .mform #id_config_feedurls,
 #block-news-feedurls {
@@ -165,6 +182,10 @@
     width: 50%;
 }
 
+.block_news .menu .menu-action-text img.smallicon {
+    display: none;
+}
+
 @media (max-width: 767px) {
     .block-news-desktop-nextprev {
         display: none;
@@ -172,4 +193,17 @@
     .block-news-mobile-nextprev {
         display: inline;
     }
+    #page-blocks-news-edit #fitem_id_groupids,
+    #page-blocks-news-edit #fitem_id_grouping {
+        width: 100%;
+    }
+}
+
+/*
+ * TEMPORARY: This option should be visible (even on non-ousubject sites)
+ * but because the feature is not fully implemented, we are hiding it.
+ * TODO This style should be removed by September release.
+ */
+body:not(.osep-courseformat-ousubject) #fitem_id_config_displaytype {
+    display: none;
 }

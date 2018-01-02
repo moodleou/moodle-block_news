@@ -202,6 +202,69 @@ function xmldb_block_news_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2017013100, 'news');
     }
 
+    if ($oldversion < 2017061400) {
+
+        $transaction = $DB->start_delegated_transaction();
+        // Define table block_news_message_groups to be created.
+        $table = new xmldb_table('block_news_message_groups');
+
+        // Adding fields to table block_news_message_groups.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('messageid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('groupid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+        // Adding keys to table block_news_message_groups.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('messageid', XMLDB_KEY_FOREIGN, array('messageid'), 'block_news_messages', array('id'));
+        $table->add_key('groupid', XMLDB_KEY_FOREIGN, array('groupid'), 'groups', array('id'));
+
+        // Conditionally launch create table for block_news_message_groups.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Migrate group links to new table.
+        $groupmessages = $DB->get_records_select('block_news_messages', 'groupid != ?', [0]);
+        foreach ($groupmessages as $message) {
+            $messagegroup = (object) ['messageid' => $message->id, 'groupid' => $message->groupid];
+            $DB->insert_record('block_news_message_groups', $messagegroup, false, true);
+        }
+        $groupingmessages = $DB->get_records_select('block_news_messages', 'groupingid != ?', [0]);
+        foreach ($groupingmessages as $message) {
+            $groups = $DB->get_records('groupings_groups', ['groupingid' => $message->groupingid]);
+            foreach ($groups as $group) {
+                $messagegroup = (object) ['messageid' => $message->id, 'groupid' => $group->groupid];
+                $DB->insert_record('block_news_message_groups', $messagegroup, false, true);
+            }
+        }
+
+        // Define field groupid to be dropped from block_news_messages.
+        $table = new xmldb_table('block_news_messages');
+        $field = new xmldb_field('groupid');
+
+        // Conditionally launch drop field groupid.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Define field groupingid to be dropped from block_news_messages.
+        $table = new xmldb_table('block_news_messages');
+        $field = new xmldb_field('groupingid');
+
+        // Conditionally launch drop field groupingid.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Switch blocks in "grouping" mode to "group" mode.
+        $DB->set_field('block_news', 'groupingsupport', 2, ['groupingsupport' => 1]);
+
+        // Fix invalid foreign keys.
+        $DB->set_field('block_news_messages', 'newsfeedid', null, ['newsfeedid' => 0]);
+        $transaction->allow_commit();
+        upgrade_block_savepoint(true, 2017061400, 'news');
+    }
+
     return $result;
 
 }

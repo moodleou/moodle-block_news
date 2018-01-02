@@ -54,6 +54,14 @@
             "eventlocation": "A pub",
             "formattedmessage": "This is <b>fake news</b>. Sad!",
             "viewlink": "http://example.com",
+            "link": "http://example.net",
+            "linkicon": {
+                "attributes": [
+                    {"name": "src", "value": "http://placehold.it/24/24" },
+                    {"name": "class", "value": "iconlarge" },
+                    {"name": "alt", "value": "Alt text for icon"}
+                ]
+            }
             "classes": "",
             "groupindication": "",
             "hasactions": true,
@@ -91,67 +99,7 @@
         }
     }
 }}
-<section class="block-news-view">
+<section class="block-news-view clearfix">
     <h1>{{title}}</h1>
-    {{#message}}
-        <article class="block_news_message {{classes}}">
-            {{#isnews}}
-                <p class="author">{{messagedate}}{{#author}} by {{author}}{{/author}}</p>
-            {{/isnews}}
-            <h2 class="title">{{title}}</h2>
-            {{#isnews}}
-                {{#imageurl}}
-                    <div class="box messageimage">
-                        <img alt="" src="{{imageurl}}" width="{{imagewidth}}" height="{{imageheight}}" />
-                    </div>
-                {{/imageurl}}
-            {{/isnews}}
-            {{^isnews}}
-                <time class="block_news_event_date" datetime="{{eventdatetime}}">
-                    <span class="block_news_event_date_month">{{eventmonth}}</span>
-                    <span class="block_news_event_date_day">{{eventday}}</span>
-                </time>
-                <div class="block_news_event_fulldate">{{{fulleventdate}}}</div>
-                {{#eventlocation}}
-                    <div class="block_news_event_location">{{{eventlocation}}}</div>
-                {{/eventlocation}}
-            {{/isnews}}
-            <div class="block-news-message-text">{{{formattedmessage}}}</div>
-        </article>
-        {{#hasattachments}}
-            <div class="news-message-attachments">
-                <h3>{{#str}} msgedithlpattach, block_news {{/str}}</h3>
-                <ul>
-                    {{#attachments}}
-                        <li><a href="{{url}}">{{#icon}}{{> core/pix_icon}}{{/icon}} {{filename}}</a></li>
-                    {{/attachments}}
-                </ul>
-            </div>
-        {{/hasattachments}}
-        {{#hasactions}}
-            <div class="box editicons">
-            {{#actions}}
-                <a href="{{url}}">
-                    {{#icon}}
-                        {{> core/pix_icon}}
-                    {{/icon}}
-                </a>
-            {{/actions}}
-            </div>
-        {{/hasactions}}
-        {{#hasnotes}}
-            <div class="block-news-notes">
-                {{#notes}}
-                    <p class="note">{{.}}</p>
-                {{/notes}}
-            </div>
-        {{/hasnotes}}
-        <div class="block_news_group_indication">{{{groupindication}}}</div>
-        {{#prevlink}}
-            <div class="block-news-prevlink">{{{prevlink}}}</div>
-        {{/prevlink}}
-        {{#nextlink}}
-            <div class="block-news-nextlink">{{{nextlink}}}</div>
-        {{/nextlink}}
-    {{/message}}
+    {{#message}}{{> block_news/message_full}}{{/message}}
 </section>

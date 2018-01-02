@@ -105,10 +105,13 @@ class block_news_generator extends testing_block_generator {
      *
      * @param stdclass $block
      * @param stdclass $block
+     * @param int[] $groups IDs of groups for display restrictions.
      * @return bool|int
      */
-    public function create_block_new_message($block, $record) {
+    public function create_block_new_message($block, $record, $groups = []) {
         global $CFG, $DB;
+
+        $record = (object) $record; // Accept arrays as well.
 
         $record->blockinstanceid = $block->id;
 
@@ -130,7 +133,7 @@ class block_news_generator extends testing_block_generator {
             $record->messageimage = null;
         }
         if (!isset($record->newsfeedid)) {
-            $record->newsfeedid = 0;
+            $record->newsfeedid = null;
         }
         if (!isset($record->messagevisable)) {
             $record->messagevisible = 1;
@@ -160,6 +163,12 @@ class block_news_generator extends testing_block_generator {
             $record->eventlocation = null;
         }
         $id = $DB->insert_record('block_news_messages', $record, true);
+
+        if (!empty($groups)) {
+            foreach ($groups as $group) {
+                $DB->insert_record('block_news_message_groups', (object) ['groupid' => $group, 'messageid' => $id]);
+            }
+        }
 
         if (isset($record->image)) {
             $imagepath = $CFG->dirroot . $record->image;

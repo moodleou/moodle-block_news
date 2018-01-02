@@ -38,8 +38,6 @@ abstract class renderable_message implements \renderable {
     public $title;
     /** @var string Additional CSS classes for message wrapper */
     public $classes;
-    /** @var string Source URL for the message (if from a feed) */
-    public $link;
     /** @var string URL to view the whole message */
     public $viewlink;
     /** @var string Message text */
@@ -121,7 +119,7 @@ abstract class renderable_message implements \renderable {
      */
     protected function set_edit_links(message $bnm, \context $blockcontext, $mode) {
         // If a feed message (newsfeedid != 0) dont show edit etc icons.
-        if ($bnm->get_newsfeedid() == 0) {
+        if (empty($bnm->get_newsfeedid())) {
             if (has_capability('block/news:hide', $blockcontext)) {
                 $this->hideicon = new \pix_icon('t/' . $this->showhideact, $this->showhideact);
                 // Eg 't/hide', 'hide'.

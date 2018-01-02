@@ -41,6 +41,7 @@ class restore_news_block_structure_step extends restore_structure_step {
         $paths[] = new restore_path_element('block', '/block', true);
         $paths[] = new restore_path_element('news', '/block/news/instance');
         $paths[] = new restore_path_element('news_message', '/block/news/messages/message');
+        $paths[] = new restore_path_element('news_message_group', '/block/news/messages/message/messagegroups/messagegroup');
         $paths[] = new restore_path_element('news_feed', '/block/news/feeds/feed');
 
         return $paths;
@@ -71,6 +72,10 @@ class restore_news_block_structure_step extends restore_structure_step {
                 // but it isn't necessary to the news block instance.
 
                 $instance->blockinstanceid = $this->task->get_blockid();
+                if (isset($instance->groupingsupport) && $instance->groupingsupport == 1) {
+                    // Convert old grouping mode to groups mode.
+                    $instance->groupingsupport = 2;
+                }
                 $newid = $DB->insert_record('block_news', $instance);
                 $this->set_mapping('block_news', $oldid, $newid);
             }
@@ -106,8 +111,12 @@ class restore_news_block_structure_step extends restore_structure_step {
                     }
 
                     $message->userid = $this->get_mappingid('user', $message->userid);
-                    $message->groupingid = $this->get_mappingid('grouping', $message->groupingid);
-                    $message->groupid = $this->get_mappingid('group', $message->groupid);
+                    if (isset($message->groupingid)) {
+                        $message->groupingid = $this->get_mappingid('grouping', $message->groupingid);
+                    }
+                    if (isset($message->groupid)) {
+                        $message->groupid = $this->get_mappingid('group', $message->groupid);
+                    }
                     if ($message->newsfeedid) {
                         $message->newsfeedid = $this->get_mappingid('block_news_feed', $message->newsfeedid);
                     }
@@ -118,6 +127,29 @@ class restore_news_block_structure_step extends restore_structure_step {
                     $this->add_related_files('block_news', 'attachment', 'block_news\message',
                             null, $oldid);
                     $this->add_related_files('block_news', 'message', 'block_news\message', null, $oldid);
+
+                    $messagegroups = array();
+                    if (!empty($message->messagegroups)) {
+                        foreach ($message->messagegroups['messagegroup'] as $messagegroup) {
+                            $messagegroups[] = (object) [
+                                'messageid' => $newid,
+                                'groupid' => $this->get_mappingid('group', $messagegroup['groupid'])
+                            ];
+                        }
+                    }
+                    // Covert legacy group and grouping IDs to new message_groups records.
+                    if (isset($message->groupid)) {
+                        $messagegroups[] = (object) ['messageid' => $newid, 'groupid' => $message->groupid];
+                    }
+                    if (isset($message->groupingid)) {
+                        $groups = groups_get_all_groups($this->task->get_courseid(), 0, $message->groupingid);
+                        foreach ($groups as $group) {
+                            $messagegroups[] = (object) ['messageid' => $newid, 'groupid' => $group->id];
+                        }
+                    }
+                    foreach ($messagegroups as $messagegroup) {
+                        $DB->insert_record('block_news_message_groups', $messagegroup, true, true);
+                    }
                 }
             }
         }

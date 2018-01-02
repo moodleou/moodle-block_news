@@ -107,11 +107,9 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
 
         // Create 2 news messages in news blocks. Add message to group.
         $message1 = new stdClass();
-        $message1->groupid = $this->group1->id;
-        $message1id = $generator->create_block_new_message($nblock, $message1);
+        $message1id = $generator->create_block_new_message($nblock, $message1, [$this->group1->id]);
         $message2 = new stdClass();
-        $message2->groupid = $this->group2->id;
-        $message2id = $generator->create_block_new_message($nblock, $message2);
+        $message2id = $generator->create_block_new_message($nblock, $message2, [$this->group2->id]);
 
         // Enable group support and call get_messages_limited function.
         $bns = system::get_block_settings($nblock->id);
@@ -120,7 +118,7 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
 
         // When group restriction support is enabled. Return 1 the messages with correct groupid.
         $this->assertEquals(1, count($msgs));
-        $this->assertEquals($this->group1->id, $msgs[0]->get_groupid());
+        $this->assertTrue(in_array($this->group1->id, $msgs[0]->get_groupids()));
     }
 
     /**
@@ -164,11 +162,9 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
 
         // Create 2 news messages in news blocks. Add message to group.
         $message1 = new stdClass();
-        $message1->groupid = $this->group1->id;
-        $message1id = $generator->create_block_new_message($nblock, $message1);
+        $message1id = $generator->create_block_new_message($nblock, $message1, [$this->group1->id]);
         $message2 = new stdClass();
-        $message2->groupid = $this->group2->id;
-        $message2id = $generator->create_block_new_message($nblock, $message2);
+        $message2id = $generator->create_block_new_message($nblock, $message2, [$this->group2->id]);
 
         // Enable group support and call get_messages_all function.
         $bns = system::get_block_settings($nblock->id);
@@ -177,6 +173,45 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
 
         // When group restriction support is enabled. Return 1 the messages with correct groupid.
         $this->assertEquals(1, count($msgs));
-        $this->assertEquals($this->group1->id, $msgs[0]->get_groupid());
+        $this->assertTrue(in_array($this->group1->id, $msgs[0]->get_groupids()));
+    }
+
+    public function test_remove_deleted_message_groups() {
+
+        global $COURSE, $DB;
+
+        $this->setUser($this->user->id);
+        $COURSE->id = $this->course->id;
+
+        // Create the generator object.
+        $generator = $this->getDataGenerator()->get_plugin_generator('block_news');
+
+        // Create news blocks.
+        $nblock = $generator->create_instance(array(), array('courseid' => $this->course->id));
+
+        // Create 2 news messages in news blocks. Add message to group.
+        $message1 = new stdClass();
+        $message1id = $generator->create_block_new_message($nblock, $message1, [$this->group1->id, $this->group2->id]);
+
+        $bns = system::get_block_settings($nblock->id);
+        $bns->set_groupingsupport(2);
+        $msgs = $bns->get_messages_all(1);
+        $groupindication = $bns->get_group_indication($msgs[0]);
+        $this->assertTrue($DB->record_exists('block_news_message_groups',
+                ['messageid' => $message1id, 'groupid' => $this->group1->id]));
+        $this->assertTrue($DB->record_exists('block_news_message_groups',
+                ['messageid' => $message1id, 'groupid' => $this->group2->id]));
+        $this->assertEquals(get_string('rendermsggroupindication', 'block_news', $this->group1->name . ', ' . $this->group2->name),
+                $groupindication);
+
+        // Delete the group and check that the message group is removed when we get the group indication.
+        groups_delete_group($this->group1->id);
+        $groupindication = $bns->get_group_indication($msgs[0]);
+        $this->assertFalse($DB->record_exists('block_news_message_groups',
+                ['messageid' => $message1id, 'groupid' => $this->group1->id]));
+        $this->assertTrue($DB->record_exists('block_news_message_groups',
+                ['messageid' => $message1id, 'groupid' => $this->group2->id]));
+        $this->assertEquals(get_string('rendermsggroupindication', 'block_news', $this->group2->name),
+                $groupindication);
     }
 }

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>http://127.0.0.1/ou-moodle2/blocks/news/feed.php?bi=188007</id>
+    <updated>2017-07-10T18:03:28+08:00</updated>
+    <title>C1 - (new News block)</title>
+    <link href="http://127.0.0.1/ou-moodle2/blocks/news/feed.php?bi=188007" rel="self"></link>
+    <link href="http://127.0.0.1/ou-moodle2/course/view.php?id=100000" rel="alternate"></link>
+    <generator>Moodle</generator>
+    <rights>&#169; 2017 Acceptance test site</rights>
+    <logo>http://127.0.0.1/ou-moodle2/theme/image.php/boost/core/1499431930/i/rsssitelogo</logo>
+    <entry>
+        <title>Fourth message</title>
+        <link href="http://127.0.0.1/ou-moodle2/blocks/news/message.php?m=575003" rel="alternate"></link>
+        <updated>2017-07-10T17:58:37+08:00</updated>
+        <author>
+            <name>ANNE Lastname1</name>
+        </author>
+        <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Message4 text</div></content>
+        <id>http://127.0.0.1/ou-moodle2/blocks/news/message.php?m=575003</id>
+    </entry>
+    <entry>
+        <title>Medium message</title>
+        <link href="http://127.0.0.1/ou-moodle2/blocks/news/message.php?m=575001" rel="alternate"></link>
+        <updated>2017-07-10T17:58:14+08:00</updated>
+        <author>
+            <name>ANNE Lastname1</name>
+        </author>
+        <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Message2 text is longer and contains over 100 characters but will get cut off on the front page at some point before the word JACKPOT</div></content>
+        <id>http://127.0.0.1/ou-moodle2/blocks/news/message.php?m=575001</id>
+    </entry>
+</feed>

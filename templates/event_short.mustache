@@ -70,15 +70,12 @@
     </time>
     <div class="block_news_msg">
         <h1>
-            <span class="block_news_msg_title">{{title}}</span>
+            <a href="{{viewlink}}"><span class="block_news_msg_title">{{title}}</span></a>
         </h1>
         <div class="block_news_event_fulldate">{{{fulleventdate}}}</div>
         {{#eventlocation}}
             <div class="block_news_event_location">{{{eventlocation}}}</div>
         {{/eventlocation}}
-        <div class="link">
-            {{> block_news/message_link}}
-        </div>
         <div class="block_news_group_indication">{{{groupindication}}}</div>
         {{#hasactions}}
         <div class="box editicons">

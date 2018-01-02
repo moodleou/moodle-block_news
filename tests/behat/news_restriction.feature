@@ -1,4 +1,4 @@
-@ou @ou_vle @block @block_news
+@ou @ou_vle @block @block_news @javascript
 Feature: News message restriction by grouping or group
   In order to restrict access to message
   As a teacher
@@ -45,20 +45,25 @@ Feature: News message restriction by grouping or group
     Given I open the "(new News block)" blocks action menu
     And I follow "Configure (new News block) block"
     And I set the following fields to these values:
-      | Enable message restriction | Grouping |
+      | Enable message restriction | Group |
     And I press "Save changes"
 
     # Post message and set grouping is grouping 1.
     When I click on "Add" "link" in the "(new News block)" "block"
     And I set the following fields to these values:
-      | Title | Short message title 1 |
-      | Text  | Message1 text |
-      | Grouping | Grouping 1 |
+      | Title                         | Short message title 1 |
+      | Text                          | Message1 text         |
+      | Select all groups in grouping | Grouping 1            |
+    Then the following fields match these values:
+      | Group | Group 1 |
+    When I set the field "Group" to "Group 2"
+    Then the field "Select all groups in grouping" matches value ""
+    When I set the field "Select all groups in grouping" to "Grouping 1"
     And I press "Save changes"
 
     # Teacher see the grouping indication.
     Then I should see "Short message title 1"
-    Then I should see "Not available unless: You belong to Grouping 1"
+    Then I should see "Not available unless you belong to one of the following groups: Group 1"
 
     # Student 1 in grouping 1 see the message 1.
     And I log out
@@ -91,7 +96,7 @@ Feature: News message restriction by grouping or group
 
     # Teacher see the group indication.
     Then I should see "Short message title 2"
-    Then I should see "Not available unless: You belong to Group 2"
+    Then I should see "Not available unless you belong to one of the following groups: Group 2"
 
     # Student 1 in group 1 do not see the message 2.
     And I log out

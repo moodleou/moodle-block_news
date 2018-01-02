@@ -154,12 +154,29 @@ Feature: Display events in news block
     And I should not see "message2" in the "News and events" "block"
     And "message3" "text" should appear before "message1" "text"
 
+  Scenario: Only display the first 2 of each message type
+    Given the following news messages exist on course "C1":
+      | title  | message | messagetype | messagedate | eventstart |
+      | news1  | news1   | 1           | 1483228800  |            |
+      | news2  | news2   | 1           | 1483228801  |            |
+      | news3  | news3   | 1           | 1483228802  |            |
+      | event1 | event1  | 2           | 1483228800  | 2145924000 |
+      | event2 | event2  | 2           | 1483228801  | 2145924001 |
+      | event3 | event3  | 2           | 1483228802  | 2145924002 |
+    When I reload the page
+    Then I should see "news2" in the "News and events (new)" "block"
+    And I should see "news3" in the "News and events (new)" "block"
+    And I should not see "news1" in the "News and events (new)" "block"
+    And I should see "event1" in the "News and events (new)" "block"
+    And I should see "event2" in the "News and events (new)" "block"
+    And I should not see "event3" in the "News and events (new)" "block"
+
   Scenario: Don't show byline on event pages
     Given the following news messages exist on course "C1":
       | title    | message      | messagetype | messagedate | eventstart |
       | message1 | test message | 2           | 1483228800  | 2145974400 |
     And I reload the page
-    And I click on "View" "link" in the "News and events" "block"
+    And I click on "message1" "link" in the "News and events" "block"
     Then I should see "message1"
     And I should see "test message"
     And I should not see "by Admin User"

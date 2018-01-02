@@ -35,11 +35,12 @@ $action          = optional_param('action', '', PARAM_TEXT);
 $confirm         = optional_param('confirm', '', PARAM_TEXT);
 
 $sql = system::get_message_sql_start() .
-    'WHERE {block_news_messages}.id = ?';
+    'WHERE m.id = ?';
 $mrec = $DB->get_record_sql($sql, array('id' => $id), MUST_EXIST);
 
 $blockinstanceid = $mrec->blockinstanceid;
-$bnm = new message($mrec);
+$groupids = $DB->get_fieldset_select('block_news_message_groups', 'groupid', 'messageid = ?', [$mrec->id]);
+$bnm = new message($mrec, $groupids);
 
 if (empty($blockinstanceid)) {
     print_error('errorinvalidblockinstanceid', 'block_news');
@@ -50,15 +51,20 @@ $newstitle = $bns->get_title();
 $csemod = block_news_init_page($blockinstanceid, $newstitle);
 
 if ($bns->get_groupingsupport() == $bns::RESTRICTBYGROUP) {
-    if ($bnm->get_groupid()) {
+    $messagegroups = $bnm->get_groupids();
+    if (!empty($messagegroups)) {
         // Get the course id from the group id.
-        $courseid = $DB->get_field('groups', 'courseid', array('id' => $bnm->get_groupid()), MUST_EXIST);
-        $context = context_course::instance($courseid);
+        list($sql, $params) = $DB->get_in_or_equal($messagegroups);
+        $groups = $DB->get_records_select('groups', 'id ' . $sql, $params);
 
-        // Get the group ids.
-        $groupids = $bns->get_groupids($USER->id, $courseid);
+        $allowedgroups = [];
+        foreach ($groups as $group) {
+            // Get the groups the user has access to.
+            $allowedgroups = array_merge($allowedgroups, $bns->get_groupids($USER->id, $group->courseid));
+        }
 
-        if (!in_array($bnm->get_groupid(), $groupids)) {
+        // Check that at least one group the message is visible to is accessible to the user.
+        if (empty(array_intersect($messagegroups, $allowedgroups))) {
             print_error('errormessageaccessrestricted', 'block_news');
         }
     }
@@ -165,16 +171,9 @@ if ($action == 'delete' && !$confirm) {
     $image = $bns->get_images('messageimage', $bnm->get_id());
     $msgwidget = new full_message($bnm, $pn->previd, $pn->nextid, $bns, 'one', $image);
 
-    if ($bns->get_displaytype() == system::DISPLAY_DEFAULT) {
-        // Normal display of a message.
-        block_news_output_hdr($title, $bns);
-        echo $output->render($msgwidget);
-    } else {
-        $page = new view_page($msgwidget);
-        echo $OUTPUT->header();
-        echo $output->render($page);
-    }
-
+    $page = new view_page($msgwidget);
+    echo $OUTPUT->header();
+    echo $output->render($page);
 }
 
 echo $OUTPUT->footer();
