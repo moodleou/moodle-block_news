@@ -166,4 +166,4 @@ $string['eventmessage_deleted'] = 'Deleted news message';
 $string['process_feeds_task'] = 'Refresh News block feeds';
 
 // Global search.
-$string['search:news_message'] = 'News block messages';
+$string['search:news_message'] = 'News messages';
