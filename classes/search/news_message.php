@@ -38,23 +38,25 @@ defined('MOODLE_INTERNAL') || die();
  */
 class news_message extends \core_search\base_block {
 
-    public function get_recordset_by_timestamp($modifiedfrom = 0) {
+    public function get_document_recordset($modifiedfrom = 0, \context $context = null) {
         global $DB;
+        // Get context restrictions.
+        list ($contextjoin, $contextparams) = $this->get_context_restriction_sql($context, 'bi');
 
-        return $DB->get_recordset_sql("
-                SELECT bnm.id AS id, bi.configdata, bn.title, bi.id AS instance, bnm.title AS messagetitle,
+        return $DB->get_recordset_sql(
+               "SELECT bnm.id AS id, bi.configdata, bn.title, bi.id AS instance, bnm.title AS messagetitle,
                        bnm.message AS message, bnm.messageformat, bnm.hideauthor, bnm.timemodified AS timemodified,
                        bnm.userid AS userid, bnm.messagedate, c.id AS contextid, co.id AS courseid
                   FROM {block_news_messages} bnm
                   JOIN {block_news} bn ON bn.blockinstanceid = bnm.blockinstanceid
                   JOIN {block_instances} bi ON bn.blockinstanceid = bi.id
+          $contextjoin
                   JOIN {context} c ON c.instanceid = bi.id AND c.contextlevel = ?
                   JOIN {context} coursecontext ON coursecontext.id = bi.parentcontextid AND coursecontext.contextlevel = ?
                   JOIN {course} co ON co.id = coursecontext.instanceid
-                 WHERE bi.blockname = 'news'
-                       AND bnm.timemodified >= ?
+                 WHERE bi.blockname = 'news' AND bnm.timemodified >= ?
               ORDER BY bnm.timemodified ASC",
-                array(CONTEXT_BLOCK, CONTEXT_COURSE, $modifiedfrom));
+                array_merge($contextparams, [CONTEXT_BLOCK, CONTEXT_COURSE, $modifiedfrom]));
     }
 
     public function get_document($record, $options = array()) {
