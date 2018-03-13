@@ -27,6 +27,7 @@ namespace block_news\output;
 defined('MOODLE_INTERNAL') || die();
 
 use block_news\message;
+use block_news\system;
 
 /**
  * Short message class (for display in the block).
@@ -113,6 +114,17 @@ class short_message extends renderable_message implements \templatable {
                     $blockcontext->id, 'block_news', 'message', $bnm->get_id());
         } else {
             $this->message = '';
+        }
+        if ($bns->get_displaytype() == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
+            // Tags of news title in subject site.
+            $this->tag = 'h4';
+            if ($mode == 'all') {
+                // Tags of news title in All News page in subject site.
+                $this->tag = 'h2';
+            }
+        } else {
+            // Tags of news title in study planner.
+            $this->tag = 'h3';
         }
     }
 

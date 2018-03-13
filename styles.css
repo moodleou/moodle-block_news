@@ -11,7 +11,10 @@
     margin-bottom: 0px;
 }
 
-.block_news_msg h1 {
+.block_news_msg h1,
+.block_news_msg h2,
+.block_news_msg h3,
+.block_news_msg h4 {
     font-size: 1.0em;
     margin: 15px 0 0 0;
     line-height: 1.2;
@@ -34,7 +37,10 @@
     font-weight: bold;
 }
 
-.block_news_msg h1.main {
+.block_news_msg h1.main,
+.block_news_msg h2.main,
+.block_news_msg h3.main,
+.block_news_msg h4.main {
     margin-bottom: 5px;
 }
 

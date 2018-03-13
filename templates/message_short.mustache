@@ -45,6 +45,7 @@
         "classes": "",
         "groupindication": "",
         "hasactions": true,
+        "tag": "h3",
         "actions": [
             {
                 "icon": {
@@ -69,9 +70,9 @@
                         sizes="(max-width: 380px) {{thumbwidth}}px, (max-width: 767px) {{imagewidth}}px, {{thumbwidth}}px"{{/imageurl}} />
             </div>
         {{/thumburl}}
-        <h1>
+        <{{tag}}>
             <a href="{{viewlink}}"><span class="block_news_msg_title">{{title}}</span></a>
-        </h1>
+        </{{tag}}>
         <span class="block_news_msg_messagedate">{{#str}} posted, block_news {{/str}} {{messagedate}}</span>
         {{#author}}
             <div class="block_news_msg_author">{{author}}</div>
