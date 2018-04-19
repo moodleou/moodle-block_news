@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet title="XSL_formatting" type="text/xsl" href="/shared/bsp/xsl/rss/nolsol.xsl"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
+    <channel>
+        <title><![CDATA[Frog News - Home]]></title>
+        <description><![CDATA[Frog News - Home]]></description>
+        <link>http://frog.example.org/news/</link>
+        <image>
+            <url>http://frog.example.org/nol/shared/img/frog_news_120x60.gif</url>
+            <title>Frog News - Home</title>
+            <link>http://frog.example.org/news/</link>
+        </image>
+        <generator>RSS for Node</generator>
+        <lastBuildDate>Thu, 19 Apr 2018 10:55:58 GMT</lastBuildDate>
+        <copyright><![CDATA[Copyright: (C) The Open University]]></copyright>
+        <language><![CDATA[en-gb]]></language>
+        <ttl>15</ttl>
+        <item>
+            <title><![CDATA[Frogs 3]]></title>
+            <description><![CDATA[Some frogs have long tongues.]]></description>
+            <link>http://frog.example.org/news/uk-politics-43820328</link>
+            <guid isPermaLink="true">http://frog.example.org/news/uk-politics-43820328</guid>
+            <pubDate>Thu, 19 Apr 2018 10:10:39 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Frogs 4]]></title>
+            <description><![CDATA[More information about frogs is available.]]></description>
+            <link>http://frog.example.org/news/business-43820573</link>
+            <guid isPermaLink="true">http://frog.example.org/news/business-43820573</guid>
+            <pubDate>Thu, 19 Apr 2018 09:39:12 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Frogs 5]]></title>
+            <description><![CDATA[One source of frog-related information would be Wikipedia.]]></description>
+            <link>http://frog.example.org/news/stories-43702764</link>
+            <guid isPermaLink="true">http://frog.example.org/news/stories-43702764</guid>
+            <pubDate>Wed, 18 Apr 2018 23:25:32 GMT</pubDate>
+        </item>
+    </channel>
+</rss>

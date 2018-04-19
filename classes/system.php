@@ -426,7 +426,7 @@ class system {
 
         $data->id = $this->id;
 
-        if (isset($data->displaytype) && ($data->displaytype == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS)) {
+        if (isset($data->displaytype) && ($data->displaytype == self::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS)) {
             // Force default (new News block) to 'News and events'.
             if ($data->title == get_string('defaultblocktitle', 'block_news')) {
                 $data->title = get_string('newsandeventsblocktitle', 'block_news');
@@ -523,7 +523,7 @@ class system {
      * @param int|null $type Restrict returned messages by messagetype.
      * @param string $order ORDER BY statement for sorting results (default: eventstart ASC, messagedate DESC)
      * @param bool $pastevents If showing events, show past events instead of upcoming ones?
-     * @return array block_news\message
+     * @return message[] Messages
      */
     public function get_messages_all($viewhidden, $pagesize = null, $pagenumber = null, $type = null,
             $order = 'eventstart ASC, messagedate DESC', $pastevents = false) {
@@ -633,11 +633,9 @@ class system {
     public function get_message_pn($bnm, $viewhidden) {
         global $DB;
 
-        /*
-         * Get all relevant messages into an array of ids (as sorted by messagedate asc)
-         * indexed by a subscript. The offset of the current message id is found and
-         * the ids of the messages either side returned, or -1 if at end of list.
-         */
+        // Get all relevant messages into an array of ids (as sorted by messagedate asc)
+        // indexed by a subscript. The offset of the current message id is found and
+        // the ids of the messages either side returned, or -1 if at end of list.
         if ($viewhidden) {  // No date limit, all visibilty.
             $sqlvh = '';
             $paramsvh = array();
@@ -815,17 +813,39 @@ class system {
         $hash = sha1(serialize($fia));
 
         if ($hash != $bnf->currenthash) {
-            // Delete existing.
-            $DB->delete_records('block_news_messages', array('newsfeedid' => $bnf->id));
+            // Get existing records.
+            $existing = $DB->get_records('block_news_messages', ['newsfeedid' => $bnf->id]);
 
-            // Also clear cache.
+            // Get hash of existing messages (key fields).
+            $existinghashes = [];
+            foreach ($existing as $messagedata) {
+                // Use all fields except the ones which are fixed to a given value below.
+                $hash = sha1($messagedata->title . $messagedata->link . $messagedata->message .
+                        $messagedata->messagedate . $messagedata->messagetype .
+                        $messagedata->eventstart . $messagedata->eventend .
+                        $messagedata->eventlocation);
+                $existinghashes[$hash] = $messagedata->id;
+            }
+
+            // Clear cache.
             $this->uncache_block_feed();
 
             $context = \context_block::instance($bnf->blockinstanceid);
-            $bns = system::get_block_settings($bnf->blockinstanceid);
+            $bns = self::get_block_settings($bnf->blockinstanceid);
 
             // Write new message.
             foreach ($fia as $fi) {
+                // Set default null values.
+                $fi->messagetype = message::MESSAGETYPE_NEWS;
+                $fi->eventlocation = null;
+                $fi->eventstart = null;
+                $fi->eventend = null;
+
+                // Ensure message is non-null.
+                if ($fi->message === null) {
+                    $fi->message = '';
+                }
+
                 // Add missing cols.
                 $fi->blockinstanceid = $fbrec->blockinstanceid;
                 $fi->newsfeedid = $bnf->id;
@@ -835,9 +855,9 @@ class system {
                 $extraimageurl = false;
                 if (strpos($fi->message, '<div class="block_news-extras">') !== false) {
                     // For internal feeds gather and strip out the extra internal information.
-                    list($msg, $extraimageurl, $type, $loc, $start, $end) = system::process_internal_feed_extras($fi->message);
+                    list($msg, $extraimageurl, $type, $loc, $start, $end) = self::process_internal_feed_extras($fi->message);
                     // Skip importing any messages of type event if the block does not allow events.
-                    if ($type && $bns->get_displaytype() == system::DISPLAY_DEFAULT) {
+                    if ($type && $bns->get_displaytype() == self::DISPLAY_DEFAULT) {
                         continue;
                     }
                     $fi->message = $msg;
@@ -869,12 +889,24 @@ class system {
                 $fi->userid = null; // Set to null for feed msgs.
                 $fi->timemodified = time();
 
-                $id = message::create($fi);
+                $hash = sha1($fi->title . $fi->link . $fi->message . $fi->messagedate .
+                        $fi->messagetype . $fi->eventstart . $fi->eventend . $fi->eventlocation);
 
-                if ($extraimageurl) {
-                    $this->store_message_images($extraimageurl, $context, $id);
+                if (array_key_exists($hash, $existinghashes)) {
+                    // Reuse existing message.
+                    unset($existing[$existinghashes[$hash]]);
+                } else {
+                    // Create new message.
+                    $id = $DB->insert_record('block_news_messages', $fi);
+
+                    if ($extraimageurl) {
+                        $this->store_message_images($extraimageurl, $context, $id);
+                    }
                 }
             }
+
+            // Delete all the existing messages we didn't reuse.
+            $DB->delete_records_list('block_news_messages', 'id', array_keys($existing));
 
             // Write new hash.
             $bnf->currenthash = $hash;
@@ -923,7 +955,7 @@ class system {
         }
         $node = $xpath->query("//div[@class='block_news-extras']")[0];
         $node->parentNode->removeChild($node);
-        $message = str_replace(array('<html>','</html>') , '' , $doc->saveHTML());
+        $message = str_replace(array('<html>', '</html>') , '' , $doc->saveHTML());
         return [$message, $imgurl, $type, $location, $start, $end];
     }
 
@@ -938,8 +970,8 @@ class system {
         global $CFG;
         if (substr_count($url, $CFG->wwwroot . '/blocks/news/images.php/')) {
             // The image exists on this server so just copy it to this blocks images.
-            list($contextid, $component, $filearea, $itemid, $filename) =
-                    explode('/', str_replace($CFG->wwwroot . '/blocks/news/images.php/', '', $url));
+            list($contextid, $component, $filearea, $itemid, $filename) = explode(
+                    '/', str_replace($CFG->wwwroot . '/blocks/news/images.php/', '', $url));
             $fs = get_file_storage();
             $imgfile = $fs->get_file($contextid, $component, $filearea, $itemid, '/', $filename);
             if ($imgfile) {
@@ -999,7 +1031,15 @@ class system {
         $fia = array();
 
         require_once($CFG->libdir . '/simplepie/moodle_simplepie.php');
-        $feed = new \moodle_simplepie($feedurl);
+
+        if (PHPUNIT_TEST && !empty($CFG->block_news_simplepie_feed)) {
+            $feed = new \moodle_simplepie();
+            $file = new \SimplePie_File($CFG->block_news_simplepie_feed);
+            $feed->set_file($file);
+            $feed->init();
+        } else {
+            $feed = new \moodle_simplepie($feedurl);
+        }
 
         $feed->set_timeout = 10; // Secs.
         if (isset($CFG->block_rss_client_timeout)) {

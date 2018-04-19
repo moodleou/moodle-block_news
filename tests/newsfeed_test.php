@@ -278,7 +278,7 @@ EOT;
         // Call uncache for the first block.
         system::get_block_settings($block1->id)->uncache_block_feed();
 
-        // First block feed is changed, but second is still cached
+        // First block feed is changed, but second is still cached.
         $feed = system::get_block_feed($block1->id, 0);
         $this->assertContains('</entry>', $feed);
         $feed = system::get_block_feed($block2->id, 0, null, $user1->username);
@@ -295,4 +295,56 @@ EOT;
         $feed = system::get_block_feed($block2->id, 0, null, $user2->username);
         $this->assertContains('</entry>', $feed);
     }
+
+    /**
+     * Tests the update feed function for getting a remote feed, with changes.
+     */
+    public function test_update_feed() {
+        global $CFG, $DB;
+        $this->resetAfterTest(true);
+
+        // Create a course.
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+
+        // Create a news block.
+        $newsgenerator = $generator->get_plugin_generator('block_news');
+        $block = $newsgenerator->create_instance([], ['courseid' => $course->id]);
+
+        // Unit testing hack to request feed from a file.
+        $CFG->block_news_simplepie_feed = __DIR__ . '/fixtures/remote_rss_1.xml';
+
+        // Set the block to use a feed.
+        $blocksettings = system::get_block_settings($block->id);
+        $blocksettings->save_feed_urls('https://frogs.example.org/');
+
+        // Check there are 4 messages, in date order.
+        $messages = $blocksettings->get_messages_all(true);
+        $this->assertCount(4, $messages);
+        $this->assertEquals('Frogs 2', $messages[0]->get_title());
+        $this->assertEquals('Frogs 3', $messages[1]->get_title());
+        $this->assertEquals('Frogs 1', $messages[2]->get_title());
+        $this->assertEquals('Frogs 4', $messages[3]->get_title());
+
+        // Now update the feed (pretend it wasn't updated since 1970).
+        $CFG->block_news_simplepie_feed = __DIR__ . '/fixtures/remote_rss_2.xml';
+        $DB->set_field('block_news_feeds', 'feedupdated', 1);
+        $task = new \block_news\task\process_feeds();
+        ob_start();
+        $task->execute();
+        ob_end_clean();
+
+        // Get messages again - 1 and 2 have gone, there should be a new message 5.
+        $messagesafter = $blocksettings->get_messages_all(true);
+        $this->assertCount(3, $messagesafter);
+        $this->assertEquals('Frogs 3', $messagesafter[0]->get_title());
+        $this->assertEquals('Frogs 4', $messagesafter[1]->get_title());
+        $this->assertEquals('Frogs 5', $messagesafter[2]->get_title());
+
+        // Confirm that the two existing messages do not have changed ID i.e. they were not
+        // recreated.
+        $this->assertEquals($messages[1]->get_id(), $messagesafter[0]->get_id());
+        $this->assertEquals($messages[3]->get_id(), $messagesafter[1]->get_id());
+    }
+
 }

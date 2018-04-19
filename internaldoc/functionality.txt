@@ -3,11 +3,9 @@
 == Introduction ==
 
 This document currently only contains functionality information about
-the news feed feature of the news block at present, not the
-functionality of the whole news block feature.
+selected features of the news block, not the whole news block feature.
 
-
-== News block feed ==
+== News block feed URLs ==
 
 === Description ===
 
@@ -38,4 +36,19 @@ course short name.
 Example
 http://www.someserver.org/blocks/news/feed.php?shortname=NEWSBLOCK&username=fred1
 
-- End -
+== News block remote feeds ==
+
+Remote feeds can be set up in the 'Feed URLs' setting of a news block. These will be updated
+periodically. You can set a remote feed to another news block's feed, or to any public feed such as
+BBC News.
+
+NOTE: There should be more detail about remote feeds here but I am only documenting the feature
+currently being added.
+
+When remote feeds are updated, the system deletes from the database any existing messages which
+have changed or been deleted, and then adds into the database any changed or added messages. For
+example, if you have a feed with messages A, B, and C, and it then changes to have messages A, C*,
+and D (where C* is a modified version of C), then messages B and C will be deleted, and C* and D
+added. This results in the minimal number of changes in the database.
+
+
