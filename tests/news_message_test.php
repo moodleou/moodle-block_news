@@ -47,6 +47,76 @@ class news_message_testcase extends \advanced_testcase {
         return $result;
     }
 
+    public function test_get_document_recordset() {
+
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+
+        // Enable global search for this test.
+        set_config('enableglobalsearch', true);
+        $search = \testable_core_search::instance();
+        $newsmessage = new \block_news\search\news_message();
+
+        // Create 2 courses.
+        $course1 = $this->getDataGenerator()->create_course();
+        $course2 = $this->getDataGenerator()->create_course();
+
+        // We need a user.
+        $user = $this->getDataGenerator()->create_user();
+
+        // Create the generator object.
+        $generator = $this->getDataGenerator()->get_plugin_generator('block_news');
+
+        $nblock1 = $generator->create_instance(array(), array('courseid' => $course1->id));
+        $nblock2 = $generator->create_instance(array(), array('courseid' => $course2->id));
+        system::get_block_settings($nblock1->id);
+        system::get_block_settings($nblock2->id);
+
+        // Create news messages (one for each course).
+        $message1 = new \stdClass();
+        $message1->timemodified = 3;
+        $message1->title = 'Message No1';
+        $message1->message = 'This is message number one';
+        $message1->messageformat = 1;
+        $message1->messagetype = 1;
+        $message1->messageimage = (object) ['image' => '/blocks/news/tests/fixtures/kitten1.jpg'];
+        $message1->newsfeedid = null;
+        $message1->messagevisible = 1;
+        $message1->messagedate = time();
+        $message1->hideauthor = 0;
+        $message1->messagerepeat = 0;
+        $message1->userid = 0;
+        $message1id = $generator->create_block_new_message($nblock1, $message1);
+
+        $message2 = new \stdClass();
+        $message2->timemodified = 2;
+        $message2->title = 'Message No2';
+        $message2->message = 'This is message number two';
+        $message2->messageformat = 1;
+        $message2->messagetype = 1;
+        $message2->messageimage = (object) ['image' => '/blocks/news/tests/fixtures/kitten2.jpg'];
+        $message2->newsfeedid = null;
+        $message2->messagevisible = 1;
+        $message2->messagedate = time();
+        $message2->hideauthor = 1;
+        $message2->messagerepeat = 0;
+        $message2->userid = $user->id;
+        $message2id = $generator->create_block_new_message($nblock2, $message2);
+
+        // Check without context.
+        $rs = $newsmessage->get_document_recordset();
+        $recordsetarray = self::recordset_to_array($rs);
+        $doc = $newsmessage->get_document($recordsetarray[0]);
+        $this->assertCount(2, $recordsetarray);
+
+        // Check with context.
+        $coursecontext = \context_course::instance($course1->id);
+        $rs2 = $newsmessage->get_document_recordset(0, $coursecontext);
+        $recordsetarray2 = self::recordset_to_array($rs2);
+        $doc = $newsmessage->get_document($recordsetarray2[0]);
+        $this->assertCount(1, $recordsetarray2);
+    }
+
     public function test_news_message() {
 
         $this->resetAfterTest(true);
@@ -56,7 +126,7 @@ class news_message_testcase extends \advanced_testcase {
         $search = \testable_core_search::instance();
 
         $newsmessage = new \block_news\search\news_message();
-        $rs = $newsmessage->get_recordset_by_timestamp();
+        $rs = $newsmessage->get_document_recordset();
         $this->assertCount(0, self::recordset_to_array($rs));
 
         // Create 2 courses.
@@ -122,7 +192,7 @@ class news_message_testcase extends \advanced_testcase {
         $message3->userid = $user->id;
         $message3id = $generator->create_block_new_message($nblock1, $message3);
 
-        $rs2 = $newsmessage->get_recordset_by_timestamp();
+        $rs2 = $newsmessage->get_document_recordset();
         $myrecordsetarray = self::recordset_to_array($rs2);
         $this->assertCount(3, $myrecordsetarray);
 
@@ -194,7 +264,7 @@ class news_message_testcase extends \advanced_testcase {
 
         $bns1->save((object)['title' => 'News', 'groupingsupport' => 2]);
         $bns2->save((object)['title' => 'News', 'groupingsupport' => 2]);
-        $rs2 = $newsmessage->get_recordset_by_timestamp();
+        $rs2 = $newsmessage->get_document_recordset();
 
         // Admin user.
         // Confirm access to message1.
@@ -258,7 +328,7 @@ class news_message_testcase extends \advanced_testcase {
 
         $bns1 = system::get_block_settings($nblock1->id);
 
-        $rs2 = $newsmessage->get_recordset_by_timestamp();
+        $rs2 = $newsmessage->get_document_recordset();
         $myrecordsetarray = self::recordset_to_array($rs2);
 
         // Check get_doc_url.
