@@ -13,11 +13,13 @@ Feature: News message restriction by grouping or group
       | teacher1 | ANNE      |
       | student1 | BOB       |
       | student2 | TOM       |
+      | student3 | BRUCE     |
     And the following "course enrolments" exist:
       | user     | course | role           |
       | teacher1 | C1     | editingteacher |
       | student1 | C1     | student        |
       | student2 | C1     | student        |
+      | student3 | C1     | student        |
     And the following "groups" exist:
       | name | description | course | idnumber |
       | Group 1 | Group description | C1 | GROUP1 |
@@ -77,6 +79,12 @@ Feature: News message restriction by grouping or group
     And I am on "Course 1" course homepage
     Then I should not see "Short message title 1"
 
+    # Student 3 does not see the message 1.
+    And I log out
+    When I log in as "student3"
+    And I am on "Course 1" course homepage
+    Then I should not see "Short message title 1"
+
   Scenario: Set Enable message restriction in Block News configuration to Group and set Group to a
             message to restrict user.
     # Go to settings page. Set Enable message restriction to Group.
@@ -109,3 +117,9 @@ Feature: News message restriction by grouping or group
     When I log in as "student2"
     And I am on "Course 1" course homepage
     Then I should see "Short message title 2"
+
+    # Student 3 does not see the message 2.
+    And I log out
+    When I log in as "student3"
+    And I am on "Course 1" course homepage
+    Then I should not see "Short message title 2"

@@ -60,8 +60,8 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
         $this->user = $this->getDataGenerator()->create_user();
 
         // Create 2 user group.
-        $this->group1 = $this->getDataGenerator()->create_group(array('courseid' => $this->course->id));
-        $this->group2 = $this->getDataGenerator()->create_group(array('courseid' => $this->course->id));
+        $this->group1 = $this->getDataGenerator()->create_group(array('courseid' => $this->course->id, 'name' => 'group1'));
+        $this->group2 = $this->getDataGenerator()->create_group(array('courseid' => $this->course->id, 'name' => 'group2'));
 
         // Add the the user to group1.
         $this->getDataGenerator()->enrol_user($this->user->id, $this->course->id);
@@ -95,7 +95,7 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
      * Tests the get_messages_limited function when block news enable group restriction support.
      */
     public function test_get_messages_limited_with_group_restriction_support() {
-        global $COURSE;
+        global $COURSE, $SESSION;
 
         $this->setUser($this->user->id);
         $COURSE->id = $this->course->id;
@@ -119,6 +119,13 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
         // When group restriction support is enabled. Return 1 the messages with correct groupid.
         $this->assertEquals(1, count($msgs));
         $this->assertTrue(in_array($this->group1->id, $msgs[0]->get_groupids()));
+
+        // When user is removed from groups check restriction works.
+        groups_remove_member($this->group1, $this->user);
+        groups_remove_member($this->group2, $this->user);
+        unset($SESSION->block_news_user_groups);
+        $msgs = $bns->get_messages_limited(3);
+        $this->assertEmpty($msgs);
     }
 
     /**
@@ -149,7 +156,7 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
      * Tests the get_messages_all function when block news enable group restriction support.
      */
     public function test_get_messages_all_with_group_restriction_support() {
-        global $COURSE;
+        global $COURSE, $SESSION;
 
         $this->setUser($this->user->id);
         $COURSE->id = $this->course->id;
@@ -174,6 +181,13 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
         // When group restriction support is enabled. Return 1 the messages with correct groupid.
         $this->assertEquals(1, count($msgs));
         $this->assertTrue(in_array($this->group1->id, $msgs[0]->get_groupids()));
+
+        // When user is removed from groups check restriction works.
+        groups_remove_member($this->group1, $this->user);
+        groups_remove_member($this->group2, $this->user);
+        unset($SESSION->block_news_user_groups);
+        $msgs = $bns->get_messages_all(1);
+        $this->assertEmpty($msgs);
     }
 
     public function test_remove_deleted_message_groups() {

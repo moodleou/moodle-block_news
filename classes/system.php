@@ -339,6 +339,9 @@ class system {
             $groups = $this->get_groupids();
             if (!empty($groups)) {
                 list($sql, $params) = $DB->get_in_or_equal($groups);
+            } else {
+                // User has no groups so cannot see group restricted messages.
+                $output['sql'] = 'AND g.id IS NULL ';
             }
         } else {
             list($insql, $params) = $DB->get_in_or_equal($groupingids);
