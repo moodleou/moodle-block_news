@@ -167,3 +167,23 @@ $string['process_feeds_task'] = 'Refresh News block feeds';
 
 // Global search.
 $string['search:news_message'] = 'News messages';
+
+// Privacy.
+$string['privacy:metadata:block_news_messages'] = 'Information about the news message';
+$string['privacy:metadata:block_news_messages:user'] = 'The person who last edited the message';
+$string['privacy:metadata:block_news_messages:title'] = 'Message title';
+$string['privacy:metadata:block_news_messages:message'] = 'Message contents';
+$string['privacy:metadata:block_news_messages:link'] = 'Message URL';
+$string['privacy:metadata:block_news_messages:messagetype'] = 'Message type';
+$string['privacy:metadata:block_news_messages:messageformat'] = 'Format of message';
+$string['privacy:metadata:block_news_messages:messagedate'] = 'Date of message';
+$string['privacy:metadata:block_news_messages:messagevisible'] = 'Yes if message is visible, no if it’s hidden';
+$string['privacy:metadata:block_news_messages:messagerepeat'] = 'Yes if repeat this message is visible, no if it’s hidden';
+$string['privacy:metadata:block_news_messages:hideauthor'] = 'Yes if hide author name is chosen';
+$string['privacy:metadata:block_news_messages:timemodified'] = 'Time at which message was edited';
+$string['privacy:metadata:block_news_messages:eventend'] = 'Date end of event';
+$string['privacy:metadata:block_news_messages:eventstart'] = 'Date start of event';
+$string['privacy:metadata:block_news_messages:eventlocation'] = 'Event location';
+$string['privacy:metadata:core_files'] = 'Files attached to news message';
+$string['privacy_you'] = 'You';
+$string['privacy_somebodyelse'] = 'Somebody else';
