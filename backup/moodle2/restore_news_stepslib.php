@@ -108,11 +108,12 @@ class restore_news_block_structure_step extends restore_structure_step {
                         $offset = $newstartdate - $original;
                         $new = block_news_get_new_time((int)$message->messagedate, $offset);
                         $message->messagedate = $new;
-
-                        $newstart = block_news_get_new_time((int)$message->eventstart, $offset);
-                        $message->eventstart = $newstart;
-                        $newend = block_news_get_new_time((int)$message->eventend, $offset);
-                        $message->eventend = $newend;
+                        if (isset($message->messagetype) && $message->messagetype == \block_news\message::MESSAGETYPE_EVENT) {
+                            $newstart = block_news_get_new_time((int)$message->eventstart, $offset);
+                            $message->eventstart = $newstart;
+                            $newend = block_news_get_new_time((int)$message->eventend, $offset);
+                            $message->eventend = $newend;
+                        }
                     }
 
                     $message->userid = $this->get_mappingid('user', $message->userid);

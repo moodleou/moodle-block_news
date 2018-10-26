@@ -495,6 +495,7 @@ class system {
         $bnms = array();
 
         $groups = $this->get_group_sql();
+        $order = $type != message::MESSAGETYPE_EVENT ? 'messagedate DESC' : 'eventstart ASC, messagedate DESC';
         $restricttype = $this->get_type_sql($type);
         $sql = self::get_message_sql_start() .
                 'WHERE blockinstanceid=?
@@ -502,7 +503,7 @@ class system {
                  AND messagedate <= ?'
                 . $groups['sql']
                 . $restricttype['sql'] .
-                'ORDER BY eventstart ASC, messagedate DESC
+                'ORDER BY ' . $order . ' 
                  LIMIT ' . $max;
 
         $params = array($this->blockinstanceid, time());
@@ -532,6 +533,9 @@ class system {
             $order = 'eventstart ASC, messagedate DESC', $pastevents = false) {
         global $DB;
         $bnms = array();
+        if ($type != message::MESSAGETYPE_EVENT && $order == 'eventstart ASC, messagedate DESC') {
+            $order = 'messagedate DESC';
+        }
         $orderby = 'ORDER BY ' . $order;
         $limitfrom = 0;
         $limitnum = 0;
