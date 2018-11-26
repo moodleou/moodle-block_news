@@ -69,8 +69,10 @@ class full_message extends renderable_message implements \templatable {
      * @param \block_news\system $bns
      * @param string $mode
      * @param array $images List of images for this block, keyed by message ID.
+     * @param bool $webserviceurls Output URLs for web services, instead of browser links?
      */
-    public function __construct(message $bnm, $previd, $nextid, $bns, $mode, array $images = []) {
+    public function __construct(message $bnm, $previd, $nextid, $bns, $mode, array $images = [],
+            $webserviceurls = false) {
         global $CFG;
 
         $this->classes = '';
@@ -89,7 +91,12 @@ class full_message extends renderable_message implements \templatable {
         $this->viewlink = $bnm->get_link();
 
         $blockcontext = \context_block::instance($bnm->get_blockinstanceid());
-        $this->message = file_rewrite_pluginfile_urls($bnm->get_message(), 'pluginfile.php',
+        if ($webserviceurls) {
+            $rewritefile = 'webservice/pluginfile.php';
+        } else {
+            $rewritefile = 'pluginfile.php';
+        }
+        $this->message = file_rewrite_pluginfile_urls($bnm->get_message(), $rewritefile,
                 $blockcontext->id, 'block_news', 'message', $bnm->get_id());
         $this->messagedate = userdate($bnm->get_messagedate(),
                 get_string('dateformat', 'block_news'));
@@ -140,15 +147,20 @@ class full_message extends renderable_message implements \templatable {
         }
 
         // For attachments.
+        $this->webserviceurls = $webserviceurls;
         $this->blockinstanceid = $bnm->get_blockinstanceid();
         $this->messageformat = $bnm->get_messageformat();
         $this->id = $bnm->get_id();
         if (array_key_exists($this->id, $images)) {
             $image = $images[$this->id];
             $this->imageinfo = $image->get_imageinfo();
-            $pathparts = array('/pluginfile.php', $blockcontext->id, 'block_news',
-                    'messageimage', $this->id, $image->get_filename());
-            $this->imageurl = new \moodle_url(implode('/', $pathparts));
+            if ($this->webserviceurls) {
+                $this->imageurl = \moodle_url::make_webservice_pluginfile_url($blockcontext->id, 'block_news',
+                    'messageimage', $this->id, '/', $image->get_filename())->out(false);
+            } else {
+                $this->imageurl = \moodle_url::make_pluginfile_url($blockcontext->id, 'block_news',
+                    'messageimage', $this->id, '/', $image->get_filename())->out(false);
+            }
         }
 
     }
@@ -194,11 +206,18 @@ class full_message extends renderable_message implements \templatable {
                 $filename = $file->get_filename();
                 $mimetype = $file->get_mimetype();
                 $icon = new \pix_icon(file_mimetype_icon($mimetype), $mimetype);
-                $url = \moodle_url::make_pluginfile_url($blockcontext->id, 'block_news',
+                if ($this->webserviceurls) {
+                    $url = \moodle_url::make_webservice_pluginfile_url($blockcontext->id, 'block_news',
                         'attachment', $this->id, '/', $filename, true);
+                } else {
+                    $url = \moodle_url::make_pluginfile_url($blockcontext->id, 'block_news',
+                        'attachment', $this->id, '/', $filename, true);
+                }
                 $attachment = (object) [
                     'filename' => $filename,
                     'icon' => $icon->export_for_template($output),
+                    'iconsrc' => $output->image_url($icon->pix, $icon->component)->out(false),
+                    'iconalt' => $mimetype,
                     'url' => $url->out()
                 ];
                 $this->attachments[] = $attachment;

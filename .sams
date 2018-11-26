@@ -4,3 +4,6 @@ DISABLE_SAMS
 <Files images.php>
 DISABLE_SAMS
 </Files>
+<Files mobile.css>
+DISABLE_SAMS
+</Files>

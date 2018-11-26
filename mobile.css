@@ -1,0 +1,44 @@
+.block-news-message h2 {
+    white-space: normal;
+}
+.block-news-message-image {
+    height: auto;
+}
+.block-news-attachment-icon {
+    display: inline;
+    width: 24px;
+    vertical-align: bottom;
+}
+.block-news-message-extlink ion-icon {
+    padding-right: 4px;
+    vertical-align: bottom;
+}
+.block_news_event_date {
+    text-align: center;
+    width: 56px;
+    display: inline-block;
+    float: left;
+    margin-right: 17px;
+}
+.block_news_event_date span {
+    display: block;
+}
+.block_news_event_date_month {
+    background-color: #002158;
+    font-size: 1.6rem;
+    color: #fff;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 1px 0;
+}
+.block_news_event_date_day {
+    background-color: #fff;
+    border: 1px solid #002158;
+    color: #000;
+    font-size: 2.4rem;
+    padding-bottom: 9px;
+}
+.block_news_group_indication {
+    font-style: italic;
+    font-size: 1.2rem;
+}
