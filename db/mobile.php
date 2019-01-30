@@ -35,7 +35,7 @@ $addons = [
                 ],
                 'styles' => [
                     'url' => $CFG->wwwroot . '/blocks/news/mobile.css',
-                    'version' => 2018121101
+                    'version' => 2019013003
                 ],
                 'priority' => 60,
                 'init' => 'news_init'
