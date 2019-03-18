@@ -48,6 +48,10 @@ if (empty($blockinstanceid)) {
 
 $bns = system::get_block_settings($blockinstanceid);
 $newstitle = $bns->get_title();
+// Check prison theme to make breadcrumb consistent with title.
+$isprison = class_exists('\auth_prison\util') && \auth_prison\util::is_prison_vle();
+$newstitle = $isprison && $bns->get_displaytype() == system::DISPLAY_DEFAULT ?
+        get_string('pluginname', 'block_news') : $newstitle;
 $csemod = block_news_init_page($blockinstanceid, $newstitle);
 
 if ($bns->get_groupingsupport() == $bns::RESTRICTBYGROUP) {
