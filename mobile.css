@@ -74,3 +74,7 @@ ion-card.block-news-message core-format-text h5 {
 [dir="ltr"] .block-news-message.card-md core-format-text p {
     margin-bottom: 1em;
 }
+
+.block_news .content {
+    background-color: white;
+}
