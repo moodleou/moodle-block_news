@@ -61,3 +61,35 @@ Feature: Test News area in mobile
     Then I should see "News"
     When I press "News" in the app
     Then I should see "No news messages have been posted to this website."
+
+  Scenario: News area display on mobile with many items
+    # Log in as admin to create News block.
+    Given I log in as "admin"
+    And I am on "Course 1" course homepage
+    And I turn editing mode on
+    And I add the "News" block
+    And the following news messages exist on course "C1":
+      | title   | message         | messagetype | messagedate |
+      | news 1  | news 1 message  | news        | 1487952035  |
+      | news 2  | news 2 message  | news        | 1487952036  |
+      | news 3  | news 3 message  | news        | 1487952037  |
+      | news 4  | news 4 message  | news        | 1487952038  |
+      | news 5  | news 5 message  | news        | 1487952039  |
+      | news 6  | news 6 message  | news        | 1487952040  |
+      | news 7  | news 7 message  | news        | 1487952041  |
+      | news 8  | news 8 message  | news        | 1487952042  |
+      | news 9  | news 9 message  | news        | 1487952043  |
+      | news 10 | news 10 message | news        | 1487952044  |
+      | news 11 | news 11 message | news        | 1487952045  |
+    When I enter the app
+    And I log in as "student1"
+    And I press "Course 1" near "Course overview" in the app
+    And I press "arrow forward" in the app
+    And I press "arrow forward" in the app
+    Then I should see "News"
+    When I press "News" in the app
+    Then I should see "news 11 message"
+    And I should not see "news 1 message"
+    # Scroll down to bottom of the screen.
+    When I trigger the news block infinite scroll "block_news_infinite_load_messages"
+    Then I should see "news 1 message"
