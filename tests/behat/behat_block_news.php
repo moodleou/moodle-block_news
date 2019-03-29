@@ -123,5 +123,29 @@ class behat_block_news extends behat_base {
         $feedurl = $CFG->wwwroot . '/blocks/news/feed.php?bi=' . $blockinstance->id;
         $this->execute("behat_forms::i_set_the_field_to", ['id_config_feedurls', $feedurl]);
     }
+
+    /**
+     * Trigger news block infinite scroll to element defined for load more events on mobile devices.
+     *
+     * @When /^I trigger the news block infinite scroll "(?P<node_string>(?:[^"]|\\")*)"$/
+     *
+     * @param string $nodeelement Node to scroll
+     * @throws \Behat\Mink\Exception\DriverException
+     * @throws \Behat\Mink\Exception\ExpectationException
+     * @throws \Behat\Mink\Exception\UnsupportedDriverActionException
+     */
+    public function i_trigger_the_news_block_infinite_scroll($nodeelement) {
+        $nodeelement = '//*[@id="' . $nodeelement . '"]//ancestor::div[@class="scroll-content"]';
+        list($a, $b) = $this->transform_selector('xpath_element', $nodeelement);
+        $node = $this->find($a, $b);
+        $xpath = addslashes_js($node->getXpath());
+        $js = 'var node = document.evaluate("' . $xpath
+            . '", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+            node.scrollTo({
+                top: 1000,
+                behavior: "smooth"
+            });';
+        $this->getSession()->getDriver()->executeScript($js);
+    }
 }
 
