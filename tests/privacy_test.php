@@ -166,11 +166,71 @@ class block_news_privacy_testcase extends provider_testcase {
         $appctx = new approved_contextlist($this->users[1], 'block_news',
                 [$this->bctxs[1]->id, $this->bctxs[2]->id]);
         provider::delete_data_for_user($appctx);
-        $record = $DB->get_records('block_news_messages', ['blockinstanceid' => $this->bctxs[1]->instanceid, 'userid' => $this->users[1]->id]);
+        $record = $DB->get_records('block_news_messages',
+                ['blockinstanceid' => $this->bctxs[1]->instanceid, 'userid' => $this->users[1]->id]);
         $this->assertTrue(true, $record);
-        $record = $DB->get_records('block_news_messages', ['blockinstanceid' => $this->bctxs[1]->instanceid, 'userid' => $this->users[2]->id]);
+        $record = $DB->get_records('block_news_messages',
+                ['blockinstanceid' => $this->bctxs[1]->instanceid, 'userid' => $this->users[2]->id]);
         $this->assertTrue(true, $record);
-        $record = $DB->get_records('block_news_messages', ['blockinstanceid' => $this->bctxs[1]->instanceid, 'userid' => get_admin()->id]);
+        $record = $DB->get_records('block_news_messages',
+                ['blockinstanceid' => $this->bctxs[1]->instanceid, 'userid' => get_admin()->id]);
         $this->assertTrue(true, $record);
+    }
+
+    /**
+     * Test for get_users_in_context()
+     */
+    public function test_get_users_in_context() {
+        $component = 'block_news';
+
+        $userlist1 = new \core_privacy\local\request\userlist($this->bctxs[1], $component);
+        $userlist2 = new \core_privacy\local\request\userlist($this->bctxs[2], $component);
+        $userlist3 = new \core_privacy\local\request\userlist($this->bctxs[3], $component);
+
+        // Check first block news.
+        provider::get_users_in_context($userlist1);
+        $userids = $userlist1->get_userids();
+        $this->assertCount(2, $userids);
+        $this->assertContains($this->users[1]->id, $userids);
+        $this->assertContains($this->users[2]->id, $userids);
+
+        // Check second block news.
+        provider::get_users_in_context($userlist2);
+        $userids = $userlist2->get_userids();
+        $this->assertCount(1, $userids);
+        $this->assertContains($this->users[1]->id, $userids);
+
+        // Check third block news.
+        provider::get_users_in_context($userlist3);
+        $userids = $userlist3->get_userids();
+        $this->assertCount(1, $userids);
+        $this->assertContains($this->users[2]->id, $userids);
+    }
+
+    /**
+     * Test update data for multiple users in context.
+     *
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    public function test_delete_data_for_users() {
+        global $DB;
+        $component = 'block_news';
+
+        $approveduserids = [$this->users[1]->id];
+        $approvedlist = new \core_privacy\local\request\approved_userlist($this->bctxs[1], $component, $approveduserids);
+        provider::delete_data_for_users($approvedlist);
+        $bnm = $DB->get_records('block_news_messages', ['blockinstanceid' => $this->bctxs[1]->instanceid]);
+        // Check first message belongs to admin now.
+        $this->assertEquals($bnm[$this->messages[1]]->userid, get_admin()->id);
+
+        // Test data belongs to second user still there, other are deleted for first context.
+        $this->assertCount(2, $bnm);
+        $this->assertArrayHasKey($this->messages[3], $bnm);
+
+        // Check data belongs to second context is not updated.
+        $bnm = $DB->get_records('block_news_messages', ['blockinstanceid' => $this->bctxs[2]->instanceid]);
+        $this->assertCount(1, $bnm);
+        $this->assertArrayHasKey($this->messages[2], $bnm);
     }
 }
