@@ -192,7 +192,7 @@
     font-style: italic;
 }
 
-.block-news-mobile-nextprev {
+.arrow_link.block-news-mobile-nextprev {
     display: none;
 }
 
@@ -206,10 +206,10 @@
 }
 
 @media (max-width: 767px) {
-    .block-news-desktop-nextprev {
+    .arrow_link.block-news-desktop-nextprev {
         display: none;
     }
-    .block-news-mobile-nextprev {
+    .arrow_link.block-news-mobile-nextprev {
         display: inline;
     }
     #page-blocks-news-edit #fitem_id_groupids,

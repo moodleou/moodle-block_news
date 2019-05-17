@@ -51,8 +51,12 @@ class full_message extends renderable_message implements \templatable {
     public $attachments;
     /** @var string Rendered "previous" link */
     public $prevlink;
+    /** @var string Rendered "previous" link for mobile view*/
+    public $prevlinkmobile;
     /** @var string Rendered "next" link */
     public $nextlink;
+    /** @var string Rendered "next" link for mobile view*/
+    public $nextlinkmobile;
     /** @var bool True if this is a news message, false if it's an event */
     public $isnews;
     /** @var string Source URL for the message (if from a feed) */
@@ -187,14 +191,16 @@ class full_message extends renderable_message implements \templatable {
         }
         $this->formattedmessage = format_text($this->message, $this->messageformat);
         if ($this->nexturl && $this->nexturl != 'end') {
-            $label = \html_writer::span(get_string('next'), 'block-news-mobile-nextprev')
-                    . \html_writer::span(get_string($fullnextlabel, 'block_news'), 'block-news-desktop-nextprev');
-            $this->nextlink = link_arrow_right($label, $this->nexturl);
+            $this->nextlink = link_arrow_right(get_string($fullnextlabel, 'block_news'),
+                    $this->nexturl, false, 'block-news-desktop-nextprev');
+            $this->nextlinkmobile = link_arrow_right(get_string('next'),
+                    $this->nexturl, false, 'block-news-mobile-nextprev');
         }
         if ($this->prevurl && $this->prevurl != 'end') {
-            $label = \html_writer::span(get_string('previous'), 'block-news-mobile-nextprev')
-                    . \html_writer::span(get_string($fullprevlabel, 'block_news'), 'block-news-desktop-nextprev');
-            $this->prevlink = link_arrow_left($label, $this->prevurl);
+            $this->prevlink = link_arrow_left(get_string($fullprevlabel, 'block_news'),
+                    $this->prevurl, false, 'block-news-desktop-nextprev');
+            $this->prevlinkmobile = link_arrow_left(get_string('previous'),
+                    $this->prevurl, false, 'block-news-mobile-nextprev');
         }
 
         $fs = get_file_storage();
