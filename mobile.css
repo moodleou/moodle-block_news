@@ -74,7 +74,20 @@ ion-card.block-news-message core-format-text h5 {
 [dir="ltr"] .block-news-message.card-md core-format-text p {
     margin-bottom: 1em;
 }
+[dir="ltr"] .block-news-message.card-md core-format-text p:last-of-type {
+    margin-bottom: 0;
+}
 
 .block_news .content {
     background-color: white;
+}
+
+ion-card.block-news-message .block-news-message-text {
+    padding: 13px;
+}
+.block-news-message .card-content .col {
+    padding: 5px 0;
+}
+.block-news-message .card-content .block_news_event_date {
+    margin-right: 10px;
 }
