@@ -61,6 +61,8 @@ class system {
     const ALL_EVENTS_PAGE_SIZE = 3;
     /** @var int Max length for feed URLs */
     const MAXURLLEN = 255;
+    /** @var int The number of news messages on a page for the mobile app infinite scroll */
+    const MOBILE_PAGE_SIZE = 5;
 
 
     public static function get_message_sql_start() {

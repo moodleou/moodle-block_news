@@ -97,7 +97,14 @@ class block_news extends block_base {
         if ($msgs || $events || $this->bns->get_displaytype() == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
             $c = 1;
             $this->content->text = $output->open_news_block_custom_wrapper();
-            $this->content->text .= $output->container_start('block_news_msglist');
+            $msglistclasses = 'block_news_msglist';
+            if ($this->bns->get_displaytype() == system::DISPLAY_DEFAULT) {
+                $msglistclasses .= ' block_news_noeventlist';
+                if ($COURSE->format === 'ousubject') {
+                    $this->content->text .= $output->heading(get_string('newsheading', 'block_news'), 3, 'news-heading');
+                }
+            }
+            $this->content->text .= $output->container_start($msglistclasses);
 
             if ($this->bns->get_displaytype() == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
                 $this->content->text .= $output->heading(get_string('newsheading', 'block_news'), 3);
@@ -163,7 +170,12 @@ class block_news extends block_base {
             $this->content->footer .= $output->render_view_all($blockinstanceid, $this->bns->get_viewall_label());
             $this->content->footer .= $output->container_end();
         } else {
-            $this->content->text = $output->container(
+            $this->content->text = '';
+            if ($this->bns->get_displaytype() == system::DISPLAY_DEFAULT &&
+                    $COURSE->format === 'ousubject') {
+                $this->content->text .= $output->heading(get_string('newsheading', 'block_news'), 3, 'news-heading');
+            }
+            $this->content->text .= $output->container(
                     get_string('msgblocknonews', 'block_news'), null, 'msgblocknonews');
             if (has_capability('block/news:viewhidden', $blockcontext)) {
                 $this->content->footer .= $output->container_start(null, 'block_news_viewall');

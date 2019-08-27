@@ -15,16 +15,22 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details.
+ * Services.
  *
  * @package block_news
- * @copyright 2015 The Open University
+ * @copyright 2018 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2018112901;
-$plugin->requires = 2013111801.00;
-$plugin->outestssufficient = true;
-$plugin->component = 'block_news';
+$functions = [
+    'block_news_get_message_page' => [
+        'classname' => '\block_news\external',
+        'methodname' => 'get_message_page',
+        'description' => 'Get a page of messages from the news block.',
+        'type' => 'read',
+        'capabilities' => '',
+        'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE, 'local_mobile']
+    ]
+];

@@ -132,6 +132,17 @@ class block_news_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Generate HTML for full message
+     *
+     * @param full_message $nmsg Renderable data
+     * @return string HTML
+     */
+    public function render_mobile_full_message(full_message $nmsg) {
+        $context = $nmsg->export_for_template($this->output);
+        return $this->output->render_from_template('block_news/mobile_message_full', $context);
+    }
+
+    /**
      * @param string $date News date
      * @param string $title News title
      * @return string HTML code for displaying the news heading.
@@ -209,6 +220,17 @@ class block_news_renderer extends plugin_renderer_base {
     public function render_view_all_page(view_all_page $page) {
         $context = $page->export_for_template($this->output);
         return $this->output->render_from_template('block_news/view_all_page', $context);
+    }
+
+    /**
+     * Renders view_all_page component using mobile template.
+     *
+     * @param view_all_page $page
+     * @return bool|string
+     */
+    public function render_mobile_view_all_page(view_all_page $page) {
+        $context = $page->export_for_template($this->output);
+        return $this->output->render_from_template('block_news/mobile_view_all_page', $context);
     }
 
     /**

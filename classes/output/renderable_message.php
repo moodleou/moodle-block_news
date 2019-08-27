@@ -66,7 +66,7 @@ abstract class renderable_message implements \renderable {
     public $thumbheight;
     /** @var array Info for message image */
     public $imageinfo;
-    /** @var \moodle_url URL for message image */
+    /** @var string URL for message image */
     public $imageurl;
     /** @var int Image width, for templates. */
     public $imagewidth;
@@ -108,6 +108,8 @@ abstract class renderable_message implements \renderable {
     public $actions;
     /** @var bool True if $actions isn't empty */
     public $hasactions;
+    /** @var bool True if we need to generate web service URLs for images and attachments */
+    protected $webserviceurls;
 
 
     /**

@@ -1,13 +1,15 @@
 .block .content .block_news_msglist > h3,
 .block .content .block_news_eventlist > h3,
-.block .content .block-news-editheading {
+.block .content .block-news-editheading,
+.format-ousubject .block_news h3.news-heading {
     color: #38254c;
     font-weight: normal;
     font-size: 2.14285em;
     margin-top: 0px;
     margin-bottom: 5px;
 }
-.block .content .block_news_msglist > h3 {
+.block .content .block_news_msglist > h3,
+.format-ousubject .block_news h3.news-heading {
     margin-bottom: 0px;
 }
 
