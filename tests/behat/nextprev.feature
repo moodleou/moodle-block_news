@@ -36,15 +36,6 @@ Feature: Next/Previous message navigation
     Then I should see "news 2"
     And "Previous" "link" should exist
     And "Next" "link" should exist
-    And I should see "Previous (older) message"
-    And "//a[@title='Previous (older) message']" "xpath_element" should exist
-    And I should see "Next (newer) message"
-    And "//a[@title='Next (newer) message']" "xpath_element" should exist
-    When I change window size to "320x480"
-    Then I should see "Previous"
-    And "//a[@title='Previous']" "xpath_element" should exist
-    And I should see "Next"
-    And "//a[@title='Next']" "xpath_element" should exist
     When I follow "Previous"
     Then I should see "news 1"
     And "Previous" "link" should not exist

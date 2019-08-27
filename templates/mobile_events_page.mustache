@@ -35,7 +35,7 @@
 
 }}
 {{=<% %>=}}
-<ion-item-divider class="block-news-events-heading">{{ 'plugin.block_news.eventsheading' | translate }}</ion-item-divider>
+<ion-item-divider>{{ 'plugin.block_news.eventsheading' | translate }}</ion-item-divider>
 <ion-card *ngIf="!CONTENT_OTHERDATA.messages.length">
     <ion-card-content>
         {{ 'plugin.block_news.noeventsyet' | translate }}
@@ -45,7 +45,7 @@
     <ng-container *ngTemplateOutlet="eventMessage;context:{event:message}"></ng-container>
 </ion-card>
 <ng-container *ngIf="pastEvents">
-    <ion-item-divider class="block-news-events-heading">{{ 'plugin.block_news.pasteventsheading' | translate }}</ion-item-divider>
+    <ion-item-divider>{{ 'plugin.block_news.pasteventsheading' | translate }}</ion-item-divider>
     <ion-card *ngIf="!CONTENT_OTHERDATA.pastEvents.length">
         <ion-card-content>
             {{ 'plugin.block_news.nopastevents' | translate }}

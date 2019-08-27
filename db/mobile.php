@@ -31,12 +31,11 @@ $addons = [
                 'delegate' => 'CoreCourseOptionsDelegate',
                 'method' => 'news_page',
                 'displaydata' => [
-                    'title' => 'newsheading',
-                    'class' => 'block_news'
+                    'title' => 'newsheading'
                 ],
                 'styles' => [
-                    'url' => $CFG->wwwroot . '/blocks/news/mobile.css?v=2019062500',
-                    'version' => 2019062500
+                    'url' => $CFG->wwwroot . '/blocks/news/mobile.css',
+                    'version' => 2019013003
                 ],
                 'priority' => 60,
                 'init' => 'news_init'
@@ -45,8 +44,7 @@ $addons = [
                 'delegate' => 'CoreCourseOptionsDelegate',
                 'method' => 'events_page',
                 'displaydata' => [
-                    'title' => 'events',
-                    'class' => 'block_news'
+                    'title' => 'events'
                 ],
                 'priority' => 50,
                 'init' => 'events_init'

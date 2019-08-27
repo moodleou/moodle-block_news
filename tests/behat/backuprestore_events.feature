@@ -93,7 +93,7 @@ Feature: Backup/Restore news and events block
     And I should see "news3" in the "(//*[@class='block_news_msg'])[2]" "xpath_element"
     And I should see "news2" in the "(//*[@class='block_news_msg'])[3]" "xpath_element"
     And I should see "news1" in the "(//*[@class='block_news_msg'])[4]" "xpath_element"
-     #And I navigate to "Reports > Roll forward" in current page administration
+     #And I navigate to "Roll forward" node in "Course administration > Reports"
     And I am using the OU theme
     And I am on "Course 5" course homepage
     And I expand "Reports" node

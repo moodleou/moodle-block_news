@@ -42,21 +42,13 @@
     font-style: italic;
     font-size: 1.2rem;
 }
-.block-news-events-heading {
-    font-size: 1.8rem;
-}
 .block-news-message ion-label.label-md,
 .block-news-message ion-label.label-ios {
     margin-bottom: 7px;
 }
-.block-news-message-text {
-    line-height: 1.5;
-}
 ion-card.block-news-message h2 {
     margin-top: 1em;
-    font-size: 1.6rem;
-    font-weight: bold;
-    color: #002158;
+    font-size: 1.8rem;
 }
 ion-card.block-news-message core-format-text h3 {
     font-size: 1.6rem;
@@ -70,27 +62,6 @@ ion-card.block-news-message core-format-text h5 {
     font-size: 1.4rem;
     font-weight: 500;
 }
-
 [dir="ltr"] .block-news-message.card-md core-format-text p {
     margin-bottom: 1em;
-}
-[dir="ltr"] .block-news-message.card-md core-format-text p:last-of-type {
-    margin-bottom: 3px;
-}
-
-.block_news .content {
-    background-color: white;
-}
-
-.block-news-message .card-content .col {
-    padding: 5px 0;
-}
-.block-news-message .card-content .block_news_event_date {
-    margin-right: 13px;
-    margin-bottom: 8px;
-}
-
-/* Align the attachments title */
-.block-news-message .row .col h3 {
-    padding-left: 11px;
 }
