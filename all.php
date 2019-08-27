@@ -36,9 +36,14 @@ $blockinstanceid = required_param('bi', PARAM_INT);
 $page = optional_param('page', 0, PARAM_INT);
 
 $bns = system::get_block_settings($blockinstanceid);
+// Check prison theme to make breadcrumb consistent with title.
+$title = $bns->get_title();
+$isprison = class_exists('\auth_prison\util') && \auth_prison\util::is_prison_vle();
+$title = $isprison && $bns->get_displaytype() == system::DISPLAY_DEFAULT || empty($title) ?
+        get_string('pluginname', 'block_news') : $title;
 
 // Codechecker complains about missing require_login.  It's part of the following function.
-$csemod = block_news_init_page($blockinstanceid, $bns->get_title(), $bns->get_displaytype());
+$csemod = block_news_init_page($blockinstanceid, $title, $bns->get_displaytype());
 
 $output = $PAGE->get_renderer('block_news');
 $blockcontext = context_block::instance($blockinstanceid);
@@ -47,8 +52,6 @@ $urlparams = array('bi' => $blockinstanceid);
 $PAGE->set_url('/blocks/news/all.php', $urlparams);
 
 // Breadcrumb.
-$title = $bns->get_title();
-$title = empty($title) ? get_string('pluginname', 'block_news') : $title;
 $title .= ': ' . get_string('allmessages', 'block_news');
 $PAGE->set_title($csemod->cseshortname . ': ' . $title);
 $PAGE->set_heading($csemod->csefullname);

@@ -26,8 +26,10 @@ defined('MOODLE_INTERNAL') || die();
 
 use \core_privacy\local\metadata\collection;
 use \core_privacy\local\request\approved_contextlist;
+use core_privacy\local\request\approved_userlist;
 use \core_privacy\local\request\contextlist;
 use \core_privacy\local\request\transform;
+use core_privacy\local\request\userlist;
 use \core_privacy\local\request\writer;
 use \core_privacy\local\request\helper;
 
@@ -42,7 +44,8 @@ require_once($CFG->dirroot . '/blocks/news/classes/search/news_message.php');
  */
 class provider implements
         \core_privacy\local\metadata\provider,
-        \core_privacy\local\request\plugin\provider {
+        \core_privacy\local\request\plugin\provider,
+        \core_privacy\local\request\core_userlist_provider {
     const FILEAREA_TYPES = ['message', 'messageimage', 'attachment'];
 
     /**
@@ -240,5 +243,81 @@ class provider implements
                 'component' => 'block_news'
         ];
         $DB->execute($sqlfile, array_merge($paramfile, $params));
+    }
+
+    /**
+     * Get the list of users who have data within a context.
+     *
+     * @param userlist $userlist Containing the list of users who have data in this context/plugin combination.
+     */
+    public static function get_users_in_context(userlist $userlist) {
+        $context = $userlist->get_context();
+
+        if (!$context instanceof \context_block) {
+            return;
+        }
+
+        $params = [
+                'instanceid' => $context->instanceid,
+                'blockname'  => 'news'
+        ];
+
+        // Select user from block news messages table.
+        $sql = "SELECT bnm.userid
+                  FROM {block_instances} bi
+                  JOIN {block_news_messages} bnm ON bnm.blockinstanceid = bi.id
+                 WHERE bi.id = :instanceid AND bi.blockname = :blockname";
+
+        $userlist->add_from_sql('userid', $sql, $params);
+    }
+
+    /**
+     * Delete multiple users within a single context.
+     *
+     * @param approved_userlist $userlist The approved context and user information to delete information for.
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public static function delete_data_for_users(approved_userlist $userlist) {
+        global $DB;
+        $context = $userlist->get_context();
+
+        if ($context instanceof \context_block && ($blockinstance = static::get_instance_from_context($context))) {
+            // Update messages.
+            list($userinsql, $userinparams) = $DB->get_in_or_equal($userlist->get_userids(), SQL_PARAMS_NAMED);
+            $params = array_merge([
+                    'blockinstanceid' => $context->instanceid,
+                    'adminid'         => get_admin()->id
+            ], $userinparams);
+            $sql = "UPDATE {block_news_messages}
+                       SET userid = :adminid
+                     WHERE blockinstanceid = :blockinstanceid AND userid {$userinsql}";
+            $DB->execute($sql, $params);
+
+            // Update attached files.
+            list($filearea, $params) = $DB->get_in_or_equal(self::FILEAREA_TYPES, SQL_PARAMS_NAMED);
+            $sqlfile = "UPDATE {files}
+                           SET userid = :adminid
+                         WHERE component = :component AND userid {$userinsql}
+                               AND filearea {$filearea} AND contextid = :contextid";
+            $paramfile = [
+                    'adminid'   => get_admin()->id,
+                    'component' => 'block_news',
+                    'contextid' => $context->id
+            ];
+            $DB->execute($sqlfile, array_merge($paramfile, $params, $userinparams));
+        }
+    }
+
+    /**
+     * Get the block instance record for the specified context.
+     *
+     * @param   \context_block $context The context to fetch
+     * @return  \stdClass
+     */
+    protected static function get_instance_from_context(\context_block $context) {
+        global $DB;
+
+        return $DB->get_record('block_instances', ['id' => $context->instanceid, 'blockname' => 'news']);
     }
 }

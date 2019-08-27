@@ -71,8 +71,12 @@ require_capability('block/news:add', $blockcontext);
 
 $PAGE->set_context($context);
 
+// Check prison theme to make breadcrumb consistent with title.
+$isprison = class_exists('\auth_prison\util') && \auth_prison\util::is_prison_vle();
+$newstitle = $isprison && $bns->get_displaytype() == system::DISPLAY_DEFAULT ?
+        get_string('pluginname', 'block_news') : $bns->get_title();
 // Codechecker complains about missing require_login.  It's part of the following function.
-$csemod = block_news_init_page($blockinstanceid, $bns->get_title());
+$csemod = block_news_init_page($blockinstanceid, $newstitle);
 
 $courseurl = new moodle_url('/course/view.php?id=' . $csemod->cseid);
 $PAGE->set_title($csemod->cseshortname . ': ' . $title);
