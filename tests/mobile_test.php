@@ -92,8 +92,19 @@ class mobile extends \advanced_testcase {
      */
     public function test_news_init() {
         $this->courses['course2'] = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($user->id, $this->courses['course2']->id, 'student');
 
-        $result = \block_news\output\mobile::news_init();
+        // User does not have any courses because they only belong to course2 which has no news.
+        $result = \block_news\output\mobile::news_init(['userid' => $user->id]);
+        $this->assertNotContains($this->courses['course1']->id, $result['restrict']['courses']);
+        $this->assertNotContains($this->courses['course2']->id, $result['restrict']['courses']);
+
+        // Now they also belong to course1.
+        $this->getDataGenerator()->enrol_user($user->id, $this->courses['course1']->id, 'student');
+
+        // User now has 1 course with news (course1).
+        $result = \block_news\output\mobile::news_init(['userid' => $user->id]);
         $this->assertContains($this->courses['course1']->id, $result['restrict']['courses']);
         $this->assertNotContains($this->courses['course2']->id, $result['restrict']['courses']);
     }
@@ -111,7 +122,20 @@ class mobile extends \advanced_testcase {
             'displaytype' => system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS
         ]);
 
-        $result = \block_news\output\mobile::events_init();
+        $user = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($user->id, $this->courses['course1']->id, 'student');
+        $this->getDataGenerator()->enrol_user($user->id, $this->courses['course3']->id, 'student');
+
+        // User does not have any courses with events (because they don't belong to course2).
+        $result = \block_news\output\mobile::events_init(['userid' => $user->id]);
+        $this->assertNotContains($this->courses['course1']->id, $result['restrict']['courses']);
+        $this->assertNotContains($this->courses['course2']->id, $result['restrict']['courses']);
+        $this->assertNotContains($this->courses['course3']->id, $result['restrict']['courses']);
+
+        $this->getDataGenerator()->enrol_user($user->id, $this->courses['course2']->id, 'student');
+
+        // User now has just course2 with events.
+        $result = \block_news\output\mobile::events_init(['userid' => $user->id]);
         $this->assertNotContains($this->courses['course1']->id, $result['restrict']['courses']);
         $this->assertContains($this->courses['course2']->id, $result['restrict']['courses']);
         $this->assertNotContains($this->courses['course3']->id, $result['restrict']['courses']);
