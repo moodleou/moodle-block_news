@@ -166,15 +166,15 @@ class block_news_privacy_testcase extends provider_testcase {
         $appctx = new approved_contextlist($this->users[1], 'block_news',
                 [$this->bctxs[1]->id, $this->bctxs[2]->id]);
         provider::delete_data_for_user($appctx);
-        $record = $DB->get_records('block_news_messages',
+        $records = $DB->get_records('block_news_messages',
                 ['blockinstanceid' => $this->bctxs[1]->instanceid, 'userid' => $this->users[1]->id]);
-        $this->assertTrue(true, $record);
-        $record = $DB->get_records('block_news_messages',
+        $this->assertCount(0, $records);
+        $records = $DB->get_records('block_news_messages',
                 ['blockinstanceid' => $this->bctxs[1]->instanceid, 'userid' => $this->users[2]->id]);
-        $this->assertTrue(true, $record);
-        $record = $DB->get_records('block_news_messages',
+        $this->assertCount(1, $records);
+        $records = $DB->get_records('block_news_messages',
                 ['blockinstanceid' => $this->bctxs[1]->instanceid, 'userid' => get_admin()->id]);
-        $this->assertTrue(true, $record);
+        $this->assertCount(1, $records);
     }
 
     /**
