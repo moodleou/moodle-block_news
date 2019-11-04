@@ -21,7 +21,7 @@ Feature: Usage of settings and checking the message_form in block
     When I click on "Add a message" "link"
     Then I should see "Add a new message"
     And I should see "Image"
-    And I should see "maximum attachments: 1"
+    And I should see "maximum number of files: 1"
     And I set the field "Title" to "News item 001"
     And I set the field "Text" to "This is the text message of News item 001"
     Then I press "Save changes"
