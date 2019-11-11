@@ -52,13 +52,17 @@ class mobile {
     /**
      * Get the IDs of courses that have an instance of the news block.
      */
-    public static function news_init() {
+    public static function news_init(array $args) : array {
         global $DB, $CFG;
+        $courses = enrol_get_users_courses($args['userid'], true);
+        list($sqlin, $params) = $DB->get_in_or_equal(array_keys($courses));
         $sql = "SELECT DISTINCT con.instanceid
                   FROM {block_instances} bi
                        JOIN {context} con ON bi.parentcontextid = con.id
-                 WHERE bi.blockname = ? AND con.contextlevel = ?";
-        $courseids = $DB->get_fieldset_sql($sql, ['news', CONTEXT_COURSE]);
+                 WHERE con.instanceid $sqlin AND bi.blockname = ? AND con.contextlevel = ?";
+        $params[] = 'news';
+        $params[] = CONTEXT_COURSE;
+        $courseids = $DB->get_fieldset_sql($sql, $params);
         return [
             'restrict' => [
                 'courses' => $courseids
@@ -70,14 +74,17 @@ class mobile {
     /**
      * Get the IDs of courses that have an instance of the news block in news and events mode.
      */
-    public static function events_init() {
+    public static function events_init(array $args) : array {
         global $DB;
+        $courses = enrol_get_users_courses($args['userid'], true);
+        list($sqlin, $params) = $DB->get_in_or_equal(array_keys($courses));
         $sql = "SELECT DISTINCT con.instanceid
                   FROM {block_instances} bi
                        JOIN {block_news} bn ON bi.id = bn.blockinstanceid
                        JOIN {context} con ON bi.parentcontextid = con.id
-                 WHERE con.contextlevel = ? AND bn.displaytype = ?";
-        $params = [CONTEXT_COURSE, system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS];
+                 WHERE con.instanceid $sqlin AND con.contextlevel = ? AND bn.displaytype = ?";
+        $params[] = CONTEXT_COURSE;
+        $params[] = system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS;
         $courseids = $DB->get_fieldset_sql($sql, $params);
         return [
             'restrict' => [
