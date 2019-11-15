@@ -146,7 +146,7 @@ class block_news extends block_base {
             }
 
             if ($newmsg) {
-                $this->title = $output->render_block_news_new_messages($this->title);
+                $this->content->text .= $output->render_new_icon($blockinstanceid);
             }
 
             $this->content->text .= $output->container_end();

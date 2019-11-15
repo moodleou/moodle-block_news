@@ -205,6 +205,10 @@
     display: none;
 }
 
+.block_news_unreadicon {
+    display: none;
+}
+
 @media (max-width: 767px) {
     .arrow_link.block-news-desktop-nextprev {
         display: none;

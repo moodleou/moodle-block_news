@@ -174,12 +174,22 @@ class block_news_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Adds (new) to the News block title if there are new messages
-     * @param string $newstitle News block title
+     * Hidden icon that will be added to the title if there are new messages.
+     *
+     * @param int $blockinstanceid Block instance id
      * @return string text
      */
-    public function render_block_news_new_messages($newstitle) {
-        return $newstitle . ' ('.get_string('new', 'block_news') . ')';
+    public function render_new_icon(int $blockinstanceid): string {
+        global $PAGE;
+        if ($PAGE->user_is_editing()) {
+            return '';
+        }
+
+        $this->page->requires->js_call_amd('block_news/newicon', 'moveIcon', [$blockinstanceid]);
+        return html_writer::span(
+                ' ' . $this->output->pix_icon(
+                    'unread', '(' . get_string('new', 'block_news') . ')', 'block_news'),
+                'block_news_unreadicon');
     }
 
     /**
