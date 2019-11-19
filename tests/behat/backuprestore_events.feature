@@ -32,12 +32,12 @@ Feature: Backup/Restore news and events block
       | event2 | event2  | 2           | 1483228801  | 2145924001 | Ev2 locator   | 1             |
       | event3 | event3  | 2           | 1483228802  | 2145924002 | Ev3 locator   | 1             |
     When I reload the page
-    Then I should see "news2" in the "News and events (new)" "block"
-    And I should see "news3" in the "News and events (new)" "block"
-    And I should not see "news1" in the "News and events (new)" "block"
-    And I should see "event1" in the "News and events (new)" "block"
-    And I should see "event2" in the "News and events (new)" "block"
-    And I should not see "event3" in the "News and events (new)" "block"
+    Then I should see "news2" in the "News and events" "block"
+    And I should see "news3" in the "News and events" "block"
+    And I should not see "news1" in the "News and events" "block"
+    And I should see "event1" in the "News and events" "block"
+    And I should see "event2" in the "News and events" "block"
+    And I should not see "event3" in the "News and events" "block"
 
     # Without reload, Backup step fails
     And I reload the page
@@ -47,14 +47,14 @@ Feature: Backup/Restore news and events block
       | Schema | Course name       | Course 2 |
       | Schema | Course short name | C2       |
     And I am on "Course 2" course homepage
-    Then I should see "news2" in the "News and events (new)" "block"
-    And I should see "news3" in the "News and events (new)" "block"
-    And I should not see "news1" in the "News and events (new)" "block"
-    And I should see "event1" in the "News and events (new)" "block"
-    And I should see "Ev1 locator" in the "News and events (new)" "block"
-    And I should see "event2" in the "News and events (new)" "block"
-    And I should see "Ev2 locator" in the "News and events (new)" "block"
-    And I should not see "event3" in the "News and events (new)" "block"
+    Then I should see "news2" in the "News and events" "block"
+    And I should see "news3" in the "News and events" "block"
+    And I should not see "news1" in the "News and events" "block"
+    And I should see "event1" in the "News and events" "block"
+    And I should see "Ev1 locator" in the "News and events" "block"
+    And I should see "event2" in the "News and events" "block"
+    And I should see "Ev2 locator" in the "News and events" "block"
+    And I should not see "event3" in the "News and events" "block"
 
     When I follow "View all news and events"
     Then I should see "News and events: All messages"

@@ -163,12 +163,12 @@ Feature: Display events in news block
       | event2 | event2  | 2           | 1483228801  | 2145924001 |
       | event3 | event3  | 2           | 1483228802  | 2145924002 |
     When I reload the page
-    Then I should see "news2" in the "News and events (new)" "block"
-    And I should see "news3" in the "News and events (new)" "block"
-    And I should not see "news1" in the "News and events (new)" "block"
-    And I should see "event1" in the "News and events (new)" "block"
-    And I should see "event2" in the "News and events (new)" "block"
-    And I should not see "event3" in the "News and events (new)" "block"
+    Then I should see "news2" in the "News and events" "block"
+    And I should see "news3" in the "News and events" "block"
+    And I should not see "news1" in the "News and events" "block"
+    And I should see "event1" in the "News and events" "block"
+    And I should see "event2" in the "News and events" "block"
+    And I should not see "event3" in the "News and events" "block"
 
   Scenario: Don't show byline on event pages
     Given the following news messages exist on course "C1":
