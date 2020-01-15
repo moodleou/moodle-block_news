@@ -26,7 +26,7 @@ Feature: Usage of settings and checking the message_form in block
     And I set the field "Text" to "This is the text message of News item 001"
     Then I press "Save changes"
 
-  @javascript
+  @javascript @_file_upload
   Scenario: Block setting and conditional display of elements on message type in the form
     When I click on "Add a message" "link"
 
@@ -45,7 +45,7 @@ Feature: Usage of settings and checking the message_form in block
     And I should see "kitten1.jpg"
     Then I press "Save changes"
 
-  @javascript
+  @javascript @_file_upload
   Scenario: Post a news message with an oversized image.
     When I click on "Add a message" "link"
 
