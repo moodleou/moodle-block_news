@@ -106,7 +106,7 @@ class behat_block_news extends behat_base {
     public function i_set_the_news_block_feedurls_field_to_fixture_file($filename) {
         global $CFG;
         $url = $CFG->wwwroot . '/blocks/news/tests/fixtures/' . $filename;
-        $this->execute("behat_forms::i_set_the_field_to", ['id_config_feedurls', $url]);
+        $this->execute("behat_forms::i_set_the_field_to", ['config_feedurls', $url]);
     }
 
     /**
@@ -121,7 +121,7 @@ class behat_block_news extends behat_base {
         $context = context_course::instance($course->id);
         $blockinstance = $DB->get_record('block_instances', ['parentcontextid' => $context->id, 'blockname' => 'news']);
         $feedurl = $CFG->wwwroot . '/blocks/news/feed.php?bi=' . $blockinstance->id;
-        $this->execute("behat_forms::i_set_the_field_to", ['id_config_feedurls', $feedurl]);
+        $this->execute("behat_forms::i_set_the_field_to", ['config_feedurls', $feedurl]);
     }
 
     /**
