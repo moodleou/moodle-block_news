@@ -35,8 +35,6 @@ Feature: Events block
     And I log in as "student1"
     And I press "Course 1" near "Recently accessed courses" in the app
     And I press "arrow forward" in the app
-    And I press "arrow forward" in the app
-    And I press "arrow forward" in the app
     # Checking events tab is visible.
     When I press "Events" in the app
     # Check recent items is visible.
@@ -78,13 +76,10 @@ Feature: Events block
     And I log in as "student1"
     And I press "Course 1" near "Recently accessed courses" in the app
     And I press "arrow forward" in the app
-    And I press "arrow forward" in the app
     Then I should not see "Events"
     When the news block for course "C1" is in news and events mode
     And I enter the app
     And I log in as "student1"
     And I press "Course 1" near "Recently accessed courses" in the app
-    And I press "arrow forward" in the app
-    And I press "arrow forward" in the app
     And I press "arrow forward" in the app
     Then I should see "Events"

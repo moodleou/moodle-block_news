@@ -36,7 +36,6 @@ Feature: Test News area in mobile
     And I log in as "student1"
     And I press "Course 1" near "Course overview" in the app
     And I press "arrow forward" in the app
-    And I press "arrow forward" in the app
     Then I should see "News"
     # News should display newest first by messagedate
     When I press "News" in the app
@@ -56,7 +55,6 @@ Feature: Test News area in mobile
     When I enter the app
     And I log in as "student1"
     And I press "Course 1" near "Course overview" in the app
-    And I press "arrow forward" in the app
     And I press "arrow forward" in the app
     Then I should see "News"
     When I press "News" in the app
@@ -84,7 +82,6 @@ Feature: Test News area in mobile
     When I enter the app
     And I log in as "student1"
     And I press "Course 1" near "Course overview" in the app
-    And I press "arrow forward" in the app
     And I press "arrow forward" in the app
     Then I should see "News"
     When I press "News" in the app
