@@ -93,6 +93,7 @@ class short_message extends renderable_message implements \templatable {
             $pathparts = array('/pluginfile.php', $blockcontext->id, 'block_news',
                     'thumbnail', $bnm->get_id(), $thumb->get_filename());
             $this->thumburl = new \moodle_url(implode('/', $pathparts));
+            $this->thumbdesc = $bnm->get_imagedesc();
         }
         if (array_key_exists($bnm->get_id(), $images)) {
             $image = $images[$bnm->get_id()];

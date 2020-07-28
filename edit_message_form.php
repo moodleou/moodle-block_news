@@ -139,6 +139,17 @@ class block_news_edit_message_form extends moodleform {
                 null, self::IMAGE_FILE_OPTIONS);
         $mform->disabledIf('messageimage', 'messagetype', 'eq', message::MESSAGETYPE_EVENT);
 
+        $mform->addElement('text', 'imagedesc', get_string('imagedesc', 'block_news'),
+                array('size' => '40'));
+        $mform->setType('imagedesc', PARAM_TEXT);
+        $mform->disabledIf('imagedesc', 'messagetype', 'eq', message::MESSAGETYPE_EVENT);
+
+        $mform->addElement('checkbox', 'imagedescnotnecessary',
+                get_string('imagedescnotnecessary', 'block_news'));
+        $mform->setDefault('imagedescnotnecessary', 0);
+        $mform->disabledIf('imagedescnotnecessary', 'messagetype',
+                'eq', message::MESSAGETYPE_EVENT);
+
         $mform->addElement('selectyesno', 'messagevisible',
                 get_string('msgeditvisible', 'block_news'));
         $mform->setDefault('messagevisible', 1);
@@ -252,6 +263,10 @@ class block_news_edit_message_form extends moodleform {
                 }
                 if (!empty($imageerrors)) {
                     $errors['messageimage'] = $imageerrors;
+                }
+
+                if (empty($data['imagedesc']) && (!isset($data['imagedescnotnecessary']) or $data['imagedescnotnecessary'] == 0)) {
+                    $errors['imagedesc'] = get_string('errorimagedesc', 'block_news');
                 }
             }
         }

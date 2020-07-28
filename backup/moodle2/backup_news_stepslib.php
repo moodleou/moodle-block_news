@@ -56,7 +56,7 @@ class backup_news_block_structure_step extends backup_block_structure_step {
             'blockinstanceid', 'newsfeedid', 'title', 'link', 'message',
             'messageformat', 'messagedate', 'messagevisible', 'messagerepeat',
             'messagetype', 'hideauthor', 'userid', 'timemodified', 'eventstart',
-            'eventend', 'eventlocation'));
+            'eventend', 'eventlocation', 'imagedesc', 'imagedescnotnecessary'));
 
         $messagegroups = new backup_nested_element('messagegroups');
 

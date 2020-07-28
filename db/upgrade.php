@@ -265,6 +265,28 @@ function xmldb_block_news_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2017061400, 'news');
     }
 
+    if ($oldversion < 2020072202) {
+
+        // Define field imagedesc to be added to block_news_messages.
+        $table = new xmldb_table('block_news_messages');
+        $field = new xmldb_field('imagedesc', XMLDB_TYPE_TEXT, null, null, null, null, null, 'eventlocation');
+
+        // Conditionally launch add field imagedesc.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('imagedescnotnecessary', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'imagedesc');
+
+        // Conditionally launch add field imagedescnotnecessary.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // News savepoint reached.
+        upgrade_block_savepoint(true, 2020072202, 'news');
+    }
+
     return $result;
 
 }

@@ -92,6 +92,7 @@ class external extends \external_api {
                     VALUE_OPTIONAL, 700),
                 'imageheight' => new \external_value(PARAM_INT, 'Height of message image',
                     VALUE_OPTIONAL, 330),
+                'imagedesc' => new \external_value(PARAM_TEXT, 'Image description', VALUE_OPTIONAL, ''),
                 'eventdate' => new \external_value(PARAM_TEXT, 'Short-form start date of event', VALUE_OPTIONAL),
                 'eventmonth' => new \external_value(PARAM_ALPHA, 'Month of the event start date', VALUE_OPTIONAL),
                 'eventday' => new \external_value(PARAM_ALPHANUM, 'Day of the event start date', VALUE_OPTIONAL),

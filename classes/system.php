@@ -832,7 +832,7 @@ class system {
                 $hash = sha1($messagedata->title . $messagedata->link . $messagedata->message .
                         $messagedata->messagedate . $messagedata->messagetype .
                         $messagedata->eventstart . $messagedata->eventend .
-                        $messagedata->eventlocation);
+                        $messagedata->eventlocation . $messagedata->imagedesc);
                 $existinghashes[$hash] = $messagedata->id;
             }
 
@@ -862,9 +862,11 @@ class system {
                 // constrict title.
                 $fi->title = \core_text::substr(html_entity_decode($fi->title), 0, 255);
                 $extraimageurl = false;
+                $extraimagedesc = '';
                 if (strpos($fi->message, '<div class="block_news-extras">') !== false) {
                     // For internal feeds gather and strip out the extra internal information.
-                    list($msg, $extraimageurl, $type, $loc, $start, $end) = self::process_internal_feed_extras($fi->message);
+                    list($msg, $extraimageurl, $extraimagedesc, $type, $loc, $start, $end) =
+                            self::process_internal_feed_extras($fi->message);
                     // Skip importing any messages of type event if the block does not allow events.
                     if ($type && $bns->get_displaytype() == self::DISPLAY_DEFAULT) {
                         continue;
@@ -897,9 +899,10 @@ class system {
                 $fi->hideauthor = 0;
                 $fi->userid = null; // Set to null for feed msgs.
                 $fi->timemodified = time();
+                $fi->imagedesc = $extraimagedesc;
 
                 $hash = sha1($fi->title . $fi->link . $fi->message . $fi->messagedate .
-                        $fi->messagetype . $fi->eventstart . $fi->eventend . $fi->eventlocation);
+                        $fi->messagetype . $fi->eventstart . $fi->eventend . $fi->eventlocation . $fi->imagedesc);
 
                 if (array_key_exists($hash, $existinghashes)) {
                     // Reuse existing message.
@@ -934,7 +937,7 @@ class system {
      * @return array
      */
     public static function process_internal_feed_extras($message) {
-        $imgurl = $type = $location = $start = $end = '';
+        $imgurl = $imgdesc = $type = $location = $start = $end = '';
         // Unfortunately because we are just parsing snippets of a feed here the
         // message nearly always throws a warning during load.
         libxml_use_internal_errors(true);
@@ -945,6 +948,7 @@ class system {
         $xpath = new \DOMXpath($doc);
         if (strpos($message, 'block_news-main-msg-image')) {
             $imgurl = $xpath->evaluate("string(//img[@class='block_news-main-msg-image']/@src)");
+            $imgdesc = $xpath->evaluate("string(//img[@class='block_news-main-msg-image']/@alt)");
         }
         if (strpos($message, 'block_news-event-type')) {
             $node = $xpath->query("//div[@class='block_news-event-type']")[0];
@@ -965,7 +969,7 @@ class system {
         $node = $xpath->query("//div[@class='block_news-extras']")[0];
         $node->parentNode->removeChild($node);
         $message = str_replace(array('<html>', '</html>') , '' , $doc->saveHTML());
-        return [$message, $imgurl, $type, $location, $start, $end];
+        return [$message, $imgurl, $imgdesc, $type, $location, $start, $end];
     }
 
     /**
@@ -1047,10 +1051,9 @@ class system {
             $feed->set_file($file);
             $feed->init();
         } else {
-            $feed = new \moodle_simplepie($feedurl);
+            $feed = new \moodle_simplepie($feedurl, 10);
         }
 
-        $feed->set_timeout = 10; // Secs.
         if (isset($CFG->block_rss_client_timeout)) {
             $feed->set_cache_duration($CFG->block_rss_client_timeout * 60);
         }
@@ -1334,7 +1337,7 @@ class system {
             $pathparts = array('/blocks/news/images.php', $context->id, 'block_news',
                     'messageimage', $bnm->get_id(), $image->get_filename());
             $imageurl = new \moodle_url(implode('/', $pathparts));
-            $it->content .= \html_writer::img($imageurl->out(), '', ['class' => 'block_news-main-msg-image']);
+            $it->content .= \html_writer::img($imageurl->out(), $bnm->get_imagedesc(), ['class' => 'block_news-main-msg-image']);
             $it->content .= \html_writer::end_div();
         }
         // Add event dates.

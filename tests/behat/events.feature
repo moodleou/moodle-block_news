@@ -36,7 +36,7 @@ Feature: Display events in news block
     And the "eventend[hour]" "field" should be disabled
     And the "eventend[minute]" "field" should be disabled
     And the "Event location" "field" should be disabled
-    And the "class" attribute of "//label[contains(., 'Image')]/../.." "xpath_element" should not contain "disabled"
+    And the "class" attribute of "#fitem_id_messageimage" "css_element" should not contain "disabled"
     When I set the field "Type" to "Event"
     Then the "eventstart[day]" "field" should be enabled
     And the "eventstart[month]" "field" should be enabled
@@ -50,7 +50,7 @@ Feature: Display events in news block
     And the "eventend[hour]" "field" should be disabled
     And the "eventend[minute]" "field" should be disabled
     And the "Event location" "field" should be enabled
-    And the "class" attribute of "//label[contains(., 'Image')]/../.." "xpath_element" should contain "disabled"
+    And the "class" attribute of "#fitem_id_messageimage" "css_element" should contain "disabled"
     When I set the field "All day event" to ""
     Then the "eventstart[day]" "field" should be enabled
     And the "eventstart[month]" "field" should be enabled
@@ -64,7 +64,7 @@ Feature: Display events in news block
     And the "eventend[hour]" "field" should be enabled
     And the "eventend[minute]" "field" should be enabled
     And the "Event location" "field" should be enabled
-    And the "class" attribute of "//label[contains(., 'Image')]/../.." "xpath_element" should contain "disabled"
+    And the "class" attribute of "#fitem_id_messageimage" "css_element" should contain "disabled"
 
   Scenario: Event date validation
     Given I click on "Add" "link" in the "News and events" "block"

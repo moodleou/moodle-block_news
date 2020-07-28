@@ -69,7 +69,9 @@ class provider implements
                 'messagetype'    => 'privacy:metadata:block_news_messages:messagetype',
                 'eventstart'     => 'privacy:metadata:block_news_messages:eventstart',
                 'eventend'       => 'privacy:metadata:block_news_messages:eventend',
-                'eventlocation'  => 'privacy:metadata:block_news_messages:eventlocation'
+                'eventlocation'  => 'privacy:metadata:block_news_messages:eventlocation',
+                'imagedesc'      => 'privacy:metadata:block_news_messages:imagedesc',
+                'imagedescnotnecessary' => 'privacy:metadata:block_news_messages:imagedescnotnecessary'
         ], 'privacy:metadata:block_news_messages');
         $collection->link_subsystem('core_files', 'privacy:metadata:core_files');
         return $collection;
@@ -154,7 +156,9 @@ class provider implements
                         'messagetype'    => $record->messagetype,
                         'eventstart'     => transform::datetime($record->eventstart),
                         'eventend'       => transform::datetime($record->eventend),
-                        'eventlocation'  => $record->eventlocation
+                        'eventlocation'  => $record->eventlocation,
+                        'imagedesc'      => $record->imagedesc,
+                        'imagedescnotnecessary' => $record->imagedescnotnecessary
                 ];
 
                 $contextdata->news[$record->title] = $data;

@@ -53,6 +53,8 @@ class message {
     protected $messagedate;
     protected $messagerepeat;
     protected $messagevisible;
+    protected $imagedesc;
+    protected $imagedescnotnecessary;
     protected $hideauthor;
     protected $publish;
     protected $timemodified;
@@ -306,6 +308,24 @@ class message {
         } else {
             return clone($this->user);
         }
+    }
+
+    /**
+     * Get the message description.
+     *
+     * @return string message description
+     */
+    public function get_imagedesc() {
+        return $this->imagedesc;
+    }
+
+    /**
+     * Is the message description not necessary?
+     *
+     * @return boolean Whether message is not necessary
+     */
+    public function get_imagedescnotnecessary() {
+        return $this->imagedescnotnecessary;
     }
 
     /**

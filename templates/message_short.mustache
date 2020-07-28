@@ -40,6 +40,7 @@
         "thumburl": "http://placehold.it/340x160",
         "thumbwidth": "340",
         "thumbheight": "160",
+        "thumbdesc": "",
         "formattedmessage": "This is <b>fake news</b>. Sad!",
         "viewlink": "http://example.com",
         "classes": "",
@@ -65,7 +66,7 @@
     <div class="block_news_msg">
         {{#thumburl}}
             <div class="box messageimage">
-                <img src="{{thumburl}}" alt=""
+                <img src="{{thumburl}}" alt="{{thumbdesc}}"
                         {{#imageurl}}srcset="{{thumburl}} {{thumbwidth}}w, {{imageurl}} {{imagewidth}}w"
                         sizes="(max-width: 380px) {{thumbwidth}}px, (max-width: 767px) {{imagewidth}}px, {{thumbwidth}}px"{{/imageurl}} />
             </div>
