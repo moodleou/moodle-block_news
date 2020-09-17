@@ -70,9 +70,6 @@ class block_news_renderer extends plugin_renderer_base {
             if ($canmanage) {
                 $head .= $this->render_message_page_add($bns);
             }
-            if ($showfeed) {
-                $head .= $this->render_message_page_subscribe($bns);
-            }
             $head .= $this->output->container_end();
         }
 
@@ -88,20 +85,6 @@ class block_news_renderer extends plugin_renderer_base {
      */
     public function render_message_page_title($title, $bns = null) {
         return $this->output->heading($title);
-    }
-
-    /**
-     * Subscribe to news feed link on all page
-     *
-     * @param system $bns Block news instance record
-     * @return string
-     */
-    public function render_message_page_subscribe($bns) {
-        $pi = new pix_icon('i/rss', 'RSS');
-        $feed = $this->output->container_start('', 'block_news_rss_all');
-        $feed .= $this->output->action_icon($bns->get_feed_url(), $pi);
-        $feed .= $this->output->container_end();
-        return $feed;
     }
 
     /**

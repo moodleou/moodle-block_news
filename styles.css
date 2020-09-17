@@ -51,8 +51,7 @@
 }
 
 .block_news #block_news_addmsg,
-.block_news #block_news_viewall,
-.block_news #block_news_rss {
+.block_news #block_news_viewall {
     margin: 0 10px;
     display: inline;
     font-weight: bold;
@@ -103,11 +102,6 @@
     width: calc(100% - 24px);
     display: inline-block;
     margin: 0;
-}
-
-.block_news_top #block_news_rss_all {
-    width: 16px;
-    display: inline-block;
 }
 
 .block_news_message .msghide {
