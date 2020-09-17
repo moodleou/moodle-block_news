@@ -123,6 +123,9 @@ if ($formdata = $mform->get_data()) {
     if (isset($formdata->m)) {
         $formdata->id = $formdata->m;
     }
+    if (!isset($formdata->imagedescnotnecessary)) {
+        $formdata->imagedescnotnecessary = 0;
+    }
     // Ensure that event fields are nulled if we're not creating an event.
     if ($bns->get_displaytype() == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS
             && $formdata->messagetype != message::MESSAGETYPE_EVENT) {
@@ -214,6 +217,8 @@ if ($action == EDIT) {
     $toform['messagetype'] = $bnm->get_messagetype();
     $toform['messagedate'] = $bnm->get_messagedate();
     $toform['messagerepeat'] = $bnm->get_messagerepeat();
+    $toform['imagedesc'] = $bnm->get_imagedesc();
+    $toform['imagedescnotnecessary'] = $bnm->get_imagedescnotnecessary();
     $toform['hideauthor'] = $bnm->get_hideauthor();
     $toform['groupids'] = $bnm->get_groupids();
     $toform['eventstart'] = $bnm->get_eventstart();

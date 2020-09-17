@@ -158,6 +158,7 @@ class full_message extends renderable_message implements \templatable {
         if (array_key_exists($this->id, $images)) {
             $image = $images[$this->id];
             $this->imageinfo = $image->get_imageinfo();
+            $this->imagedesc = $bnm->get_imagedesc();
             if ($this->webserviceurls) {
                 $this->imageurl = \moodle_url::make_webservice_pluginfile_url($blockcontext->id, 'block_news',
                     'messageimage', $this->id, '/', $image->get_filename())->out(false);

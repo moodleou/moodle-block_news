@@ -73,6 +73,7 @@ $string['errornocsemodinfo'] = 'Could not get course/module info';
 $string['errorwritefile'] = 'Unable to write cache file';
 $string['erroreventstart'] = 'Event start must be in the future';
 $string['erroreventend'] = 'Event end must be after event start';
+$string['errorimagedesc'] = 'Please describe the image for users who cannot see it';
 $string['errorimagesize'] = 'The message image must be less than {$a}KB.';
 $string['errorimagedimensions'] = 'The message image must be exactly {$a->width}x{$a->height} pixels.';
 $string['errorinvalidgroups'] = 'You cannot select "All participants" as well as specific groups.';
@@ -110,6 +111,8 @@ $string['settingshideauthor_info'] = 'Set default value for the hide author opti
 $string['separateintoeventsandnewsitems'] = 'Separate into events and news items';
 
 // Edit.
+$string['imagedesc'] = 'Image description';
+$string['imagedescnotnecessary'] = 'Description not necessary';
 $string['msgeditpghdr'] = 'News';
 $string['msgeditpgtitle'] = 'News message';
 $string['msgfieldgroup'] = 'message';
@@ -184,6 +187,8 @@ $string['privacy:metadata:block_news_messages:timemodified'] = 'Time at which me
 $string['privacy:metadata:block_news_messages:eventend'] = 'Date end of event';
 $string['privacy:metadata:block_news_messages:eventstart'] = 'Date start of event';
 $string['privacy:metadata:block_news_messages:eventlocation'] = 'Event location';
+$string['privacy:metadata:block_news_messages:imagedesc'] = 'Image description';
+$string['privacy:metadata:block_news_messages:imagedescnotnecessary'] = 'Image description is not necessary';
 $string['privacy:metadata:core_files'] = 'Files attached to news message';
 $string['privacy_you'] = 'You';
 $string['privacy_somebodyelse'] = 'Somebody else';

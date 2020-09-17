@@ -44,7 +44,7 @@
         <p class="author">{{message.messagedate}}<ng-container *ngIf="author"> by {{message.author}}</ng-container></p>
         <h2 class="title">{{message.title}}</h2>
     </ion-item>
-    <img *ngIf="message.imageurl" core-external-content alt="" [src]="message.imageurl" class="block-news-message-image"
+    <img *ngIf="message.imageurl" core-external-content [alt]="message.imagedesc" [src]="message.imageurl" class="block-news-message-image"
          [width]="message.imagewidth" [height]="message.imageheight" />
     <ion-card-content class="block-news-message-text">
         <core-format-text [text]="message.formattedmessage" [maxHeight]="80"></core-format-text>

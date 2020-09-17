@@ -73,6 +73,8 @@ abstract class renderable_message implements \renderable {
     /** @var int Image height, for templates. */
     public $imageheight;
     /** @var int The timestamp for the start of the event */
+    public $imagedesc;
+    /** @var string Image description */
     public $eventstart;
     /** @var int The timestamp for the end of the event */
     public $eventend;

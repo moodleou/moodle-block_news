@@ -208,10 +208,11 @@ class block_news_newsfeed_testcase extends advanced_testcase {
  <p>News message includes an <img src="small.jpg"/> inline image (and an image above).</p>
 </div>
 EOT;
-        list($msg, $imgurl, $type, $loc, $start, $end) = system::process_internal_feed_extras($message);
+        list($msg, $imgurl, $imgdesc, $type, $loc, $start, $end) = system::process_internal_feed_extras($message);
         $this->assertNotContains('block_news-extras', $msg);
         $this->assertContains('News message includes', $msg);
         $this->assertEquals('img700x330.jpg', $imgurl);
+        $this->assertEquals('', $imgdesc);
         $this->assertEquals('', $type);
         $this->assertEquals('', $loc);
         $this->assertEquals('', $start);
@@ -228,10 +229,11 @@ EOT;
  <p>Event message includes an <img src="small.jpg"/> inline image (but no image above).</p>
 </div>
 EOT;
-        list($msg, $imgurl, $type, $loc, $start, $end) = system::process_internal_feed_extras($message);
+        list($msg, $imgurl, $imgdesc, $type, $loc, $start, $end) = system::process_internal_feed_extras($message);
         $this->assertNotContains('block_news-extras', $msg);
         $this->assertContains('Event message includes', $msg);
         $this->assertEquals('', $imgurl);
+        $this->assertEquals('', $imgdesc);
         $this->assertEquals(block_news\message::MESSAGETYPE_EVENT, $type);
         $this->assertEquals('Milton Keynes', $loc);
         $this->assertEquals('1506812411', $start);
