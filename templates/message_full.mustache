@@ -120,13 +120,6 @@
         {{/eventlocation}}
     {{/isnews}}
     <div class="block-news-message-text">{{{formattedmessage}}}</div>
-    {{#isnews}}
-        {{#link}}
-            <a href="{{link}}" class="block-news-message-extlink">
-                {{#linkicon}}{{> core/pix_icon}}{{/linkicon}}{{#str}} rendermsgextlink, block_news {{/str}}
-            </a>
-        {{/link}}
-    {{/isnews}}
     {{#hasattachments}}
         <div class="news-message-attachments">
             <h3>{{#str}} msgedithlpattach, block_news {{/str}}</h3>
@@ -137,6 +130,13 @@
             </ul>
         </div>
     {{/hasattachments}}
+    {{#isnews}}
+        {{#link}}
+            <a href="{{link}}" class="block-news-message-extlink">
+                {{#linkicon}}{{> core/pix_icon}}{{/linkicon}}{{#str}} rendermsgextlink, block_news {{/str}}
+            </a>
+        {{/link}}
+    {{/isnews}}
     {{#hasactions}}
         <div class="box editicons">
             {{#actions}}

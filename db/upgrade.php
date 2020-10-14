@@ -287,6 +287,21 @@ function xmldb_block_news_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2020072202, 'news');
     }
 
+    if ($oldversion < 2020101300) {
+
+        // Define field currenthash to be added to block_news_messages.
+        $table = new xmldb_table('block_news_messages');
+        $field = new xmldb_field('currenthash', XMLDB_TYPE_CHAR, '40', null, null, null, null, 'imagedescnotnecessary');
+
+        // Conditionally launch add field currenthash.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // News savepoint reached.
+        upgrade_block_savepoint(true, 2020101300, 'news');
+    }
+
     return $result;
 
 }

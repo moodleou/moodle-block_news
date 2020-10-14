@@ -189,6 +189,21 @@ class block_news_generator extends testing_block_generator {
             $fs->create_file_from_pathname($fr, $thumbpath);
             unlink($thumbpath);
         }
+
+        if (isset($record->attachment)) {
+            $filepath = $CFG->dirroot . $record->attachment;
+            $fs = get_file_storage();
+            $fr = (object) [
+                    'contextid' => context_block::instance($block->id)->id,
+                    'component' => 'block_news',
+                    'filearea' => 'attachment',
+                    'filepath' => '/',
+                    'filename' => basename($record->attachment),
+                    'itemid' => $id
+            ];
+            $fs->create_file_from_pathname($fr, $filepath);
+        }
+
         return $id;
     }
 }

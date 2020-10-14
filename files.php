@@ -15,15 +15,15 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * News block images service.
+ * News block files service.
  *
  * This is the equivalent of pluginfile.php but without the require logins.
  *
- * This code is used when users view messages in a feed. When they view images in the VLE,
+ * This code is used when users view messages in a feed. When they view files in the VLE,
  * standard pluginfile, and the callback in lib.php is used instead.
  *
  * @package block_news
- * @copyright 2017 The Open University
+ * @copyright 2020 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -59,7 +59,7 @@ $blockname = substr($component, 6);
 list($context, $course, $cm) = get_context_info_array($contextid);
 
 if ($context->contextlevel == CONTEXT_BLOCK) {
-    $birecord = $DB->get_record('block_instances', array('id'=>$context->instanceid), '*',MUST_EXIST);
+    $birecord = $DB->get_record('block_instances', ['id' => $context->instanceid], '*', MUST_EXIST);
     if ($birecord->blockname !== $blockname) {
         // Somebody tries to gain illegal access!
         send_file_not_found();

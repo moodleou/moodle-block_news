@@ -173,7 +173,8 @@ if ($action == 'delete' && !$confirm) {
     $pn = $bns->get_message_pn($bnm, $viewhidden);
 
     $image = $bns->get_images('messageimage', $bnm->get_id());
-    $msgwidget = new full_message($bnm, $pn->previd, $pn->nextid, $bns, 'one', $image);
+    $file = $bns->get_files('attachment', $bnm->get_id());
+    $msgwidget = new full_message($bnm, $pn->previd, $pn->nextid, $bns, 'one', $image, false, $file);
 
     $page = new view_page($msgwidget);
     echo $OUTPUT->header();

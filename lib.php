@@ -35,7 +35,7 @@ if (!defined('MOODLE_INTERNAL')) {
  * Standard attachments handler
  *
  * This code is used when users view messages in the VLE.
- * When they view images in feeds, images.php is used instead.
+ * When they view images and attachments in feeds, files.php is used instead.
  *
  * @param course $course
  * @param $birecordorcm

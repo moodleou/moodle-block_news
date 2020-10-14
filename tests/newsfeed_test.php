@@ -203,16 +203,19 @@ class block_news_newsfeed_testcase extends advanced_testcase {
         $message = <<<EOT
 <div xmlns="http://www.w3.org/1999/xhtml">
  <div class="block_news-extras">
-  <div class="box messageimage"><img class="block_news-main-msg-image" src="img700x330.jpg"/></div>
+  <div class="box messageimage"><img class="block_news-main-msg-image" src="img700x330.jpg" alt="imagedesc"/></div>
+  <div class="box messageattachment"><p>Attachments</p><ul><li><a class="block_news-attachment" href="attachment1">Attachment 1</a>
+  </li><li><a class="block_news-attachment" href="attachment2">Attachment 2</a></li></ul></div>
  </div>
  <p>News message includes an <img src="small.jpg"/> inline image (and an image above).</p>
 </div>
 EOT;
-        list($msg, $imgurl, $imgdesc, $type, $loc, $start, $end) = system::process_internal_feed_extras($message);
+        list($msg, $imgurl, $imgdesc, $attachments, $type, $loc, $start, $end) = system::process_internal_feed_extras($message);
         $this->assertNotContains('block_news-extras', $msg);
         $this->assertContains('News message includes', $msg);
         $this->assertEquals('img700x330.jpg', $imgurl);
-        $this->assertEquals('', $imgdesc);
+        $this->assertEquals('imagedesc', $imgdesc);
+        $this->assertEquals(['attachment1', 'attachment2'], $attachments);
         $this->assertEquals('', $type);
         $this->assertEquals('', $loc);
         $this->assertEquals('', $start);
@@ -229,7 +232,7 @@ EOT;
  <p>Event message includes an <img src="small.jpg"/> inline image (but no image above).</p>
 </div>
 EOT;
-        list($msg, $imgurl, $imgdesc, $type, $loc, $start, $end) = system::process_internal_feed_extras($message);
+        list($msg, $imgurl, $imgdesc, $attachments, $type, $loc, $start, $end) = system::process_internal_feed_extras($message);
         $this->assertNotContains('block_news-extras', $msg);
         $this->assertContains('Event message includes', $msg);
         $this->assertEquals('', $imgurl);
@@ -345,7 +348,7 @@ EOT;
 
         // Confirm that the two existing messages do not have changed ID i.e. they were not
         // recreated.
-        $this->assertEquals($messages[1]->get_id(), $messagesafter[0]->get_id());
+        $this->assertEquals($messages[1], $messagesafter[0]);
         $this->assertEquals($messages[3]->get_id(), $messagesafter[1]->get_id());
     }
 

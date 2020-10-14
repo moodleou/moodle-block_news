@@ -71,9 +71,11 @@ if ($bns->get_displaytype() == system::DISPLAY_DEFAULT) {
     if ($bnms == null) {
         echo $OUTPUT->container(get_string('msgblocknonews', 'block_news'), 'block_news_nonews');
     } else {
+        $images = $bns->get_images();
+        $files = $bns->get_files();
         foreach ($bnms as $bnm) {
             $SESSION->news_block_views[$bnm->get_id()] = true;
-            $msgwidget = new full_message($bnm, null, null, $bns, 'all', $bns->get_images());
+            $msgwidget = new full_message($bnm, null, null, $bns, 'all', $images, false, $files);
             echo $output->render($msgwidget);
         }
     }

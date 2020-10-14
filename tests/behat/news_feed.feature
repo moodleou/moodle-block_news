@@ -1,4 +1,4 @@
-@ou @ou_vle @block @block_news
+@ou @ou_vle @block @block_news @javascript
 Feature: Usage of news block feeds
   In order to share news and events
   As a teacher
@@ -24,8 +24,8 @@ Feature: Usage of news block feeds
     And I add the "News" block
     And the news block for course "C1" is in news and events mode
     And the following news messages exist on course "C1":
-      | title     | message      | image                                   | messagedate |
-      | Message 1 | Message text | /blocks/news/tests/fixtures/kitten1.jpg | 1483228800  |
+      | title     | message      | image                                   | attachment                                 | messagedate |
+      | Message 1 | Message text | /blocks/news/tests/fixtures/kitten1.jpg | /blocks/news/tests/fixtures/attachment.txt | 1483228800  |
     And I reload the page
     # Requires a second go or the empty image causes an issue.
     And the following news messages exist on course "C1":
@@ -65,6 +65,8 @@ Feature: Usage of news block feeds
     And I am on "Course 2" course homepage
     Then I should see "Message 1" in the "(new News block)" "block"
     And I should see image "thumbnail.jpg" in news message "Message 1"
+    And I click on "Message 1" "link"
+    And I should see "attachment.txt" in the "div.news-message-attachments" "css_element"
 
   Scenario: Import a feed from another course - events enabled - detail included
     Given I am on "Course 2" course homepage

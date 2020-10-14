@@ -61,6 +61,7 @@
         <FIELD NAME="eventlocation" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="imagedesc" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Image description"/>
         <FIELD NAME="imagedescnotnecessary" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 if image description isn't necessary, 0 if it is necessary."/>
+        <FIELD NAME="currenthash" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" COMMENT="Hash of latest feed data (null if it is not a feed)"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

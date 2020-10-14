@@ -63,6 +63,8 @@ class full_message extends renderable_message implements \templatable {
     public $link;
     /** @var \pix_icon Icon to display with link */
     public $linkicon;
+    /** @var array Files array to reduce calling get_file_storage() */
+    public $allfiles;
 
     /**
      * Build full message data
@@ -74,9 +76,10 @@ class full_message extends renderable_message implements \templatable {
      * @param string $mode
      * @param array $images List of images for this block, keyed by message ID.
      * @param bool $webserviceurls Output URLs for web services, instead of browser links?
+     * @param array $files List of files for this block, keyed by message ID.
      */
     public function __construct(message $bnm, $previd, $nextid, $bns, $mode, array $images = [],
-            $webserviceurls = false) {
+            $webserviceurls = false, array $files = []) {
         global $CFG;
 
         $this->classes = '';
@@ -168,6 +171,7 @@ class full_message extends renderable_message implements \templatable {
             }
         }
 
+        $this->allfiles = $files;
     }
 
     public function export_for_template(\renderer_base $output) {
@@ -205,8 +209,13 @@ class full_message extends renderable_message implements \templatable {
         }
 
         $fs = get_file_storage();
-        $files = $fs->get_area_files($blockcontext->id, 'block_news', 'attachment',
-                $this->id, "timemodified", false);
+
+        if ($this->allfiles && array_key_exists($this->id, $this->allfiles)) {
+            $files = $this->allfiles[$this->id];
+        } else {
+            $files = $fs->get_area_files($blockcontext->id, 'block_news', 'attachment',
+                    $this->id, "timemodified", false);
+        }
 
         if ($files) {
             foreach ($files as $file) {

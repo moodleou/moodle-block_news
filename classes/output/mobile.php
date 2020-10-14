@@ -130,9 +130,11 @@ class mobile {
         $renderer = $PAGE->get_renderer('block_news');
         $messagedata = [];
         if ($messages) {
+            $images = $bns->get_images();
+            $files = $bns->get_files();
             foreach ($messages as $message) {
                 $msgwidget = new full_message($message, null, null, $bns, 'all',
-                    $bns->get_images(), true);
+                    $images, true, $files);
                 $messagedata[] = $msgwidget->export_for_template($renderer);
             }
         }

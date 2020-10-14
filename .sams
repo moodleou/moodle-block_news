@@ -1,7 +1,7 @@
 <Files feed.php>
 DISABLE_SAMS
 </Files>
-<Files images.php>
+<Files files.php>
 DISABLE_SAMS
 </Files>
 <Files mobile.css>

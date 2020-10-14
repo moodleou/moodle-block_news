@@ -505,7 +505,7 @@ class system {
                  AND messagedate <= ?'
                 . $groups['sql']
                 . $restricttype['sql'] .
-                'ORDER BY ' . $order . ' 
+                'ORDER BY ' . $order . '
                  LIMIT ' . $max;
 
         $params = array($this->blockinstanceid, time());
@@ -825,15 +825,10 @@ class system {
             // Get existing records.
             $existing = $DB->get_records('block_news_messages', ['newsfeedid' => $bnf->id]);
 
-            // Get hash of existing messages (key fields).
+            // Get the latest hashes we stored in db to build $existinghashes.
             $existinghashes = [];
             foreach ($existing as $messagedata) {
-                // Use all fields except the ones which are fixed to a given value below.
-                $hash = sha1($messagedata->title . $messagedata->link . $messagedata->message .
-                        $messagedata->messagedate . $messagedata->messagetype .
-                        $messagedata->eventstart . $messagedata->eventend .
-                        $messagedata->eventlocation . $messagedata->imagedesc);
-                $existinghashes[$hash] = $messagedata->id;
+                $existinghashes[$messagedata->currenthash] = $messagedata->id;
             }
 
             // Clear cache.
@@ -863,9 +858,10 @@ class system {
                 $fi->title = \core_text::substr(html_entity_decode($fi->title), 0, 255);
                 $extraimageurl = false;
                 $extraimagedesc = '';
+                $attachments = [];
                 if (strpos($fi->message, '<div class="block_news-extras">') !== false) {
                     // For internal feeds gather and strip out the extra internal information.
-                    list($msg, $extraimageurl, $extraimagedesc, $type, $loc, $start, $end) =
+                    list($msg, $extraimageurl, $extraimagedesc, $attachments, $type, $loc, $start, $end) =
                             self::process_internal_feed_extras($fi->message);
                     // Skip importing any messages of type event if the block does not allow events.
                     if ($type && $bns->get_displaytype() == self::DISPLAY_DEFAULT) {
@@ -902,17 +898,24 @@ class system {
                 $fi->imagedesc = $extraimagedesc;
 
                 $hash = sha1($fi->title . $fi->link . $fi->message . $fi->messagedate .
-                        $fi->messagetype . $fi->eventstart . $fi->eventend . $fi->eventlocation . $fi->imagedesc);
-
+                        $fi->messagetype . $fi->eventstart . $fi->eventend . $fi->eventlocation . $extraimageurl . $fi->imagedesc .
+                        implode('', $attachments));
                 if (array_key_exists($hash, $existinghashes)) {
                     // Reuse existing message.
                     unset($existing[$existinghashes[$hash]]);
                 } else {
                     // Create new message.
+                    $fi->currenthash = $hash;
                     $id = $DB->insert_record('block_news_messages', $fi);
 
                     if ($extraimageurl) {
                         $this->store_message_images($extraimageurl, $context, $id);
+                    }
+
+                    if ($attachments) {
+                        foreach ($attachments as $attachment) {
+                            $this->store_message_attachment($attachment, $context, $id);
+                        }
                     }
                 }
             }
@@ -938,6 +941,7 @@ class system {
      */
     public static function process_internal_feed_extras($message) {
         $imgurl = $imgdesc = $type = $location = $start = $end = '';
+        $attachments = [];
         // Unfortunately because we are just parsing snippets of a feed here the
         // message nearly always throws a warning during load.
         libxml_use_internal_errors(true);
@@ -949,6 +953,12 @@ class system {
         if (strpos($message, 'block_news-main-msg-image')) {
             $imgurl = $xpath->evaluate("string(//img[@class='block_news-main-msg-image']/@src)");
             $imgdesc = $xpath->evaluate("string(//img[@class='block_news-main-msg-image']/@alt)");
+        }
+        if (strpos($message, 'block_news-attachment')) {
+            $hrefs = $xpath->query("//a[@class='block_news-attachment']/@href");
+            foreach ($hrefs as $href) {
+                $attachments[] = $href->value;
+            }
         }
         if (strpos($message, 'block_news-event-type')) {
             $node = $xpath->query("//div[@class='block_news-event-type']")[0];
@@ -969,7 +979,7 @@ class system {
         $node = $xpath->query("//div[@class='block_news-extras']")[0];
         $node->parentNode->removeChild($node);
         $message = str_replace(array('<html>', '</html>') , '' , $doc->saveHTML());
-        return [$message, $imgurl, $imgdesc, $type, $location, $start, $end];
+        return [$message, $imgurl, $imgdesc, $attachments, $type, $location, $start, $end];
     }
 
     /**
@@ -981,15 +991,17 @@ class system {
      */
     private function store_message_images($url, $context, $id) {
         global $CFG;
-        if (substr_count($url, $CFG->wwwroot . '/blocks/news/images.php/')) {
+
+        if (substr_count($url, $CFG->wwwroot . '/blocks/news/files.php/')) {
             // The image exists on this server so just copy it to this blocks images.
             list($contextid, $component, $filearea, $itemid, $filename) = explode(
-                    '/', str_replace($CFG->wwwroot . '/blocks/news/images.php/', '', $url));
+                    '/', str_replace($CFG->wwwroot . '/blocks/news/files.php/', '', $url));
+            $filename = urldecode($filename);
             $fs = get_file_storage();
             $imgfile = $fs->get_file($contextid, $component, $filearea, $itemid, '/', $filename);
             if ($imgfile) {
                 // Create the main image.
-                $newimgfile = array('contextid' => $context->id, 'itemid' => $id);
+                $newimgfile = ['contextid' => $context->id, 'itemid' => $id];
                 $fs->create_file_from_storedfile($newimgfile, $imgfile);
                 // Create a thumbnail as well.
                 $thumbnail = [
@@ -1002,12 +1014,12 @@ class system {
                 ];
                 $fs->convert_image($thumbnail, $imgfile, '340', null, true, null);
             }
-        } else if (substr_count($url, '/blocks/news/images.php/')) {
+        } else if (substr_count($url, '/blocks/news/images.php/') || substr_count($url, '/blocks/news/files.php/')) {
             // The image is on another server.
             $tmpfile = tempnam($CFG->tempdir, 'blocknewstempimage');
             $ok = download_file_content($url, null, null, false, 5, 5, false, $tmpfile);
             if ($ok) {
-                $filename = substr($url, strrpos($url, '/') + 1);
+                $filename = urldecode(substr($url, strrpos($url, '/') + 1));
                 $fs = get_file_storage();
                 $newimginfo = [
                         'contextid' => $context->id,
@@ -1028,6 +1040,49 @@ class system {
                         'filename' => message::THUMBNAIL_JPG
                 ];
                 $fs->convert_image($thumbnail, $imgfile, '340', null, true, null);
+            }
+        }
+    }
+
+    /**
+     * Stores message attachment from a url.
+     *
+     * @param string $url Extra message attachment url
+     * @param $context
+     * @param int $id Message id
+     */
+    private function store_message_attachment($url, $context, $id) {
+        global $CFG;
+        if (substr_count($url, $CFG->wwwroot . '/blocks/news/files.php/')) {
+            // The attachment exists on this server so just copy it to this blocks images.
+            list($contextid, $component, $filearea, $itemid, $filename) = explode(
+                    '/', str_replace($CFG->wwwroot . '/blocks/news/files.php/', '', $url));
+            $filename = urldecode($filename);
+            $fs = get_file_storage();
+            $file = $fs->get_file($contextid, $component, $filearea, $itemid, '/', $filename);
+
+            if ($file) {
+                // Create the main image.
+                $newfile = ['contextid' => $context->id, 'itemid' => $id];
+                $fs->create_file_from_storedfile($newfile, $file);
+            }
+        } else if (substr_count($url, '/blocks/news/images.php/') || substr_count($url, '/blocks/news/files.php/')) {
+            // The attachment is on another server.
+            $tmpfile = tempnam($CFG->tempdir, 'blocknewstempfile');
+            $ok = download_file_content($url, null, null, false, 5, 5, false, $tmpfile);
+            if ($ok) {
+                $filename = urldecode(substr($url, strrpos($url, '/') + 1));
+                $fs = get_file_storage();
+                $newinfo = [
+                    'contextid' => $context->id,
+                    'component' => 'block_news',
+                    'filearea' => 'attachment',
+                    'itemid' => $id,
+                    'filepath' => '/',
+                    'filename' => $filename
+                ];
+                $file = $fs->create_file_from_pathname($newinfo, $tmpfile);
+                unlink($tmpfile);
             }
         }
     }
@@ -1272,15 +1327,17 @@ class system {
         $c = 0;
         $onedayago = $now - DAYSECS;
         $items = array();
+        $images = $this->get_images();
+        $files = $this->get_files();
         foreach ($bnms as $bnm) {
             // Messagevisible && messagedate <= now.
             if ($bnm->is_visible_to_students()) {
                 // Ie just last day, not future.
                 if ($bnm->get_messagedate() > $onedayago) {
-                    $items[] = $this->generate_atom_item($bnm);
+                    $items[] = $this->generate_atom_item($bnm, $images, $files);
                 } else {
                     if ($c < self::MAXSTDMSGS) {
-                        $items[] = $this->generate_atom_item($bnm);
+                        $items[] = $this->generate_atom_item($bnm, $images, $files);
                     }
                 }
                 $c++;
@@ -1299,9 +1356,11 @@ class system {
      * Create an Atom 'entry'
      *
      * @param message $bnm Message
+     * @param array $images All images of block
+     * @param array $allfiles all files of block
      * @return string Atom 'entry' xml
      */
-    protected function generate_atom_item($bnm) {
+    protected function generate_atom_item($bnm, array $images = [], array $allfiles = []) {
         global $CFG;
 
         $it = new \stdClass();
@@ -1327,14 +1386,13 @@ class system {
         $it->content = '';
 
         // Add the message image, if exists, into the content.
-        $images = $this->get_images();
         $started = false;
         if (array_key_exists($bnm->get_id(), $images)) {
             $it->content .= \html_writer::start_div('block_news-extras');
             $started = true;
             $it->content .= \html_writer::start_div('box messageimage');
             $image = $images[$bnm->get_id()];
-            $pathparts = array('/blocks/news/images.php', $context->id, 'block_news',
+            $pathparts = array('/blocks/news/files.php', $context->id, 'block_news',
                     'messageimage', $bnm->get_id(), $image->get_filename());
             $imageurl = new \moodle_url(implode('/', $pathparts));
             $it->content .= \html_writer::img($imageurl->out(), $bnm->get_imagedesc(), ['class' => 'block_news-main-msg-image']);
@@ -1357,14 +1415,45 @@ class system {
                         'block_news-event-end');
             }
         }
+
+        // Add attachments.
+        if (array_key_exists($bnm->get_id(), $allfiles)) {
+            $files = $allfiles[$bnm->get_id()];
+            if ($files) {
+                if (!$started) {
+                    $it->content .= \html_writer::start_div('block_news-extras');
+                    $started = true;
+                }
+                $attachments = [];
+                $it->content .= \html_writer::start_div('box messageattachment');
+                $it->content .= \html_writer::tag('p', get_string('msgedithlpattach', 'block_news'));
+                $it->content .= \html_writer::start_tag('ul');
+                foreach ($files as $file) {
+                    $it->content .= \html_writer::start_tag('li');
+                    $filename = $file->get_filename();
+                    $pathparts = array('/blocks/news/files.php', $context->id, 'block_news',
+                            'attachment', $bnm->get_id(), $filename);
+                    $fileurl = new \moodle_url(implode('/', $pathparts));
+                    $it->content .= \html_writer::link($fileurl->out(), $filename, ['class' => 'block_news-attachment']);
+                    $it->content .= \html_writer::end_tag('li');
+                    $attachment = (object) [
+                            'filename' => $filename,
+                            'url' => $fileurl->out()
+                    ];
+                    $attachments[] = $attachment;
+                }
+                $it->content .= \html_writer::end_tag('ul');
+                $it->content .= \html_writer::end_div();
+            }
+        }
+
         if ($started) {
             $it->content .= \html_writer::end_div();
         }
 
         // Convert any @@PLUGINFILE@@ links to real URLs.
-        $it->content .= file_rewrite_pluginfile_urls($bnm->get_message(), 'blocks/news/images.php',
+        $it->content .= file_rewrite_pluginfile_urls($bnm->get_message(), 'blocks/news/files.php',
                 $context->id, 'block_news', 'message', $bnm->get_id(), null);
-
         return $it;
     }
 
@@ -1480,6 +1569,33 @@ class system {
             }
         }
         return $imagesbyitemid;
+    }
+
+    /**
+     * Get files for the current block instance
+     *
+     * This returns an array of all the files for the current block instance, keyed by message ID. This allows us to avoid
+     * having to call get_area_files() for each message when displaying several on a page.
+     *
+     * @param string $filearea The area to get images from, e.g. 'attachment', 'messageimage' or 'thumbnail'
+     * @param int|int[]|false $itemid item ID(s) or all files if not specified
+     * @return array stored_file objects, keyed by message ID.
+     */
+    public function get_files($filearea = 'attachment', $itemid = false) {
+        $fs = get_file_storage();
+        $context = \context_block::instance($this->blockinstanceid);
+        $files = $fs->get_area_files($context->id, 'block_news', $filearea, $itemid, "timemodified", false);
+        $filesbyitemid = [];
+        if (!empty($files)) {
+            foreach ($files as $file) {
+                if (!isset($filesbyitemid[$file->get_itemid()])) {
+                    $filesbyitemid[$file->get_itemid()] = [$file];
+                } else {
+                    $filesbyitemid[$file->get_itemid()][] = $file;
+                }
+            }
+        }
+        return $filesbyitemid;
     }
 
     /**
