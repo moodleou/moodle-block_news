@@ -268,6 +268,8 @@ function block_news_get_groupingids($courseid, $userid) {
             $groupings[] = $grouping->id;
         }
 
+        // Sort by id (just to produce reliable order for unit test).
+        sort($groupings);
         return implode(',', $groupings);
     }
 
