@@ -812,6 +812,7 @@ class system {
 
         if (isset($fia[0]->errortext)) {
             $bnf->feederror = \core_text::substr($fia[0]->errortext, 0, 255);
+            $bnf->errorcount++;
             $DB->update_record('block_news_feeds', $bnf);
             $transaction->allow_commit();
             return;
@@ -925,6 +926,7 @@ class system {
 
             // Write new hash.
             $bnf->currenthash = $hash;
+            $bnf->errorcount = 0;
             $DB->update_record('block_news_feeds', $bnf);
         }
         // Else do nothing more if hashes match.
@@ -1100,6 +1102,13 @@ class system {
 
         require_once($CFG->libdir . '/simplepie/moodle_simplepie.php');
 
+        if (PHPUNIT_TEST && !empty($CFG->block_news_simplepie_error)) {
+            $err = new \stdClass();
+            $err->errortext = $CFG->block_news_simplepie_error;
+            $fia[] = $err;
+            return $fia;
+        }
+
         if (PHPUNIT_TEST && !empty($CFG->block_news_simplepie_feed)) {
             $feed = new \moodle_simplepie();
             $file = new \SimplePie_File($CFG->block_news_simplepie_feed);
@@ -1160,25 +1169,25 @@ class system {
             print_error('errornoupdatetime', 'block_news');
         }
 
-        // Now get the update control data.
-        $fbrecs = array();
+        // Get a list of all feeds to update, sorted by URL, and in order of last update
+        // but with a delay factor (one hour per errors squared) for failing requests.
         // The update_feed process then handles each feed in the list independently (ie does
         // a get on the url for each duplicate url) but http caching on server will avoid
         // fresh gets each time (could optimise by having update_feed do one get per url
         // and then update all feed recs with same url).
-        $sql = 'SELECT {block_news_feeds}.* FROM
-                    (SELECT feedurl,MIN(feedupdated) AS lowestdate
-                    FROM {block_news_feeds}
-                    WHERE feedupdated <= ?
-                    GROUP BY feedurl) tfeeds
-                JOIN {block_news_feeds} ON tfeeds.feedurl =  {block_news_feeds}.feedurl
-                ORDER BY tfeeds.lowestdate
-                LIMIT ' . $max;
+        $sql = 'SELECT {block_news_feeds}.*
+                  FROM (
+                       SELECT feedurl,
+                              MIN(feedupdated + (errorcount * errorcount) * 3600) AS lowestdate
+                         FROM {block_news_feeds}
+                        WHERE feedupdated + (errorcount * errorcount) * 3600 <= ?
+                     GROUP BY feedurl
+                       ) tfeeds
+                  JOIN {block_news_feeds} ON tfeeds.feedurl = {block_news_feeds}.feedurl
+              ORDER BY tfeeds.lowestdate';
 
         $utime = time() - $updatetime;
-        $fbrecs = $DB->get_records_sql($sql, array($utime));
-
-        return $fbrecs;
+        return $DB->get_records_sql($sql, array($utime), 0, $max);
     }
 
     /**
