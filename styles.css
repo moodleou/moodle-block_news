@@ -86,6 +86,39 @@
     display: none;
 }
 
+@media (min-width: 1200px) {
+    #page-blocks-news-edit #fitem_id_groupids .col-md-3,
+    #page-blocks-news-edit #fitem_id_grouping .col-md-3 {
+        max-width: 100%;
+        text-align: left;
+        padding-left: 2px;
+    }
+
+    #page-blocks-news-edit.osep-courseformat-ousubject #fitem_id_grouping {
+        width: calc(50% - 180px);
+    }
+
+    #page-blocks-news-edit.osep-courseformat-ousubject #fitem_id_groupids {
+        margin-left: 280px;
+        margin-right: -70px;
+    }
+
+    #page-blocks-news-edit.osep-courseformat-oustudyplan #fitem_id_groupids {
+        margin-left: 263px;
+        margin-right: -80px;
+    }
+
+    #page-blocks-news-edit.osep-courseformat-oustudyplan #fitem_id_grouping {
+        width: calc(50% - 160px);
+    }
+}
+
+@media (max-width: 1199px) {
+    #page-blocks-news-edit #fitem_id_groupids {
+        margin-right: 10px;
+    }
+}
+
 /* view full message */
 .block_news_message,
 .block_news_top,
