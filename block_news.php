@@ -249,7 +249,6 @@ class block_news extends block_base {
      *  limit contexts from which block can be created
      */
     public function applicable_formats() {
-        return array('course' => true, 'mod' => true);
-
+        return array('course' => true, 'mod' => true, 'my' => true);
     }
 }
