@@ -86,6 +86,10 @@
     display: none;
 }
 
+#page-blocks-news-edit #fgroup_id_radioar .form-check-inline.inline-radio {
+    margin-right: 20px;
+}
+
 @media (min-width: 1200px) {
     #page-blocks-news-edit #fitem_id_groupids .col-md-3,
     #page-blocks-news-edit #fitem_id_grouping .col-md-3 {
