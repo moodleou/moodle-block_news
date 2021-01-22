@@ -29,6 +29,7 @@ if (!defined('MOODLE_INTERNAL')) {
 
 // General.
 $string['news:addinstance'] = 'Add a new news block';
+$string['news:myaddinstance'] = 'Add a new News block to Dashboard';
 $string['pluginname'] = 'News';
 $string['defaultblocktitle'] = '(new News block)';
 $string['newsandeventsblocktitle'] = 'News and events';

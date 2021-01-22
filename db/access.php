@@ -43,6 +43,14 @@ $capabilities = array(
         'clonepermissionsfrom' => 'moodle/site:manageblocks'
     ),
 
+    'block/news:myaddinstance' => array(
+        'riskbitmask' => RISK_SPAM | RISK_XSS,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => array(
+        ),
+    ),
+
     'block/news:add' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_BLOCK,
