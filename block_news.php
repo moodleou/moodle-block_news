@@ -184,6 +184,15 @@ class block_news extends block_base {
             }
         }
 
+        // If feeds allowed on site, display icon.
+        if (isset($CFG->enablerssfeeds) && $CFG->enablerssfeeds) {
+            $this->content->footer .= $output->container_start($canaddnews, 'block_news_rss');
+            $pi = new pix_icon('i/rss', 'RSS');
+            $this->content->footer .= $output->action_icon(
+                    $this->bns->get_feed_url(), $pi, null, array('title' => 'RSS'));
+            $this->content->footer .= $output->container_end();
+        }
+
         return $this->content;
     }
 
@@ -240,7 +249,6 @@ class block_news extends block_base {
      *  limit contexts from which block can be created
      */
     public function applicable_formats() {
-        return array('course' => true, 'mod' => true);
-
+        return array('course' => true, 'mod' => true, 'my' => true);
     }
 }

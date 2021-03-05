@@ -352,4 +352,99 @@ EOT;
         $this->assertEquals($messages[3]->get_id(), $messagesafter[1]->get_id());
     }
 
+    public function test_get_feeds_to_update() {
+        global $DB;
+        $this->resetAfterTest();
+
+        // Get the borderline for feeds that will be updated.
+        $borderline = time() - get_config('block_news', 'block_news_updatetime');
+
+        // Entry 1: Update first (T-100).
+        $DB->insert_record('block_news_feeds', (object)['blockinstanceid' => 1,
+                'feedurl' => 'http://example.org/1', 'feedupdated' => $borderline - 100]);
+        // Entry 2: Do not update at all (time + error count penalty > borderline).
+        $DB->insert_record('block_news_feeds', (object)['blockinstanceid' => 1,
+                'feedurl' => 'http://example.org/2', 'feedupdated' => $borderline - 3500,
+                'errorcount' => 1]);
+        // Entry 3: Update third (T-98).
+        $DB->insert_record('block_news_feeds', (object)['blockinstanceid' => 1,
+                'feedurl' => 'http://example.org/3', 'feedupdated' => $borderline - 98]);
+        // Entry 3b: Would not normally be updated but has same URL as one that will.
+        $DB->insert_record('block_news_feeds', (object)['blockinstanceid' => 2,
+                'feedurl' => 'http://example.org/3', 'feedupdated' => $borderline - 100,
+                'errorcount' => 64]);
+        // Entry 4: Due for update (second) because error count delay has run out.
+        $DB->insert_record('block_news_feeds', (object)['blockinstanceid' => 1,
+                'feedurl' => 'http://example.org/4', 'feedupdated' => $borderline - 99 - 3600,
+                'errorcount' => 1]);
+        // Entry 5: Due for update last but will not be included due to limit.
+        $DB->insert_record('block_news_feeds', (object)['blockinstanceid' => 1,
+                'feedurl' => 'http://example.org/5', 'feedupdated' => $borderline - 97]);
+
+        $results = array_values(system::get_feeds_to_update(4));
+        $this->assertCount(4, $results);
+
+        $this->assertEquals($results[0]->feedurl, 'http://example.org/1');
+        $this->assertEquals($results[1]->feedurl, 'http://example.org/4');
+        $this->assertEquals($results[2]->feedurl, 'http://example.org/3');
+        $this->assertEquals($results[3]->feedurl, 'http://example.org/3');
+    }
+
+    /**
+     * When updating feeds, checks that the errorcount field is updated.
+     */
+    public function test_update_feed_error_count() {
+        global $CFG, $DB;
+        $this->resetAfterTest(true);
+
+        // Create a course.
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+
+        // Create a news block.
+        $newsgenerator = $generator->get_plugin_generator('block_news');
+        $block = $newsgenerator->create_instance([], ['courseid' => $course->id]);
+
+        // Unit testing hack to request feed from a file.
+        $CFG->block_news_simplepie_feed = __DIR__ . '/fixtures/remote_rss_1.xml';
+
+        // Set the block to use a feed.
+        $blocksettings = system::get_block_settings($block->id);
+        $blocksettings->save_feed_urls('https://frogs.example.org/');
+
+        // Check it has error count 0 and 4 messages.
+        $this->assertEquals(0, $DB->get_field('block_news_feeds', 'errorcount', []));
+        $messages = $blocksettings->get_messages_all(true);
+        $this->assertCount(4, $messages);
+
+        // Unit testing hack to cause the URL to error.
+        $CFG->block_news_simplepie_error = 'Too many frogs';
+        $DB->set_field('block_news_feeds', 'feedupdated', 1);
+        $task = new \block_news\task\process_feeds();
+        ob_start();
+        $task->execute();
+        ob_end_clean();
+
+        // Error count now 1, no change to messages.
+        $this->assertEquals(1, $DB->get_field('block_news_feeds', 'errorcount', []));
+        $messages = $blocksettings->get_messages_all(true);
+        $this->assertCount(4, $messages);
+
+        // Another error causes count 2.
+        $DB->set_field('block_news_feeds', 'feedupdated', 1);
+        $task = new \block_news\task\process_feeds();
+        ob_start();
+        $task->execute();
+        ob_end_clean();
+        $this->assertEquals(2, $DB->get_field('block_news_feeds', 'errorcount', []));
+
+        // Successful read causes count 0.
+        unset($CFG->block_news_simplepie_error);
+        $DB->set_field('block_news_feeds', 'feedupdated', 1);
+        $task = new \block_news\task\process_feeds();
+        ob_start();
+        $task->execute();
+        ob_end_clean();
+        $this->assertEquals(0, $DB->get_field('block_news_feeds', 'errorcount', []));
+    }
 }

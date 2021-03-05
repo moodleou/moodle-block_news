@@ -302,6 +302,21 @@ function xmldb_block_news_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2020101300, 'news');
     }
 
+    if ($oldversion < 2020110600) {
+
+        // Define field errorcount to be added to block_news_feeds.
+        $table = new xmldb_table('block_news_feeds');
+        $field = new xmldb_field('errorcount', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'feederror');
+
+        // Conditionally launch add field errorcount.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // News savepoint reached.
+        upgrade_block_savepoint(true, 2020110600, 'news');
+    }
+
     return $result;
 
 }

@@ -64,7 +64,13 @@ $PAGE->set_url($murl);
 
 // No login required.
 
-$context = context_block::instance($blockinstanceid);
+$context = context_block::instance($blockinstanceid, IGNORE_MISSING);
+if (!$context) {
+    header('HTTP/1.1 404 Not Found');
+    header('Content-Type: text/plain');
+    echo 'The specified feed could not be found, or no longer exists.';
+    exit;
+}
 $PAGE->set_context($context);
 
 if (!isset($CFG->enablerssfeeds) || !$CFG->enablerssfeeds) {
