@@ -82,7 +82,7 @@ class news_feedupdate_test extends UnitTestCaseUsingDatabase {
         $this->assertEqual($actids, '6,7,2,4,1,3,');
     }
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         // All operations until end of test method will happen in test DB

@@ -73,7 +73,7 @@ class mobile extends \advanced_testcase {
     /**
      * Create 1 course with a new block instance.
      */
-    public function setUp() {
+    public function setUp(): void {
         global $PAGE;
         $this->resetAfterTest();
         $this->courses['course1'] = $this->getDataGenerator()->create_course();

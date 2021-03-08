@@ -206,7 +206,7 @@ class news_system_test extends UnitTestCaseUsingDatabase {
         $this->assertEqual($newdate, $expecteddate);
     }
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         // All operations until end of test method will happen in test DB

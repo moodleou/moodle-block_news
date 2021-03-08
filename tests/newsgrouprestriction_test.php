@@ -50,7 +50,7 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
     /**
      * Set up.
      */
-    protected function setUp() {
+    protected function setUp(): void {
         $this->resetAfterTest(true);
 
         // Create a course.

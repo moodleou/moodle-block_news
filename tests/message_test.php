@@ -33,7 +33,7 @@ class message_testcase extends \advanced_testcase {
     /** @var \block_news_generator Data generator */
     private $generator;
 
-    public function setUp() {
+    public function setUp(): void {
         $this->resetAfterTest(true);
 
         // Create a course.

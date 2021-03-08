@@ -56,7 +56,7 @@ class block_news_privacy_testcase extends provider_testcase {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function setUp() {
+    public function setUp(): void {
         global $DB;
         $this->resetAfterTest();
         $dg = $this->getDataGenerator();

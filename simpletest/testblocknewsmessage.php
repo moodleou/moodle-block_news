@@ -122,7 +122,7 @@ class news_message_test extends UnitTestCaseUsingDatabase {
     }
 
 
-    public function setUp() {
+    public function setUp(): void{
         parent::setUp();
 
         // All operations until end of test method will happen in test DB

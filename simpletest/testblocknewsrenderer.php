@@ -126,7 +126,7 @@ class news_renderer_test extends UnitTestCaseUsingDatabase {
         $this->assertTrue($isstring);
     }
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         // All operations until end of test method will happen in test DB
