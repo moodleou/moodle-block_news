@@ -172,9 +172,7 @@ class block_news_newsfeed_testcase extends advanced_testcase {
         $feed1 = system::get_block_feed($block->id, 0, [$this->groupings[1]->id]);
         $this->assertContains('<title>Group1 Message</title>', $feed1);
         $this->assertNotContains('<title>Group2 Message</title>', $feed1);
-        $this->[16:54] T.J.Hunt
-    I am just selectively replacing asserContains with assertStringContainsString
-        ('<title>All groups Message</title>', $feed1);
+        $this->assertContains('<title>All groups Message</title>', $feed1);
         $this->assertContains('<title>No groups Message</title>', $feed1);
 
         // Get posts visible to grouping 2.
