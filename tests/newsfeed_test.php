@@ -170,31 +170,31 @@ class block_news_newsfeed_testcase extends advanced_testcase {
 
         // Get posts visible to grouping 1.
         $feed1 = system::get_block_feed($block->id, 0, [$this->groupings[1]->id]);
-        $this->assertContains('<title>Group1 Message</title>', $feed1);
-        $this->assertNotContains('<title>Group2 Message</title>', $feed1);
-        $this->assertContains('<title>All groups Message</title>', $feed1);
-        $this->assertContains('<title>No groups Message</title>', $feed1);
+        $this->assertStringContainsString('<title>Group1 Message</title>', $feed1);
+        $this->assertStringNotContainsString('<title>Group2 Message</title>', $feed1);
+        $this->assertStringContainsString('<title>All groups Message</title>', $feed1);
+        $this->assertStringContainsString('<title>No groups Message</title>', $feed1);
 
         // Get posts visible to grouping 2.
         $feed2 = system::get_block_feed($block->id, 0, [$this->groupings[2]->id]);
-        $this->assertNotContains('<title>Group1 Message</title>', $feed2);
-        $this->assertContains('<title>Group2 Message</title>', $feed2);
-        $this->assertContains('<title>All groups Message</title>', $feed2);
-        $this->assertContains('<title>No groups Message</title>', $feed2);
+        $this->assertStringNotContainsString('<title>Group1 Message</title>', $feed2);
+        $this->assertStringContainsString('<title>Group2 Message</title>', $feed2);
+        $this->assertStringContainsString('<title>All groups Message</title>', $feed2);
+        $this->assertStringContainsString('<title>No groups Message</title>', $feed2);
 
         // Get posts visible to grouping 1 and grouping 2.
         $feed3 = system::get_block_feed($block->id, 0, [$this->groupings[1]->id, $this->groupings[2]->id]);
-        $this->assertContains('<title>Group1 Message</title>', $feed3);
-        $this->assertContains('<title>Group2 Message</title>', $feed3);
-        $this->assertContains('<title>All groups Message</title>', $feed3);
-        $this->assertContains('<title>No groups Message</title>', $feed3);
+        $this->assertStringContainsString('<title>Group1 Message</title>', $feed3);
+        $this->assertStringContainsString('<title>Group2 Message</title>', $feed3);
+        $this->assertStringContainsString('<title>All groups Message</title>', $feed3);
+        $this->assertStringContainsString('<title>No groups Message</title>', $feed3);
 
         // Get all posts visible to user1 - this should be the same as above as this will get all the groups user1 can view.
         $feed4 = system::get_block_feed($block->id, 0, [], $user1->username);
-        $this->assertContains('<title>Group1 Message</title>', $feed4);
-        $this->assertContains('<title>Group2 Message</title>', $feed4);
-        $this->assertContains('<title>All groups Message</title>', $feed4);
-        $this->assertContains('<title>No groups Message</title>', $feed4);
+        $this->assertStringContainsString('<title>Group1 Message</title>', $feed4);
+        $this->assertStringContainsString('<title>Group2 Message</title>', $feed4);
+        $this->assertStringContainsString('<title>All groups Message</title>', $feed4);
+        $this->assertStringContainsString('<title>No groups Message</title>', $feed4);
     }
 
     public function test_process_internal_feed_extras() {
@@ -211,8 +211,8 @@ class block_news_newsfeed_testcase extends advanced_testcase {
 </div>
 EOT;
         list($msg, $imgurl, $imgdesc, $attachments, $type, $loc, $start, $end) = system::process_internal_feed_extras($message);
-        $this->assertNotContains('block_news-extras', $msg);
-        $this->assertContains('News message includes', $msg);
+        $this->assertStringNotContainsString('block_news-extras', $msg);
+        $this->assertStringContainsString('News message includes', $msg);
         $this->assertEquals('img700x330.jpg', $imgurl);
         $this->assertEquals('imagedesc', $imgdesc);
         $this->assertEquals(['attachment1', 'attachment2'], $attachments);
@@ -233,8 +233,8 @@ EOT;
 </div>
 EOT;
         list($msg, $imgurl, $imgdesc, $attachments, $type, $loc, $start, $end) = system::process_internal_feed_extras($message);
-        $this->assertNotContains('block_news-extras', $msg);
-        $this->assertContains('Event message includes', $msg);
+        $this->assertStringNotContainsString('block_news-extras', $msg);
+        $this->assertStringContainsString('Event message includes', $msg);
         $this->assertEquals('', $imgurl);
         $this->assertEquals('', $imgdesc);
         $this->assertEquals(block_news\message::MESSAGETYPE_EVENT, $type);
@@ -270,11 +270,11 @@ EOT;
 
         // Get feed for both blocks (the second, for both users) and ensure they are all empty.
         $feed = system::get_block_feed($block1->id, 0);
-        $this->assertNotContains('</entry>', $feed);
+        $this->assertStringNotContainsString('</entry>', $feed);
         $feed = system::get_block_feed($block2->id, 0, null, $user1->username);
-        $this->assertNotContains('</entry>', $feed);
+        $this->assertStringNotContainsString('</entry>', $feed);
         $feed = system::get_block_feed($block2->id, 0, null, $user2->username);
-        $this->assertNotContains('</entry>', $feed);
+        $this->assertStringNotContainsString('</entry>', $feed);
 
         // Post a message on both blocks.
         $newsgenerator->create_block_new_message($block1, ['title' => 'M1.1']);
@@ -285,20 +285,20 @@ EOT;
 
         // First block feed is changed, but second is still cached.
         $feed = system::get_block_feed($block1->id, 0);
-        $this->assertContains('</entry>', $feed);
+        $this->assertStringContainsString('</entry>', $feed);
         $feed = system::get_block_feed($block2->id, 0, null, $user1->username);
-        $this->assertNotContains('</entry>', $feed);
+        $this->assertStringNotContainsString('</entry>', $feed);
         $feed = system::get_block_feed($block2->id, 0, null, $user2->username);
-        $this->assertNotContains('</entry>', $feed);
+        $this->assertStringNotContainsString('</entry>', $feed);
 
         // Call uncache for the second block.
         system::get_block_settings($block2->id)->uncache_block_feed();
 
         // Second block feed is now changed for both users.
         $feed = system::get_block_feed($block2->id, 0, null, $user1->username);
-        $this->assertContains('</entry>', $feed);
+        $this->assertStringContainsString('</entry>', $feed);
         $feed = system::get_block_feed($block2->id, 0, null, $user2->username);
-        $this->assertContains('</entry>', $feed);
+        $this->assertStringContainsString('</entry>', $feed);
     }
 
     /**
