@@ -33,7 +33,7 @@ Feature: Events block
       | Event 9 | Event message 9 | 2           | 1483228803  | 1547337600 | 1547424000 | Ev9 locator   |
     And I enter the app
     And I log in as "student1"
-    And I press "Course 1" near "Recently accessed courses" in the app
+    And I press "Course 1" near "Course overview" in the app
     And I press "arrow forward" in the app
     # Checking events tab is visible.
     When I press "Events" in the app
@@ -68,18 +68,34 @@ Feature: Events block
     And I should see "Ev9 locator"
     And I should see "Event message 9"
 
+    # Open in browser.
+    And I press the page menu button in the app
+    And I press "Open in browser" in the app
+    And I switch to the browser tab opened by the app
+    And I log in as "student1"
+
+    # Check recent items is visible.
+    Then I should see "Upcoming events"
+    And I should see "Event 1"
+    And I should see "Friday, 1 January 2038, 2:00 AM to Friday, 3 December 2038, 9:20 PM"
+    And I should see "Ev1 locator"
+    And I should see "Past events"
+    And I should see "Event 9"
+    And I should see "Sunday, 13 January 2019, 12:00 AM to Monday, 14 January 2019, 12:00 AM"
+    And I should see "Ev9 locator"
+
   Scenario: Check Events tab display on mobile devices when news block existed.
     Given I log in as "admin"
     And I am on "Course 1" course homepage with editing mode on
     And I add the "News" block
     And I enter the app
     And I log in as "student1"
-    And I press "Course 1" near "Recently accessed courses" in the app
+    And I press "Course 1" near "Course overview" in the app
     And I press "arrow forward" in the app
     Then I should not see "Events"
     When the news block for course "C1" is in news and events mode
     And I enter the app
     And I log in as "student1"
-    And I press "Course 1" near "Recently accessed courses" in the app
+    And I press "Course 1" near "Course overview" in the app
     And I press "arrow forward" in the app
     Then I should see "Events"

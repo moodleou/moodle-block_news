@@ -176,6 +176,8 @@ class mobile {
         $PAGE->set_course(get_course($args['courseid']));
         $messagedata = self::get_messages($args['courseid']);
         $html = $OUTPUT->render_from_template('block_news/mobile_news_page', ['timestamp' => time()]);
+        $blockinstanceid = block_news_get_top_news_block($args['courseid']);
+        $pageurl = new \moodle_url('/blocks/news/all.php', ['bi' => $blockinstanceid]);
         return [
             'templates' => [
                 [
@@ -185,6 +187,7 @@ class mobile {
             ],
             'javascript' => file_get_contents($CFG->dirroot . '/blocks/news/appjs/newspage.js'),
             'otherdata' => [
+                'pageurl' => $pageurl->out(false),
                 'messages' => json_encode($messagedata['messages']),
                 'moreMessages' => $messagedata['moremessages']
             ]
@@ -202,6 +205,8 @@ class mobile {
         $PAGE->set_course(get_course($args['courseid']));
         $messagedata = self::get_messages($args['courseid'], message::MESSAGETYPE_EVENT);
         $html = $OUTPUT->render_from_template('block_news/mobile_events_page', ['timestamp' => time()]);
+        $blockinstanceid = block_news_get_top_news_block($args['courseid']);
+        $pageurl = new \moodle_url('/blocks/news/all.php', ['bi' => $blockinstanceid]);
         return [
             'templates' => [
                 [
@@ -211,6 +216,7 @@ class mobile {
             ],
             'javascript' => file_get_contents($CFG->dirroot . '/blocks/news/appjs/eventspage.js'),
             'otherdata' => [
+                'pageurl' => $pageurl->out(false),
                 'messages' => json_encode($messagedata['messages']),
                 'moreMessages' => $messagedata['moremessages'],
                 'pastEvents' => '[]'

@@ -35,6 +35,14 @@
 
 }}
 {{=<% %>=}}
+<core-navbar-buttons>
+    <core-context-menu>
+        <core-context-menu-item [priority]="900" [content]="'core.openinbrowser' | translate" iconAction="open" autoLogin="no"
+            [href]="CONTENT_OTHERDATA.pageurl">
+        </core-context-menu-item>
+    </core-context-menu>
+</core-navbar-buttons>
+
 <ion-item-divider class="block-news-events-heading">{{ 'plugin.block_news.eventsheading' | translate }}</ion-item-divider>
 <ion-card *ngIf="!CONTENT_OTHERDATA.messages.length">
     <ion-card-content>

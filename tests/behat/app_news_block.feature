@@ -46,6 +46,21 @@ Feature: Test News area in mobile
     And "19 Mar 2019" "text" should appear before "18 Mar 2019" "text"
     And "18 Mar 2019" "text" should appear before "17 Mar 2019" "text"
 
+    # Open in browser.
+    And I press the page menu button in the app
+    And I press "Open in browser" in the app
+    And I switch to the browser tab opened by the app
+    And I log in as "student1"
+    Then I should see "19 Mar 2019"
+    And I should see "news 3"
+    And I should see "message 3"
+    And I should see "18 Mar 2019"
+    And I should see "news 2"
+    And I should see "message 2"
+    And I should see "17 Mar 2019"
+    And I should see "news 1"
+    And I should see "message 1"
+
   Scenario: News area display on mobile with no items
     # Log in as admin to create News block.
     Given I log in as "admin"
