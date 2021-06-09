@@ -41,7 +41,8 @@ if ($blockinstanceid == 0 && $shortname === '') {
     global $DB;
     // Get the required username param and the userid.
     $username = required_param('username', PARAM_ALPHANUM);
-    $userid = $DB->get_field('user', 'id', array('username' => $username), MUST_EXIST);
+    $user = \local_oudataload\users::get_user_by_oucu($username);
+    $userid = $user->id;
 
     // Get the course id from the course short name.
     $courseid = $DB->get_field('course', 'id', array('shortname' => $shortname), MUST_EXIST);

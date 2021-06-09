@@ -717,7 +717,11 @@ class system {
         $groupings = $this->get_groupingids();
         if (empty($groupings)) {
             // Pass username to URL.
-            $username = $this->username ? $this->username : $USER->username;
+            if ($this->username) {
+                $username = $this->username;
+            } else {
+                ['oucu' => $username] = \local_oudataload\users::get_oucu_and_cdcid_as_array($USER);
+            }
             $feedurl .= '&username=' . $username;
         } else {
             // Pass groupingsids to URL.
@@ -1246,7 +1250,8 @@ class system {
         // Block news use group restriction, return false if not pass userid, courseid.
         if (($bns->get_groupingsupport() == $bns::RESTRICTBYGROUP && empty($groupingids))) {
             if ($username) {
-                $userid = $DB->get_field('user', 'id', array('username' => $username), MUST_EXIST);
+                $user = \local_oudataload\users::get_user_by_oucu($username);
+                $userid = $user->id;
                 $bni = $DB->get_record('block_instances', array('id' => $blockinstanceid));
                 $context = \context::instance_by_id($bni->parentcontextid);
                 $courseid = $context->instanceid;
