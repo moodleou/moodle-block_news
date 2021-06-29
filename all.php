@@ -23,18 +23,18 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/../../config.php');
-
-require_once('lib.php');
-
 use block_news\system;
 use block_news\message;
 use block_news\output\full_message;
 use block_news\output\view_all_page;
 
+require_once(dirname(__FILE__) . '/../../config.php');
+require_once(dirname(__FILE__) . '/classes/subscription.php');
+require_once('lib.php');
+
 $blockinstanceid = required_param('bi', PARAM_INT);
 $page = optional_param('page', 0, PARAM_INT);
-
+$get_news = \block_news\subscription::get_from_bi($blockinstanceid);;
 $bns = system::get_block_settings($blockinstanceid);
 // Check prison theme to make breadcrumb consistent with title.
 $title = $bns->get_title();
@@ -61,7 +61,7 @@ $output->pre_header($bns);
 echo $OUTPUT->header();
 
 echo $output->render_message_page_header($bns, $title, (isset($CFG->enablerssfeeds) && $CFG->enablerssfeeds),
-        has_capability('block/news:add', $blockcontext));
+        has_capability('block/news:add', $blockcontext), $get_news);
 
 // Get the messages.
 $viewhidden = has_capability('block/news:viewhidden', $blockcontext);
@@ -111,5 +111,10 @@ if ($bns->get_displaytype() == system::DISPLAY_DEFAULT) {
 
     echo $output->render($pager);
 }
+if($get_news->can_view_subscribers()) {
+    echo $output->render_view_subscriber($get_news);
+}
+
+echo $output->render_news_subscribe_bottom($get_news);
 
 echo $OUTPUT->footer();

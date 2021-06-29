@@ -28,6 +28,7 @@ use block_news\output\short_message;
 use block_news\output\full_message;
 use block_news\output\view_all_page;
 use block_news\output\view_page;
+use block_news\subscription;
 
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
@@ -61,9 +62,10 @@ class block_news_renderer extends plugin_renderer_base {
      * @param string $title Page title
      * @param boolean $showfeed Show the subscribe to RSS feed link?
      * @param boolean $canmanage User can add message?
+     * @param subscription news News This variable is only used in theme OSEP renderer
      * @return string
      */
-    public function render_message_page_header($bns, $title, $showfeed, $canmanage) {
+    public function render_message_page_header($bns, $title, $showfeed, $canmanage, $news): string {
         $head = $this->render_message_page_title($title);
         if ($showfeed || $canmanage) {
             $head .= $this->output->container_start('block_news_top');
@@ -258,9 +260,90 @@ class block_news_renderer extends plugin_renderer_base {
      * Called prior to header outputs
      * Should not return anything
      *
-     * @param stdClass $bns
+     * @param system $bns
      */
-    public function pre_header($bns) {
+    public function pre_header(system $bns) {
         // Does nothing as standard.
     }
+
+    /**
+     * Render subscribe button.
+     *
+     * @param subscription $news
+     * @param int $subscribed
+     * @return string
+     */
+    protected function render_subscribe_button(subscription $news, int $subscribed): string {
+        $outsubmit = '';
+        if ($subscribed == subscription::FULLY_SUBSCRIBED) {
+            $outsubmit .= '<input type="submit" name="submitunsubscribe" value="' .
+                get_string('unsubscribeshort', 'block_news') . '" />';
+        } else {
+            $outsubmit .= '<input type="submit" name="submitsubscribe" value="' .
+                get_string('subscribetonews', 'block_news') . '" />';
+        }
+
+        return $outsubmit;
+    }
+
+    /**
+     * Display subscribe options.
+     *
+     * @param subscription $news
+     * @param string $text Textual note
+     * @param int $subscribed
+     * @param bool $button True if subscribe/unsubscribe button should be shown
+     * @param bool $viewlink True if 'view subscribers' link should be shown
+     * @return string HTML code for this area
+     */
+    public function render_news_subscribe_options(subscription $news, string $text, int $subscribed, bool $button,
+        bool $viewlink): string {
+
+        $out = '<div class="forumng-subscribe-options forumng-subscribe-options' . $subscribed .
+            '"><div class="forumng-subscribe-details">' .
+            '<h3>' . get_string('subscription', 'block_news') . '</h3>' .
+            '<p>' . $text . '</p>';
+        $out .= '</div>';
+        if ($button) {
+            $outsubmit = $this->render_subscribe_button($news, $subscribed);
+
+            $out .= '<form action="subscribe.php" method="post"><div>' .
+                $news->get_link_params(subscription::PARAM_FORM) .
+                '<input type="hidden" name="back" value="view" />' .
+                $outsubmit . '</div></form>';
+        }
+
+        $out .= '</div>';
+        return $out;
+    }
+
+    /**
+     * Display view subscriber button.
+     *
+     * @param subscription $news
+     * @return string HTML code for this area
+     */
+    public function render_view_subscriber(subscription $news): string {
+        $outsubmit = '<input type="submit" value="' .
+            get_string('viewsubscribers', 'block_news') . '" />';
+        $form = '<form action="subscribers.php" method="get"><div>' .
+            $news->get_link_params(subscription::PARAM_FORM) .
+            $outsubmit . '</div>'. '</form>';
+        $out = '<div class="block-news-features">'
+            .$form
+            .'</div>';
+        return $out;
+    }
+
+    /**
+     * Return HTML for the bottom section of a news block page (all.php/message.php)
+     *
+     * @param subscription $news
+     * @return string
+     * @throws coding_exception
+     */
+    public function render_news_subscribe_bottom(subscription $news): string {
+        return $news->display_subscribe_options();
+    }
+
 }

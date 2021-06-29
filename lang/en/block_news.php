@@ -30,6 +30,8 @@ if (!defined('MOODLE_INTERNAL')) {
 // General.
 $string['news:addinstance'] = 'Add a new news block';
 $string['news:myaddinstance'] = 'Add a new News block to Dashboard';
+$string['news:viewsubscribers'] = 'View subscribers';
+$string['news:managesubscriptions'] = 'Manage subscriptions';
 $string['pluginname'] = 'News';
 $string['defaultblocktitle'] = '(new News block)';
 $string['newsandeventsblocktitle'] = 'News and events';
@@ -40,7 +42,34 @@ $string['confirmdeletion'] = 'Confirm deletion of \'{$a}\'?';
 $string['dateformat'] = '%d %b %Y'; // See http://php.net/manual/en/function.strftime.php.
 $string['dateformatlong'] = '%d %b %Y %H:%M';
 $string['new'] = 'new';
+$string['attachments'] = 'Attachments';
+$string['attachment'] = 'Attachment';
+$string['donotmailafter'] = 'Do not mail after (hours)';
+$string['configdonotmailafter'] = 'To prevent causing a mail flood if the server cron does not run
+for a time, the news will not send out emails for messages that are older than this many hours.';
+$string['cronlimit'] = 'Time limit for normal email sending';
+$string['cronlimit_desc'] = 'Amount of time spent per scheduled task run for sending out normal emails. After this time limit, sending will resume the next time the task runs.';
+$string['replytouser'] = 'Use email address in reply';
+$string['configreplytouser'] = 'When a message is mailed out, should it contain the user\'s
+email address so that recipients can reply personally? Even if set to
+\'Yes\' users can choose in their profile to keep their email address secret.';
 $string['subscribe'] = 'Subscribe';
+$string['subscribers'] = 'Subscribers';
+$string['newssubscription'] = 'News subscription';
+$string['subscribetonews'] = 'Subscribe to news';
+$string['subscribetonews'] = 'Subscribe to news';
+$string['unsubscribeshort'] = 'Unsubscribe';
+$string['unsubscribe'] = 'Unsubscribe from this news';
+$string['subscription'] = 'Email subscription';
+$string['subscription_help'] = 'You receive messages from this news feed via email to {$a}.';
+$string['subscribe_already'] = 'You are already subscribed.';
+$string['unsubscribe_already'] = 'You are already unsubscribed.';
+$string['subscribe_confirm'] = 'You have been subscribed.';
+$string['unsubscribe_confirm'] = 'You have been unsubscribed.';
+$string['error_subscribeparams'] = 'Parameters incorrect';
+$string['unsubscription_help'] = 'You do not currently receive messages from this news feed by email. If you would like to, click ‘Subscribe to news’.';
+$string['blocknewssubscriptions'] = 'Subscriptions';
+$string['privacy:metadata:preference:newsmailformat'] = 'Handle news email type';
 $string['newsitem'] = 'News item';
 $string['event'] = 'Event';
 $string['messagetype'] = 'Type';
@@ -55,8 +84,15 @@ $string['pasteventsheading'] = 'Past events';
 $string['nonewsyet'] = 'No news messages have been posted to this website.';
 $string['noeventsyet'] = 'There are no upcoming events to display.';
 $string['nopastevents'] = 'There are no past events to display';
+$string['nosubscribers'] = 'There are no subscribers yet for this news block.';
 $string['news'] = 'News';
 $string['events'] = 'Events';
+$string['confirmbulkunsubscribe'] = 'Are you sure you want to unsubscribe the users in the list
+below? (This cannot be undone.)';
+$string['unsubscribeselected'] = 'Unsubscribe selected users';
+$string['unsubscribe_nopermission'] = 'You do not have permission to unsubscribe other users.';
+$string['viewsubscribers'] = 'View subscribers';
+
 
 // Error messages.
 $string['erroremptymessage'] = 'Missing entry';
@@ -148,6 +184,8 @@ $string['rendereventnext'] = 'Next (listed) event';
 $string['rendereventprev'] = 'Previous (listed) event';
 $string['rendermsgview'] = '(View)';
 $string['rendermsgextlink'] = 'View original message';
+$string['rss'] = 'RSS';
+
 
 // Event render.
 $string['fulleventdate'] = '{$a->start} to {$a->end}';
@@ -168,6 +206,8 @@ $string['eventmessage_deleted'] = 'Deleted news message';
 
 // Scheduled tasks.
 $string['process_feeds_task'] = 'Refresh News block feeds';
+$string['process_news_email'] = 'News email sending job';
+
 
 // Global search.
 $string['search:news_message'] = 'News messages';
@@ -195,3 +235,8 @@ $string['privacy_you'] = 'You';
 $string['privacy_somebodyelse'] = 'Somebody else';
 
 $string['feed_url_mask'] = 'Replace the OUCU in certain feed URLs with an OUCU from appropriate mapping table';
+// News subscriptions.
+$string['eventsubscription_created'] = 'Subscribe to news';
+$string['eventsubscription_deleted'] = 'Unsubscribe to news';
+$string['eventsubscribe_log'] = 'The user with id {$a->userid} subscribe to news with id {$a->objectid}.';
+$string['eventunsubscribe_log'] = 'The user with id {$a->userid} unsubscribe to news with id {$a->objectid}.';

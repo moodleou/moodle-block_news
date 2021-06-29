@@ -40,6 +40,9 @@ class backup_news_block_structure_step extends backup_block_structure_step {
     protected function define_structure() {
         global $DB;
 
+        // To know if we are including userinfo.
+        $userinfo = $this->get_setting_value('userinfo');
+
         // Get the block.
         $block = $DB->get_record('block_instances', array('id' => $this->task->get_blockid()));
 
@@ -69,6 +72,11 @@ class backup_news_block_structure_step extends backup_block_structure_step {
         $feed = new backup_nested_element('feed', array('id'), array(
             'blockinstanceid', 'feedurl', 'currenthash', 'feedupdated', 'feederror'));
 
+        $subscriptions = new backup_nested_element('subscriptions');
+
+        $subscription = new backup_nested_element('subscription', ['id'], ['userid', 'subscribed',
+            'blockinstanceid']);
+
         // Define tree.
         $news->add_child($instance);
 
@@ -80,6 +88,9 @@ class backup_news_block_structure_step extends backup_block_structure_step {
 
         $news->add_child($feeds);
         $feeds->add_child($feed);
+
+        $news->add_child($subscriptions);
+        $subscriptions->add_child($subscription);
 
         // Define sources.
         $news->set_source_array(array((object)array('id' => $this->task->get_blockid())));
@@ -104,6 +115,13 @@ class backup_news_block_structure_step extends backup_block_structure_step {
                 FROM {block_news_feeds}
             WHERE blockinstanceid = ?", array(backup::VAR_PARENTID));
 
+        if ($userinfo) {
+            $subscription->set_source_sql("
+            SELECT *
+              FROM {block_news_subscriptions}
+             WHERE blockinstanceid = ?", [backup::VAR_PARENTID]);
+        }
+
         // Annotations.
         $message->annotate_ids('user', 'userid');
         $messagegroup->annotate_ids('group', 'groupid');
@@ -111,6 +129,9 @@ class backup_news_block_structure_step extends backup_block_structure_step {
         // Define file annotations.
         $message->annotate_files('block_news', 'attachment', 'id');
         $message->annotate_files('block_news', 'message', 'id');
+
+        // Subscriptions.
+        $subscription->annotate_ids('user', 'userid');
 
         // Return the root element (rss_client), wrapped into standard block structure.
         return $this->prepare_block_structure($news);

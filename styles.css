@@ -258,3 +258,7 @@
         width: 100%;
     }
 }
+
+body#page-blocks-news-subscribers #region-main form {
+    margin-bottom: 14px;
+}

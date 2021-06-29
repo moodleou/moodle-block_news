@@ -74,6 +74,13 @@ class provider implements
                 'imagedescnotnecessary' => 'privacy:metadata:block_news_messages:imagedescnotnecessary'
         ], 'privacy:metadata:block_news_messages');
         $collection->link_subsystem('core_files', 'privacy:metadata:core_files');
+
+        // The block_news_subscriptions table store which forum user is subscribed to by email.
+        $collection->add_database_table('block_news_subscriptions', [
+            'userid' => 'privacy:metadata:block_news_subscriptions:userid',
+            'subscribed' => 'privacy:metadata:block_news_subscriptions:subscribed',
+        ], 'privacy:metadata:block_news_subscriptions');
+
         return $collection;
     }
 
@@ -105,7 +112,14 @@ class provider implements
                   FROM {context} ctx
                   JOIN {block_news_messages} m ON m.blockinstanceid = ctx.instanceid
                  WHERE ctx.contextlevel = :contextlevel AND m.userid = :userid";
+        $contextlist->add_from_sql($sql, ['subuserid' => $userid, 'userid' => $userid, 'contextlevel' => CONTEXT_BLOCK]);
+
+        $sql = "SELECT DISTINCT ctx.id
+                  FROM {context} ctx
+                  JOIN {block_news_subscriptions} sub ON sub.blockinstanceid = ctx.instanceid
+                 WHERE ctx.contextlevel = :contextlevel AND sub.userid = :userid";
         $contextlist->add_from_sql($sql, ['userid' => $userid, 'contextlevel' => CONTEXT_BLOCK]);
+
         return $contextlist;
     }
 
@@ -167,9 +181,44 @@ class provider implements
                 writer::with_context($context)->export_area_files([], 'block_news', 'messageimage', $record->id);
             }
 
+            static::export_block_news_subscription_data($user, $context);
             writer::with_context($context)->export_data([], $contextdata);
             $recordset->close();
         }
+    }
+
+    /**
+     * Store all information about all subscription that we have detected this user to have access to in block news.
+     *
+     * @param \stdClass $user Object representing current user being considered
+     * @param \context_block $context The instance of the block news context.
+     *
+     * @return void
+     */
+    protected static function export_block_news_subscription_data($user, \context_block $context) {
+        global $DB;
+        $sql = "SELECT *
+                  FROM {block_news_subscriptions}
+                 WHERE userid = :userid
+                       AND blockinstanceid = :blockinstanceid";
+        $params = [
+            'userid' => $user->id,
+            'blockinstanceid' => $context->instanceid,
+        ];
+        $subscriptions = $DB->get_recordset_sql($sql, $params);
+        if ($subscriptions) {
+            foreach ($subscriptions as $subscription) {
+                $subscriptiondata = (object) [
+                    'userid' => self::you_or_somebody_else($subscription->userid, $user),
+                    'subscribed' => transform::yesno($subscription->subscribed),
+                ];
+                // Store the block news subscription.
+                $area = get_string('blocknewssubscriptions', 'block_news') . '-' . $subscription->id;
+                writer::with_context($context)->export_data(
+                    [$area], $subscriptiondata);
+            }
+        }
+        $subscriptions->close();
     }
 
     /**
@@ -208,6 +257,15 @@ class provider implements
                 'component' => 'block_news'
         ];
         $DB->execute($sqlfile, array_merge($paramfile, $params));
+
+        // Delete subscriptions.
+        $sql = "DELETE
+                  FROM {block_news_subscriptions}
+                 WHERE blockinstanceid = :instanceid";
+        $param = [
+            'instanceid' => $context->instanceid
+        ];
+        $DB->execute($sql, $param);
     }
 
     /**
@@ -230,6 +288,16 @@ class provider implements
             $param = [
                     'instanceid' => $context->instanceid,
                     'adminid'    => get_admin()->id,
+                    'userid'     => $userid
+            ];
+            $DB->execute($sql, $param);
+
+            // Delete subscriptions by user id.
+            $sql = "DELETE
+                      FROM {block_news_subscriptions}
+                     WHERE blockinstanceid = :instanceid AND userid = :userid";
+            $param = [
+                    'instanceid' => $context->instanceid,
                     'userid'     => $userid
             ];
             $DB->execute($sql, $param);
@@ -271,7 +339,14 @@ class provider implements
                   FROM {block_instances} bi
                   JOIN {block_news_messages} bnm ON bnm.blockinstanceid = bi.id
                  WHERE bi.id = :instanceid AND bi.blockname = :blockname";
+        $userlist->add_from_sql('userid', $sql, $params);
 
+        // Get list of users for "block_news_subscriptions" table.
+        $sql = "SELECT sub.userid
+                  FROM {block_instances} bi
+                  JOIN {block_news_subscriptions} sub ON sub.blockinstanceid = bi.id
+                 WHERE bi.id = :instanceid
+                       AND bi.blockname = :blockname";
         $userlist->add_from_sql('userid', $sql, $params);
     }
 
@@ -310,6 +385,12 @@ class provider implements
                     'contextid' => $context->id
             ];
             $DB->execute($sqlfile, array_merge($paramfile, $params, $userinparams));
+
+            // Delete subscriptions.
+            $sql = "DELETE
+                      FROM {block_news_subscriptions}
+                     WHERE blockinstanceid = :instanceid AND userid {$userinsql}";
+            $DB->execute($sql, array_merge(['instanceid' => $context->instanceid], $userinparams));
         }
     }
 

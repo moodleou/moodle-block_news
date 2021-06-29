@@ -43,6 +43,7 @@ class restore_news_block_structure_step extends restore_structure_step {
         $paths[] = new restore_path_element('news_message', '/block/news/messages/message');
         $paths[] = new restore_path_element('news_message_group', '/block/news/messages/message/messagegroups/messagegroup');
         $paths[] = new restore_path_element('news_feed', '/block/news/feeds/feed');
+        $paths[] = new restore_path_element('news_subscription', '/block/news/subscriptions/subscription');
 
         return $paths;
     }
@@ -160,5 +161,35 @@ class restore_news_block_structure_step extends restore_structure_step {
             }
         }
 
+    }
+
+    /**
+     * Process news subscription data.
+     *
+     * @param array $data parsed element data
+     */
+    protected function process_news_subscription($data): void {
+        global $DB;
+
+        $data = (object)$data;
+
+        $data->blockinstanceid = $this->task->get_blockid();
+        $data->userid = $this->get_mappingid_or_null('user', $data->userid);
+
+        $DB->insert_record('block_news_subscriptions', $data);
+    }
+
+    /**
+     * Get mapping id or null.
+     *
+     * @param string $type field identifier
+     * @param int $oldid the old id of that field
+     * @return mixed
+     */
+    private function get_mappingid_or_null(string $type, int $oldid) {
+        if ($oldid === null) {
+            return null;
+        }
+        return $this->get_mappingid($type, $oldid);
     }
 }

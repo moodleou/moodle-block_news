@@ -14,34 +14,33 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace block_news\event;
+
 /**
- * Definition of scheduled tasks.
+ * Event generated when unsubscription to news.
  *
  * @package block_news
- * @category task
- * @copyright 2015 The Open University
+ * @copyright 2021 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+class subscription_deleted extends \core\event\base {
+    protected function init() {
+        $this->data['crud'] = 'd';
+        $this->data['edulevel'] = self::LEVEL_OTHER;
+        $this->data['objecttable'] = 'block_instances';
+    }
 
-defined('MOODLE_INTERNAL') || die();
+    public static function get_name() {
+        return get_string('eventsubscription_deleted', 'block_news');
+    }
 
-$tasks = array(
-    array(
-        'classname' => 'block_news\task\process_feeds',
-        'blocking' => 0,
-        'minute' => '*/10',
-        'hour' => '*',
-        'day' => '*',
-        'dayofweek' => '*',
-        'month' => '*'
-    ),
-    [
-        'classname' => 'block_news\task\news_email',
-        'blocking' => 0,
-        'minute' => '*/10',
-        'hour' => '*',
-        'day' => '*',
-        'month' => '*',
-        'dayofweek' => '*'
-    ],
-);
+    public function get_description() {
+        return get_string('eventunsubscribe_log', 'block_news',
+            (object) ['userid' => $this->userid, 'objectid' => $this->objectid]);
+    }
+
+    public function get_url() {
+        return new \moodle_url('/blocks/news/all.php', ['bi' => $this->objectid]);
+    }
+
+}

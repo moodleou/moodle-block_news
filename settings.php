@@ -74,5 +74,13 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('block_news/block_news_hideauthor',
            get_string('settingshideauthor', 'block_news'),
            get_string('settingshideauthor_info', 'block_news'), 0));
+
+    $settings->add(new admin_setting_configtext('news_donotmailafter',
+        get_string('donotmailafter', 'block_news'),
+        get_string('configdonotmailafter', 'block_news'), 48, PARAM_INT));
+
+    $settings->add(new admin_setting_configduration('block_news/cronlimit',
+        get_string('cronlimit', 'block_news'),
+        get_string('cronlimit_desc', 'block_news'), 10 * 60));
 }
 

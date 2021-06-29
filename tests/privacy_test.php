@@ -65,6 +65,7 @@ class block_news_privacy_testcase extends provider_testcase {
         $course2 = $dg->create_course();
         $this->users[1] = $dg->create_user();
         $this->users[2] = $dg->create_user();
+        $this->users[3] = $dg->create_user();
         // Create 2 news blocks for one course and 1 for the other.
         $this->blocks[1] = $this->generator->create_instance([], ['courseid' => $course1->id]);
         $this->blocks[2] = $this->generator->create_instance([], ['courseid' => $course1->id]);
@@ -91,6 +92,10 @@ class block_news_privacy_testcase extends provider_testcase {
         $message2->userid = $this->users[1]->id;
         $this->messages[2] = $this->generator->create_block_new_message($this->blocks[2], $message2);
 
+        // User 1 subscribe a block message.
+        $DB->insert_record('block_news_subscriptions', ['blockinstanceid' => $this->blocks[3]->id,
+                'userid' => $this->users[1]->id, 'subscribed' => '1']);
+
         // Create 2 news messages in news blocks by User 2.
         $message3 = new \stdClass();
         $message3->title = 'Message No3';
@@ -105,23 +110,33 @@ class block_news_privacy_testcase extends provider_testcase {
         $message4->userid = $this->users[2]->id;
         $this->messages[4] = $this->generator->create_block_new_message($this->blocks[3], $message4);
         $DB->insert_record('block_news_message_groups', ['groupid' => 2, 'messageid' => $this->messages[4]]);
+
+        // User 3 subscribe a block message.
+        $DB->insert_record('block_news_subscriptions', ['blockinstanceid' => $this->blocks[3]->id,
+                'userid' => $this->users[3]->id, 'subscribed' => '1']);
     }
     /**
      * Test get_contexts_for_userid().
      */
     public function test_get_contexts_for_userid() {
         $contextids = provider::get_contexts_for_userid($this->users[1]->id)->get_contextids();
-        $this->assertCount(2, $contextids);
+        $this->assertCount(3, $contextids);
         $this->assertTrue(in_array($this->bctxs[1]->id, $contextids));
         $this->assertTrue(in_array($this->bctxs[2]->id, $contextids));
+        $this->assertTrue(in_array($this->bctxs[3]->id, $contextids));
+
+        $contextids = provider::get_contexts_for_userid($this->users[3]->id)->get_contextids();
+        $this->assertCount(1, $contextids);
+        $this->assertTrue(in_array($this->bctxs[3]->id, $contextids));
     }
 
     /**
      * Test for export_user_data().
      */
     public function test_export_data_for_user() {
+        global $DB;
         $appctx = new approved_contextlist($this->users[1], 'block_news',
-                [$this->bctxs[1]->id, $this->bctxs[2]->id]);
+                [$this->bctxs[1]->id, $this->bctxs[2]->id, $this->bctxs[3]->id]);
         provider::export_user_data($appctx);
         // Export data.
 
@@ -139,6 +154,27 @@ class block_news_privacy_testcase extends provider_testcase {
         // Second page has a attachment upload by this user.
         $files = writer::with_context($this->bctxs[1])->get_files([]);
         $this->assertEquals(['kitten1.jpg'], array_keys($files));
+
+        // Test export for user 1 with subscription data.
+        $sub = $DB->get_record('block_news_subscriptions', ['blockinstanceid' => $this->blocks[3]->id,
+                'userid' => $this->users[1]->id]);
+        $this->assertEquals((object)[
+                'userid' => get_string('privacy_you', 'block_news'),
+                'subscribed' => \core_privacy\local\request\transform::yesno(1),
+        ], writer::with_context($this->bctxs[3])->get_data([get_string('blocknewssubscriptions', 'block_news')
+                . '-' . $sub->id]));
+
+        // Test export for user 3 with subscription data.
+        $appctx1 = new approved_contextlist($this->users[3], 'block_news',
+                [$this->bctxs[3]->id]);
+        provider::export_user_data($appctx1);
+        $sub = $DB->get_record('block_news_subscriptions', ['blockinstanceid' => $this->blocks[3]->id,
+                'userid' => $this->users[3]->id]);
+        $this->assertEquals((object)[
+                'userid' => get_string('privacy_you', 'block_news'),
+                'subscribed' => \core_privacy\local\request\transform::yesno(1),
+        ], writer::with_context($this->bctxs[3])->get_data([get_string('blocknewssubscriptions', 'block_news')
+                . '-' . $sub->id]));
     }
 
     /**
@@ -156,6 +192,13 @@ class block_news_privacy_testcase extends provider_testcase {
         // Userid field in records not in given context were not changed.
         $record = $DB->get_record('block_news_messages', ['blockinstanceid' => $this->bctxs[3]->instanceid]);
         $this->assertEquals($this->users[2]->id, $record->userid);
+
+        // Test delete all subscription.
+        $records = $DB->get_records('block_news_subscriptions', ['blockinstanceid' => $this->bctxs[3]->instanceid]);
+        $this->assertCount(2, $records);
+        provider::delete_data_for_all_users_in_context($this->bctxs[3]);
+        $records = $DB->get_records('block_news_subscriptions', ['blockinstanceid' => $this->bctxs[3]->instanceid]);
+        $this->assertCount(0, $records);
     }
 
     /**
@@ -174,6 +217,13 @@ class block_news_privacy_testcase extends provider_testcase {
         $this->assertCount(1, $records);
         $records = $DB->get_records('block_news_messages',
                 ['blockinstanceid' => $this->bctxs[1]->instanceid, 'userid' => get_admin()->id]);
+        $this->assertCount(1, $records);
+
+        // Test delete data for user 3.
+        $appctx1 = new approved_contextlist($this->users[3], 'block_news',
+                [$this->bctxs[3]->id]);
+        provider::delete_data_for_user($appctx1);
+        $records = $DB->get_records('block_news_subscriptions', ['blockinstanceid' => $this->bctxs[3]->instanceid]);
         $this->assertCount(1, $records);
     }
 
@@ -203,8 +253,10 @@ class block_news_privacy_testcase extends provider_testcase {
         // Check third block news.
         provider::get_users_in_context($userlist3);
         $userids = $userlist3->get_userids();
-        $this->assertCount(1, $userids);
+        $this->assertCount(3, $userids);
+        $this->assertContains($this->users[1]->id, $userids);
         $this->assertContains($this->users[2]->id, $userids);
+        $this->assertContains($this->users[3]->id, $userids);
     }
 
     /**
@@ -232,5 +284,10 @@ class block_news_privacy_testcase extends provider_testcase {
         $bnm = $DB->get_records('block_news_messages', ['blockinstanceid' => $this->bctxs[2]->instanceid]);
         $this->assertCount(1, $bnm);
         $this->assertArrayHasKey($this->messages[2], $bnm);
+
+        $approvedlist = new \core_privacy\local\request\approved_userlist($this->bctxs[3], $component, $approveduserids);
+        provider::delete_data_for_users($approvedlist);
+        $records = $DB->get_records('block_news_subscriptions', ['blockinstanceid' => $this->bctxs[3]->instanceid]);
+        $this->assertCount(1, $records);
     }
 }

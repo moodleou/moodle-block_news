@@ -58,7 +58,7 @@ function xmldb_block_news_upgrade($oldversion) {
         // Changing type of field link on table block_news_messages to text.
         $table = new xmldb_table('block_news_messages');
         $field = new xmldb_field('link', XMLDB_TYPE_TEXT, 'small', null, null,
-                                                                    null, null, 'title');
+            null, null, 'title');
 
         // Launch change of type for field link.
         $dbman->change_field_type($table, $field);
@@ -85,7 +85,7 @@ function xmldb_block_news_upgrade($oldversion) {
         // Changing precision of field title on table block_news_feeds to (80).
         $table = new xmldb_table('block_news');
         $field = new xmldb_field('title', XMLDB_TYPE_CHAR, '80', null, null, null, null,
-                        'blockinstanceid');
+            'blockinstanceid');
 
         // Launch change of precision for field title.
         $dbman->change_field_precision($table, $field);
@@ -116,7 +116,7 @@ function xmldb_block_news_upgrade($oldversion) {
         // The title field is inconsistent in length and not-null state.
         $table = new xmldb_table('block_news');
         $field = new xmldb_field('title', XMLDB_TYPE_CHAR, '80', null, XMLDB_NOTNULL, null, null,
-                'blockinstanceid');
+            'blockinstanceid');
 
         // Set length and not null to match expected.
         $dbman->change_field_precision($table, $field);
@@ -317,6 +317,43 @@ function xmldb_block_news_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2020110600, 'news');
     }
 
+    if ($oldversion < 2021080506) {
+        // Define table block_news_subscriptions to be created.
+        $table = new xmldb_table('block_news_subscriptions');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('blockinstanceid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('subscribed', XMLDB_TYPE_CHAR, '1', null, null, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('userid', XMLDB_KEY_FOREIGN, array('userid'), 'user', array('id'));
+        $table->add_key('blockinstanceid', XMLDB_KEY_FOREIGN, array('blockinstanceid'), 'block_news', array('blockinstanceid'));
+        $table->add_key('uq_subscription', XMLDB_KEY_UNIQUE, ['blockinstanceid, userid']);
+
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        $table = new xmldb_table('block_news_messages');
+        $field = new xmldb_field('mailstate', XMLDB_TYPE_INTEGER, 1, null, true, null, 0, 'currenthash');
+
+        // Conditionally launch add field mailstate.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define index mailstate (not unique) to be added to news.
+        $index = new xmldb_index('mailstate', XMLDB_INDEX_NOTUNIQUE,
+            array('mailstate'));
+
+        // Conditionally launch add index mailstate.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // News savepoint reached.
+        upgrade_block_savepoint(true, 2021080506, 'news');
+    }
     return $result;
 
 }
