@@ -14,17 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace block_news;
+
 /**
- * Version details.
+ * Implementation of data masking for this plugin.
  *
  * @package block_news
- * @copyright 2015 The Open University
+ * @copyright 2021 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-defined('MOODLE_INTERNAL') || die();
-
-$plugin->version = 2021071300;
-$plugin->requires = 2013111801.00;
-$plugin->outestssufficient = true;
-$plugin->component = 'block_news';
+class tool_datamasking implements \tool_datamasking\plugin {
+    public function build_plan(\tool_datamasking\plan $plan): void {
+        $plan->table('block_news_feeds')->add((new feed_url_mask())->set_negative_tags(
+                [\tool_datamasking\tool_datamasking::TAG_SKIP_ID_MAPPING]));
+    }
+}

@@ -193,3 +193,5 @@ $string['privacy:metadata:block_news_messages:imagedescnotnecessary'] = 'Image d
 $string['privacy:metadata:core_files'] = 'Files attached to news message';
 $string['privacy_you'] = 'You';
 $string['privacy_somebodyelse'] = 'Somebody else';
+
+$string['feed_url_mask'] = 'Replace the OUCU in certain feed URLs with an OUCU from appropriate mapping table';
