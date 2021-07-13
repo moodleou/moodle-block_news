@@ -720,7 +720,13 @@ class system {
             if ($this->username) {
                 $username = $this->username;
             } else {
-                ['oucu' => $username] = \local_oudataload\users::get_oucu_and_cdcid_as_array($USER);
+                $useridentifiers = \local_oudataload\users::get_oucu_and_cdcid_as_array($USER, true);
+                if (array_key_exists('oucu', $useridentifiers)) {
+                    $username = $useridentifiers['oucu'];
+                } else {
+                    // Fall back to actual username for test servers.
+                    $username = $USER->username;
+                }
             }
             $feedurl .= '&username=' . $username;
         } else {
@@ -1250,7 +1256,10 @@ class system {
         // Block news use group restriction, return false if not pass userid, courseid.
         if (($bns->get_groupingsupport() == $bns::RESTRICTBYGROUP && empty($groupingids))) {
             if ($username) {
-                $user = \local_oudataload\users::get_user_by_oucu($username);
+                $user = \local_oudataload\users::get_user_by_oucu($username, true);
+                if (!$user) {
+                    $user = $DB->get_record('user', ['username' => $username], 'id', MUST_EXIST);
+                }
                 $userid = $user->id;
                 $bni = $DB->get_record('block_instances', array('id' => $blockinstanceid));
                 $context = \context::instance_by_id($bni->parentcontextid);
