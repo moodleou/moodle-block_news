@@ -66,8 +66,10 @@ class system {
 
 
     public static function get_message_sql_start() {
+        $userfieldsapi = \core_user\fields::for_name();
+        $userfieldsmod = $userfieldsapi->get_sql('u', false, 'u_', '', false)->selects;
         return "SELECT DISTINCT m.*, u.id AS u_id, " .
-                get_all_user_name_fields(true, 'u', null, 'u_') .
+                $userfieldsmod .
                 " FROM {block_news_messages} m
              LEFT JOIN {user} u ON m.userid = u.id
              LEFT JOIN {block_news_message_groups} g ON m.id = g.messageid ";
