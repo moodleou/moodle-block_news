@@ -41,7 +41,7 @@ class backup_news_block_structure_step extends backup_block_structure_step {
         global $DB;
 
         // To know if we are including userinfo.
-        $userinfo = $this->get_setting_value('userinfo');
+        $userinfo = $this->get_setting_value('users');
 
         // Get the block.
         $block = $DB->get_record('block_instances', array('id' => $this->task->get_blockid()));
