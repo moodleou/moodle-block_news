@@ -135,10 +135,14 @@ class short_message extends renderable_message implements \templatable {
             $this->eventmonth = strftime('%b', $this->eventstart);
             $this->eventdatetime = strftime($this->eventdatetimeformat, $this->eventstart);
         } else {
-            $this->thumbwidth = $this->thumbinfo['width'];
-            $this->thumbheight = $this->thumbinfo['height'];
-            $this->imagewidth = $this->imageinfo['width'];
-            $this->imageheight = $this->imageinfo['height'];
+            if (isset($this->thumbinfo)) {
+                $this->thumbwidth = $this->thumbinfo['width'];
+                $this->thumbheight = $this->thumbinfo['height'];
+            }
+            if (isset($this->imageinfo)) {
+                $this->imagewidth = $this->imageinfo['width'];
+                $this->imageheight = $this->imageinfo['height'];
+            }
         }
         $this->formattedmessage = format_text($this->message, $this->messageformat);
         $this->export_actions_for_template($output);

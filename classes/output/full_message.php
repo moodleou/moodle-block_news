@@ -189,8 +189,10 @@ class full_message extends renderable_message implements \templatable {
             $fullprevlabel = 'rendereventprev';
         } else {
             $this->isnews = true;
-            $this->imagewidth = $this->imageinfo['width'];
-            $this->imageheight = $this->imageinfo['height'];
+            if (isset($this->imageinfo)) {
+                $this->imagewidth = $this->imageinfo['width'];
+                $this->imageheight = $this->imageinfo['height'];
+            }
             $fullnextlabel = 'rendermsgnext';
             $fullprevlabel = 'rendermsgprev';
         }
