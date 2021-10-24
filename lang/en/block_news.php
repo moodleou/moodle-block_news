@@ -230,6 +230,11 @@ $string['privacy:metadata:block_news_messages:eventstart'] = 'Date start of even
 $string['privacy:metadata:block_news_messages:eventlocation'] = 'Event location';
 $string['privacy:metadata:block_news_messages:imagedesc'] = 'Image description';
 $string['privacy:metadata:block_news_messages:imagedescnotnecessary'] = 'Image description is not necessary';
+$string['privacy:metadata:block_news_subscriptions'] = 'Information about the subscriptions for each news block.';
+$string['privacy:metadata:block_news_subscriptions:userid'] = 'User ID';
+$string['privacy:metadata:block_news_subscriptions:subscribed'] =
+    'This field is usually 1. It indicates that the user has chosen to subscribe to the news. In the case of initial-subscription news it may be 0, indicating that the user has chosen to unsubscribe. (If the user has not changed the default state, there would be no row for them in this table.)';
+
 $string['privacy:metadata:core_files'] = 'Files attached to news message';
 $string['privacy_you'] = 'You';
 $string['privacy_somebodyelse'] = 'Somebody else';
