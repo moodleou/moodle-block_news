@@ -102,7 +102,7 @@ class external extends \external_api {
                 'viewlink' => new \external_value(PARAM_URL, 'Internal link to full message', VALUE_OPTIONAL),
                 'link' => new \external_value(PARAM_URL, 'External link to story from a feed', VALUE_OPTIONAL),
                 'classes' => new \external_value(PARAM_TEXT, 'Extra CSS classes', VALUE_OPTIONAL, ''),
-                'groupindication' => new \external_value(PARAM_TEXT, 'Details of group-specific visibility', VALUE_OPTIONAL),
+                'groupindication' => new \external_value(PARAM_RAW, 'Details of group-specific visibility', VALUE_OPTIONAL),
                 'hasattachments' => new \external_value(PARAM_BOOL, 'Does the message include attachments?', VALUE_OPTIONAL, false),
                 'attachments' => new \external_multiple_structure(
                     new \external_single_structure([
