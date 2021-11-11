@@ -14,16 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Data provider tests.
- *
- * @package block_news
- * @copyright 2018 The Open University
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-defined('MOODLE_INTERNAL') || die();
-global $CFG;
+namespace block_news;
 
 use core_privacy\tests\provider_testcase;
 use core_privacy\local\request\approved_contextlist;
@@ -37,7 +28,7 @@ use block_news\privacy\provider;
  * @copyright 2018 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class block_news_privacy_testcase extends provider_testcase {
+class privacy_test extends provider_testcase {
 
     /** @var array */
     protected $users = [];
@@ -47,14 +38,14 @@ class block_news_privacy_testcase extends provider_testcase {
     protected $messages = [];
     /** @var array */
     protected $blocks = [];
-    /** @var stdClass */
+    /** @var \stdClass */
     protected $generator;
 
     /**
      * Set up for each test.
      *
-     * @throws coding_exception
-     * @throws dml_exception
+     * @throws \coding_exception
+     * @throws \dml_exception
      */
     public function setUp(): void {
         global $DB;
@@ -72,9 +63,9 @@ class block_news_privacy_testcase extends provider_testcase {
         $this->blocks[3] = $this->generator->create_instance([], ['courseid' => $course2->id]);
 
         $this->bctxs = [
-                1 => context_block::instance($this->blocks[1]->id),
-                2 => context_block::instance($this->blocks[2]->id),
-                3 => context_block::instance($this->blocks[3]->id)
+                1 => \context_block::instance($this->blocks[1]->id),
+                2 => \context_block::instance($this->blocks[2]->id),
+                3 => \context_block::instance($this->blocks[3]->id)
         ];
 
         // Create 2 news messages in news blocks by User 1.
@@ -241,29 +232,29 @@ class block_news_privacy_testcase extends provider_testcase {
         provider::get_users_in_context($userlist1);
         $userids = $userlist1->get_userids();
         $this->assertCount(2, $userids);
-        $this->assertContains($this->users[1]->id, $userids);
-        $this->assertContains($this->users[2]->id, $userids);
+        $this->assertTrue(in_array($this->users[1]->id, $userids));
+        $this->assertTrue(in_array($this->users[2]->id, $userids));
 
         // Check second block news.
         provider::get_users_in_context($userlist2);
         $userids = $userlist2->get_userids();
         $this->assertCount(1, $userids);
-        $this->assertContains($this->users[1]->id, $userids);
+        $this->assertTrue(in_array($this->users[1]->id, $userids));
 
         // Check third block news.
         provider::get_users_in_context($userlist3);
         $userids = $userlist3->get_userids();
         $this->assertCount(3, $userids);
-        $this->assertContains($this->users[1]->id, $userids);
-        $this->assertContains($this->users[2]->id, $userids);
-        $this->assertContains($this->users[3]->id, $userids);
+        $this->assertTrue(in_array($this->users[1]->id, $userids));
+        $this->assertTrue(in_array($this->users[2]->id, $userids));
+        $this->assertTrue(in_array($this->users[3]->id, $userids));
     }
 
     /**
      * Test update data for multiple users in context.
      *
-     * @throws coding_exception
-     * @throws dml_exception
+     * @throws \coding_exception
+     * @throws \dml_exception
      */
     public function test_delete_data_for_users() {
         global $DB;
