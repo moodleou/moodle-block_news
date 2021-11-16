@@ -62,10 +62,10 @@ class block_news_renderer extends plugin_renderer_base {
      * @param string $title Page title
      * @param boolean $showfeed Show the subscribe to RSS feed link?
      * @param boolean $canmanage User can add message?
-     * @param subscription news News This variable is only used in theme OSEP renderer
+     * @param subscription $news News This variable is only used in theme OSEP renderer
      * @return string
      */
-    public function render_message_page_header($bns, $title, $showfeed, $canmanage, $news): string {
+    public function render_message_page_header($bns, $title, $showfeed, $canmanage, $news = null): string {
         $head = $this->render_message_page_title($title);
         if ($showfeed || $canmanage) {
             $head .= $this->output->container_start('block_news_top');
