@@ -27,6 +27,7 @@ require_once('../../config.php');
 require_once('lib.php');
 
 $bi = required_param('bi', PARAM_INT);
+$unsubscribe = optional_param('unsubscribe', '', PARAM_RAW);
 
 $pageparams = ['bi' => $bi];
 
@@ -48,22 +49,25 @@ $title .= ': ' . get_string('viewsubscribers', 'block_news');
 $PAGE->set_title($csemod->cseshortname . ': ' . $title);
 $PAGE->set_heading($csemod->csefullname);
 $PAGE->navbar->add(get_string('subscribers', 'block_news'));
-$PAGE->requires->js_call_amd('block_news/manage_subscribe', 'manageSubscribe', [
-    'stringSelectall' => get_string('selectall'),
-    'stringDeselectall' => get_string('deselectall')
-]);
-
 
 $news = \block_news\subscription::get_from_bi($bi);
 $subscribers = $news->get_subscribers();
 $canmanage = $news->can_manage_subscriptions();
 
-if (optional_param('unsubscribe', '', PARAM_RAW)) {
+// Only need manage_subscribe.js if there are subscribers to manage and we're not on the confirm unsubscribe page.
+if ($canmanage && count($subscribers) > 0 && !$unsubscribe) {
+    $PAGE->requires->js_call_amd('block_news/manage_subscribe', 'manageSubscribe', [
+            'stringSelectall' => get_string('selectall'),
+            'stringDeselectall' => get_string('deselectall')
+    ]);
+}
+
+if ($unsubscribe) {
     if (!$canmanage) {
         throw new moodle_exception('unsubscribe_nopermission', 'block_news');
     }
     $confirmarray = ['bi' => $bi, 'confirmunsubscribe' => 1];
-    $list = '<ul>';
+    $list = '<ul class="block_news_unsubcribelist">';
     echo $OUTPUT->header();
     foreach (array_keys($_POST) as $key) {
         $matches = array();

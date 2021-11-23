@@ -26,31 +26,65 @@ Feature: News subscription
     And I log in as "teacher"
     And I am on "Course 1" course homepage
     And I follow "News"
-    Then I should see "Subscribe to news"
+    Then "View subscribers" "button" should be visible
     And I log out
     And I log in as "student"
     And I am on "Course 1" course homepage
     And I follow "News"
-    Then I should not see "Subscribe to news"
+    Then "View subscribers" "button" should not exist
 
   Scenario: Check user Subscribe and Unsubscribe
     And I log in as "teacher"
     And I am on "Course 1" course homepage
     And I follow "News"
     And I press "Subscribe to news"
-    Then I should see "Unsubscribe to news"
+    Then "Unsubscribe" "button" should be visible
     And I press "Unsubscribe"
     Then I should see "Subscribe to news"
 
   Scenario: Manage subscribers of news block
-    And I log in as "teacher"
-    And I am on "Course 1" course homepage
+    # Subscribe some users.
+    And I am on the "Course 1" course page logged in as "student"
     And I follow "News"
     And I press "Subscribe to news"
-    Then I should see "Unsubscribe to news"
+    Then "Unsubscribe" "button" should be visible
+    And I log out
+
+    And I am on the "Course 1" course page logged in as "teacher"
+    And I follow "News"
+    And I press "Subscribe to news"
+    Then "Unsubscribe" "button" should be visible
     And I press "View subscribers"
-    Then I should see "Teacher 1"
+    Then "Teacher 1" "table_row" should exist
+    And "Student 1" "table_row" should exist
+
+    # Try to unsubscribe but cancel.
     And I press "Select all"
-    And I click on "#block-news-subscription-list #block-news-buttons input:nth-last-child(3)" "css_element"
-    And I click on ".buttons .singlebutton:first-child button" "css_element"
-    Then I should see "There are no subscribers yet for this news."
+    And I press "Unsubscribe selected users"
+    Then I should see "Teacher 1" in the ".block_news_unsubcribelist" "css_element"
+    And I should see "Student 1" in the ".block_news_unsubcribelist" "css_element"
+    And I press "Cancel"
+    Then "Teacher 1" "table_row" should exist
+    And "Student 1" "table_row" should exist
+
+    # Unsubscribe one user.
+    When I click on "Teacher 1" "checkbox" in the "Teacher 1" "table_row"
+    And I press "Unsubscribe selected users"
+    Then I should see "Teacher 1" in the ".block_news_unsubcribelist" "css_element"
+    And I should not see "Student 1" in the ".block_news_unsubcribelist" "css_element"
+    And I press "Unsubscribe selected users"
+    Then "Teacher 1" "table_row" should not exist
+    And "Student 1" "table_row" should exist
+
+    # Use select all to unsubscribe all users.
+    And I follow "(new News block)"
+    And I press "Subscribe to news"
+    And I press "View subscribers"
+    Then "Teacher 1" "table_row" should exist
+    And "Student 1" "table_row" should exist
+    And I press "Select all"
+    And I press "Unsubscribe selected users"
+    And I should see "Teacher 1" in the ".block_news_unsubcribelist" "css_element"
+    And I should see "Student 1" in the ".block_news_unsubcribelist" "css_element"
+    And I press "Unsubscribe selected users"
+    Then I should see "There are no subscribers yet for this news block."
