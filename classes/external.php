@@ -84,7 +84,7 @@ class external extends \external_api {
             'messages' => new \external_multiple_structure(new \external_single_structure([
                 'isnews' => new \external_value(PARAM_BOOL, 'Is this message news, rather than an event?', VALUE_OPTIONAL, false),
                 'messagedate' => new \external_value(PARAM_TEXT, 'Message date'),
-                'title' => new \external_value(PARAM_TEXT, 'Message title'),
+                'title' => new \external_value(PARAM_TEXT, 'Message title', VALUE_OPTIONAL),
                 'author' => new \external_value(PARAM_TEXT, 'Author\'s name', VALUE_OPTIONAL),
                 'imageurl' => new \external_value(PARAM_URL, 'URL of message image',
                     VALUE_OPTIONAL),
