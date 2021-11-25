@@ -450,7 +450,7 @@ class subscription {
         $text .= format_string($this->newsfields->title, true) . "\n";
         $text .= \block_news\task\news_email::EMAIL_DIVIDER;
         $html .= "<a target='_blank' " .
-            "href='$CFG->wwwroot/blocks/news/view.php?" .
+            "href='$CFG->wwwroot/blocks/news/all.php?" .
             $this->get_link_params(self::PARAM_HTML) . "'>" .
             format_string($this->get_title(), true) . '</a>';
         $html .= '</div>';
