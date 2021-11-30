@@ -105,3 +105,34 @@ Feature: Test News area in mobile
     # Scroll down to bottom of the screen.
     When I trigger the news block infinite scroll "block_news_infinite_load_messages"
     Then I should see "news 1 message"
+
+  Scenario: Test search news navigate to News area
+    Given I log in as "admin"
+    And I am on "Course 1" course homepage
+    And I turn editing mode on
+    And I add the "News" block
+    And the following news messages exist on course "C1":
+      | title   | message         | messagetype | messagedate              |
+      | news 1  | news 1 message  | news        | ##2020-01-25 11:50:00##  |
+      | news 2  | news 2 message  | news        | ##2020-01-25 11:51:00##  |
+      | news 3  | news 3 message  | news        | ##2020-01-25 11:52:00##  |
+      | news 4  | news 4 message  | news        | ##2020-01-25 11:53:00##  |
+      | news 5  | news 5 message  | news        | ##2020-01-25 11:54:00##  |
+      | news 6  | news 6 message  | news        | ##2020-01-25 11:55:00##  |
+      | news 7  | news 7 message  | news        | ##2020-01-25 11:56:00##  |
+      | news 8  | news 8 message  | news        | ##2020-01-25 11:57:00##  |
+      | news 9  | news 9 message  | news        | ##2020-01-25 11:58:00##  |
+      | news 10 | news 10 message | news        | ##2020-01-25 11:59:00##  |
+      | news 11 | news 11 message | news        | ##2020-01-25 12:00:00##  |
+    And I update the global search index
+
+      # Do a search
+    And I enter the app
+    And I log in as "student1"
+    And I press "Course 1" near "Course overview" in the app
+    And I press "Search" in the app
+    And I set the field "Enter your search query here" to "news 1" in the app
+    When I press "Search C1" in the app
+    Then I should see "news 1"
+    When I press "news 1" in the app
+    Then I should see "news 1"

@@ -26,6 +26,7 @@ namespace block_news\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
+use block_news\local\external\get_courseid_from_messageid;
 use block_news\message;
 use block_news\system;
 
@@ -555,5 +556,24 @@ class mobile extends \advanced_testcase {
         $this->assertCount(1, $result['messages']);
         $this->assertEquals($message1id, $result['messages'][0]->id);
 
+    }
+    public function test_get_courseid_from_messageid() {
+        global $COURSE;
+
+        $user = $this->getDataGenerator()->create_user();
+
+        $this->setUser($user->id);
+
+        $COURSE->id = $this->courses['course1']->id;
+
+        // Create 2 news messages in news blocks. Add message to group.
+        $message1 = (object) ['title' => 'message1'];
+        $message1id = $this->generator->create_block_new_message($this->blocks['block1'], $message1, []);
+        $message2 = (object) ['title' => 'message2'];
+        $message2id = $this->generator->create_block_new_message($this->blocks['block1'], $message2, []);
+        $result = get_courseid_from_messageid::get_courseid_from_messageid($message1id);
+        $this->assertEquals($result['courseid'], $this->courses['course1']->id);
+        $result2 = get_courseid_from_messageid::get_courseid_from_messageid($message2id);
+        $this->assertEquals($result2['courseid'], $this->courses['course1']->id);
     }
 }

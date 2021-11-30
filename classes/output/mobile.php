@@ -135,6 +135,7 @@ class mobile {
             foreach ($messages as $message) {
                 $msgwidget = new full_message($message, null, null, $bns, 'all',
                     $images, true, $files);
+                $msgwidget->id = $message->get_id();
                 $messagedata[] = $msgwidget->export_for_template($renderer);
             }
         }
@@ -173,10 +174,12 @@ class mobile {
      */
     public static function news_page(array $args) {
         global $CFG, $OUTPUT, $PAGE;
-        $PAGE->set_course(get_course($args['courseid']));
-        $messagedata = self::get_messages($args['courseid']);
+        $args = (object) $args;
+
+        $PAGE->set_course(get_course($args->courseid));
+        $messagedata = self::get_messages($args->courseid);
         $html = $OUTPUT->render_from_template('block_news/mobile_news_page', ['timestamp' => time()]);
-        $blockinstanceid = block_news_get_top_news_block($args['courseid']);
+        $blockinstanceid = block_news_get_top_news_block($args->courseid);
         $pageurl = new \moodle_url('/blocks/news/all.php', ['bi' => $blockinstanceid]);
         return [
             'templates' => [
@@ -189,7 +192,9 @@ class mobile {
             'otherdata' => [
                 'pageurl' => $pageurl->out(false),
                 'messages' => json_encode($messagedata['messages']),
-                'moreMessages' => $messagedata['moremessages']
+                'moreMessages' => $messagedata['moremessages'],
+                'courseid' => $args->courseid,
+                'targetMessage' => !empty($args->messageid) ? $args->messageid : 0
             ]
         ];
     }

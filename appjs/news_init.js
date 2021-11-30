@@ -68,4 +68,36 @@
             }, 0);
         }
     };
+
+    /* Register a link handler to open blocks/news/message links anywhere in the app. */
+    function AddonBlockNewsLinkToPageHandler() {
+        this.pattern = new RegExp("\/blocks\/news\/message\\.php\\?m=(\\d+)");
+        this.name = "AddonBlockNewsLinkToPageHandler";
+        this.priority = 0;
+    }
+    AddonBlockNewsLinkToPageHandler.prototype = Object.create(t.CoreContentLinksHandlerBase.prototype);
+    AddonBlockNewsLinkToPageHandler.prototype.constructor = AddonBlockNewsLinkToPageHandler;
+    AddonBlockNewsLinkToPageHandler.prototype.getActions = function(siteIds, url, params) {
+        var action = {
+            action: function(siteId, NavController) {
+                t.CoreSitesProvider.getSite(siteId).then(function(site) {
+                    site.read('block_news_get_courseid_from_messageid', {messageid: parseInt(params.m, 10)}).then(function(result) {
+                        if (result) {
+                            var pageParams = {
+                                title: result.title,
+                                component: 'block_news',
+                                method: 'news_page',
+                                args: {courseid: result.courseid, messageid: result.messageid},
+                                initResult: {},
+                            };
+                            t.CoreContentLinksHelperProvider.goInSite(NavController, 'CoreSitePluginsPluginPage', pageParams, siteId);
+                        }
+                    });
+                });
+            }
+        };
+        return [action];
+    };
+    t.CoreContentLinksDelegate.registerHandler(new AddonBlockNewsLinkToPageHandler());
+
 })(this);

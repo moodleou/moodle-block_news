@@ -47,7 +47,7 @@
         {{ 'plugin.block_news.nonewsyet' | translate }}
     </ion-card-content>
 </ion-card>
-<ion-card *ngFor="let message of CONTENT_OTHERDATA.messages" class="block-news-message">
+<ion-card *ngFor="let message of CONTENT_OTHERDATA.messages" class="block-news-message" id="block-news-message-id-{{message.id}}">
     <ion-item>
         <p class="author">{{message.messagedate}}<ng-container *ngIf="author"> by {{message.author}}</ng-container></p>
         <h2 class="title">{{message.title}}</h2>
