@@ -354,6 +354,21 @@ function xmldb_block_news_upgrade($oldversion) {
         // News savepoint reached.
         upgrade_block_savepoint(true, 2021080506, 'news');
     }
+
+    if ($oldversion < 2021120200) {
+
+        // Define index timemodified (not unique) to be added to block_news_messages.
+        $table = new xmldb_table('block_news_messages');
+        $index = new xmldb_index('timemodified', XMLDB_INDEX_NOTUNIQUE, ['timemodified']);
+
+        // Conditionally launch add index timemodified.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // News savepoint reached.
+        upgrade_block_savepoint(true, 2021120200, 'news');
+    }
     return $result;
 
 }
