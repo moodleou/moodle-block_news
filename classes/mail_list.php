@@ -48,19 +48,13 @@ class mail_list {
     /**
      * Creates the mail queue and runs query to obtain list of message that should
      * be mailed.
-     *
-     * @param bool $output If true, outputs a couple of lines using mtrace to indicate progress
      */
-    public function __construct($output) {
-
-        global $DB, $CFG;
+    public function __construct() {
+        global $DB;
         $this->time = time();
         $this->news = null;
         $this->message = null;
         $this->storedrecord = null;
-        if ($output) {
-            mtrace('[News] ', '');
-        }
 
         // Check if an earlier run got aborted. In that case we mark all
         // messages as mailed anyway because it's better to skip some than
@@ -76,9 +70,6 @@ class mail_list {
 
         list ($wheresql, $whereparams) = $this->get_query_where($this->time, $this->newsid);
         $querychunk = $this->get_query_from() . $wheresql;
-        if ($output) {
-            mtrace('[Messages] ', '');
-        }
         $before = microtime(true);
 
         $userfieldsapi = \core_user\fields::for_identity(\context_block::instance($this->newsid), false)->with_name()
