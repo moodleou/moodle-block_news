@@ -82,5 +82,9 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configduration('block_news/cronlimit',
         get_string('cronlimit', 'block_news'),
         get_string('cronlimit_desc', 'block_news'), 10 * 60));
+
+    $settings->add(new admin_setting_configcheckbox('block_news/extralogging',
+            get_string('extralogging', 'block_news'),
+            get_string('extralogging_info', 'block_news'), 0));
 }
 
