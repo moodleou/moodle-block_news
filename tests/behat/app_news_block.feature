@@ -19,7 +19,7 @@ Feature: Test News area in mobile
     When I enter the app
     And I log in as "student1"
     And I press "Course 1" near "Course overview" in the app
-    Then I should not see "News"
+    Then I should not find "News" in the app
 
   Scenario: News area display on mobile with items
     # Log in as admin to create News block.
@@ -35,8 +35,7 @@ Feature: Test News area in mobile
     When I enter the app
     And I log in as "student1"
     And I press "Course 1" near "Course overview" in the app
-    And I press "arrow forward" in the app
-    Then I should see "News"
+    Then I should find "News" in the app
     # News should display newest first by messagedate
     When I press "News" in the app
     Then "news 3" "text" should appear before "news 2" "text"
@@ -47,7 +46,7 @@ Feature: Test News area in mobile
     And "18 Mar 2019" "text" should appear before "17 Mar 2019" "text"
 
     # Open in browser.
-    And I press the page menu button in the app
+    And I press "Display options" in the app
     And I press "Open in browser" in the app
     And I switch to the browser tab opened by the app
     And I log in as "student1"
@@ -70,11 +69,11 @@ Feature: Test News area in mobile
     When I enter the app
     And I log in as "student1"
     And I press "Course 1" near "Course overview" in the app
-    And I press "arrow forward" in the app
-    Then I should see "News"
+    Then I should find "News" in the app
     When I press "News" in the app
-    Then I should see "No news messages have been posted to this website."
+    Then I should find "No news messages have been posted to this website." in the app
 
+  @app_upto3.9.4
   Scenario: News area display on mobile with many items
     # Log in as admin to create News block.
     Given I log in as "admin"
@@ -106,6 +105,37 @@ Feature: Test News area in mobile
     When I trigger the news block infinite scroll "block_news_infinite_load_messages"
     Then I should see "news 1 message"
 
+  @app_from3.9.5
+  Scenario: News area display on mobile with many items (app 3.9.5)
+    # Log in as admin to create News block.
+    Given I log in as "admin"
+    And I am on "Course 1" course homepage
+    And I turn editing mode on
+    And I add the "News" block
+    And the following news messages exist on course "C1":
+      | title   | message         | messagetype | messagedate |
+      | news 1  | news 1 message  | news        | 1487952035  |
+      | news 2  | news 2 message  | news        | 1487952036  |
+      | news 3  | news 3 message  | news        | 1487952037  |
+      | news 4  | news 4 message  | news        | 1487952038  |
+      | news 5  | news 5 message  | news        | 1487952039  |
+      | news 6  | news 6 message  | news        | 1487952040  |
+      | news 7  | news 7 message  | news        | 1487952041  |
+      | news 8  | news 8 message  | news        | 1487952042  |
+      | news 9  | news 9 message  | news        | 1487952043  |
+      | news 10 | news 10 message | news        | 1487952044  |
+      | news 11 | news 11 message | news        | 1487952045  |
+    When I enter the app
+    And I log in as "student1"
+    And I press "Course 1" near "Course overview" in the app
+    Then I should find "News" in the app
+    When I press "News" in the app
+    Then I should find "news 11 message" in the app
+    And I should not find "news 1 message" in the app
+    # Scroll down to bottom of the screen.
+    When I trigger the block news infinite scroll "block_news_infinite_load_messages"
+    Then I should find "news 1 message" in the app
+
   Scenario: Test search news navigate to News area
     Given I log in as "admin"
     And I am on "Course 1" course homepage
@@ -131,8 +161,6 @@ Feature: Test News area in mobile
     And I log in as "student1"
     And I press "Course 1" near "Course overview" in the app
     And I press "Search" in the app
-    And I set the field "Enter your search query here" to "news 1" in the app
+    And I set the field "Enter your search query here" to "news 1"
     When I press "Search C1" in the app
-    Then I should see "news 1"
-    When I press "news 1" in the app
-    Then I should see "news 1"
+    Then I should find "news 1" in the app

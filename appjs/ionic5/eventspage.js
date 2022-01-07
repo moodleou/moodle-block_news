@@ -29,7 +29,7 @@
     t.loadMoreMessages = function(infiniteScroll) {
         var util = t.CoreUtilsProvider.blockNewsUtils;
         var args = {
-            courseid: t.NavController.getActive().data.course.id,
+            courseid: t.CONTENT_OTHERDATA.courseid,
             pagenum: nextPage,
             type: TYPE_EVENT,
             pastevents: t.pastEvents
@@ -51,10 +51,10 @@
                 }, 0);
             } else {
                 t.pastEvents = 1;
-                infiniteScroll.enable(false);
+                infiniteScroll.target.disabled = true;
             }
         }).finally(function() {
-            infiniteScroll.complete();
+            infiniteScroll.target.complete();
         });
     };
 

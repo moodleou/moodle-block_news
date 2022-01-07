@@ -52,6 +52,8 @@ class get_courseid_from_messageid extends external_api {
         return new external_single_structure([
                 'title' => new external_value(PARAM_RAW, 'Block news title'),
                 'messageid' => new external_value(PARAM_INT, 'Message id'),
+                'contextlevel' => new external_value(PARAM_INT, 'Context level'),
+                'instanceid' => new external_value(PARAM_RAW, 'Block instance id'),
                 'courseid' => new external_value(PARAM_INT, 'Course id'),
         ]);
     }
@@ -81,6 +83,8 @@ class get_courseid_from_messageid extends external_api {
         return [
             'title' => get_string('newsheading', 'block_news'),
             'messageid' => $params['messageid'],
+            'contextlevel' => $csemod->context->contextlevel,
+            'instanceid' => $blockinstanceid,
             'courseid' => $courseid
         ];
     }

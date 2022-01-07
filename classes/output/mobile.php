@@ -55,6 +55,9 @@ class mobile {
     public static function news_init(array $args) : array {
         global $DB, $CFG;
         $courses = enrol_get_users_courses($args['userid'], true);
+        $args = (object)$args;
+        $foldername = $args->appversioncode >= 3950 ? 'ionic5/' : 'ionic3/';
+
         list($sqlin, $params) = $DB->get_in_or_equal(array_keys($courses));
         $sql = "SELECT DISTINCT con.instanceid
                   FROM {block_instances} bi
@@ -67,7 +70,7 @@ class mobile {
             'restrict' => [
                 'courses' => $courseids
             ],
-            'javascript' => file_get_contents($CFG->dirroot . '/blocks/news/appjs/news_init.js')
+            'javascript' => file_get_contents($CFG->dirroot . '/blocks/news/appjs/' . $foldername . 'news_init.js')
         ];
     }
 
@@ -175,10 +178,11 @@ class mobile {
     public static function news_page(array $args) {
         global $CFG, $OUTPUT, $PAGE;
         $args = (object) $args;
+        $foldername = $args->appversioncode >= 3950 ? 'ionic5/' : 'ionic3/';
 
         $PAGE->set_course(get_course($args->courseid));
         $messagedata = self::get_messages($args->courseid);
-        $html = $OUTPUT->render_from_template('block_news/mobile_news_page', ['timestamp' => time()]);
+        $html = $OUTPUT->render_from_template('block_news/' . $foldername . 'mobile_news_page', ['timestamp' => time()]);
         $blockinstanceid = block_news_get_top_news_block($args->courseid);
         $pageurl = new \moodle_url('/blocks/news/all.php', ['bi' => $blockinstanceid]);
         return [
@@ -188,7 +192,7 @@ class mobile {
                     'html' => $html
                 ]
             ],
-            'javascript' => file_get_contents($CFG->dirroot . '/blocks/news/appjs/newspage.js'),
+            'javascript' => file_get_contents($CFG->dirroot . '/blocks/news/appjs/' . $foldername . 'newspage.js'),
             'otherdata' => [
                 'pageurl' => $pageurl->out(false),
                 'messages' => json_encode($messagedata['messages']),
@@ -208,8 +212,10 @@ class mobile {
     public static function events_page(array $args) {
         global $CFG, $OUTPUT, $PAGE;
         $PAGE->set_course(get_course($args['courseid']));
+        $foldername = $args['appversioncode'] >= 3950 ? 'ionic5/' : 'ionic3/';
+
         $messagedata = self::get_messages($args['courseid'], message::MESSAGETYPE_EVENT);
-        $html = $OUTPUT->render_from_template('block_news/mobile_events_page', ['timestamp' => time()]);
+        $html = $OUTPUT->render_from_template('block_news/' . $foldername . 'mobile_events_page', ['timestamp' => time()]);
         $blockinstanceid = block_news_get_top_news_block($args['courseid']);
         $pageurl = new \moodle_url('/blocks/news/all.php', ['bi' => $blockinstanceid]);
         return [
@@ -219,11 +225,12 @@ class mobile {
                     'html' => $html
                 ]
             ],
-            'javascript' => file_get_contents($CFG->dirroot . '/blocks/news/appjs/eventspage.js'),
+            'javascript' => file_get_contents($CFG->dirroot . '/blocks/news/appjs/' . $foldername . 'eventspage.js'),
             'otherdata' => [
                 'pageurl' => $pageurl->out(false),
                 'messages' => json_encode($messagedata['messages']),
                 'moreMessages' => $messagedata['moremessages'],
+                'courseid' => $args['courseid'],
                 'pastEvents' => '[]'
             ]
         ];

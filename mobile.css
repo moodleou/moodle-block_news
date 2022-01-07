@@ -94,3 +94,48 @@ ion-card.block-news-message core-format-text h5 {
 .block-news-message .row .col h3 {
     padding-left: 11px;
 }
+
+/* CSS Ionic 5 */
+body.ionic5 .block-news-message .card-content-ios ion-row.ios {
+    display: flex;
+    flex-wrap: wrap;
+}
+body.ionic5 .block-news-message .card-content-md ion-col.md:first-child,
+body.ionic5 .block-news-message .card-content-ios ion-col.ios:first-child {
+    padding: 5px 0;
+    flex: 0 0 auto;
+    width: auto;
+}
+body.ionic5 .block-news-message .card-content-ios ion-col.ios {
+    width: 100%;
+    flex-grow: 1;
+    flex-basis: 0;
+    max-width: 100%;
+}
+body.ionic5 .block-news-message .card-content-md .block_news_event_date,
+body.ionic5 .block-news-message .card-content-ios .block_news_event_date {
+    margin-right: 13px;
+    margin-bottom: 8px;
+    text-align: center;
+    width: 56px;
+    float: left;
+}
+body.ionic5 .block_news_event_date span {
+    display: block;
+}
+body.ionic5 .block_news_event_date_month {
+    background-color: #002158;
+    font-size: 1.6rem;
+    color: #fff;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 1px 0;
+}
+body.ionic5 .block_news_event_date_day {
+    border: 1px solid #002158;
+    font-size: 2.4rem;
+    padding-bottom: 9px;
+}
+body.ionic5 ion-card.block-news-message h2 {
+    margin: 2px 0;
+}
