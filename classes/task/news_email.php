@@ -90,7 +90,8 @@ class news_email extends \core\task\scheduled_task {
                 gc_collect_cycles();
                 $PAGE = new \moodle_page();
                 $PAGE->set_course($course);
-                $emailcount = 0;
+                $sentcount = 0;
+                $failedcount = 0;
                 $groupskips = 0;
                 try {
                     $langusers = [];
@@ -153,8 +154,11 @@ class news_email extends \core\task\scheduled_task {
                                         $main .= $out;
                                         $news->build_email($subject, $plaintext, $html1, $emailtype & 1, $lang, $main);
                                         $buildemailtime += microtime(true) - $innerbefore;
-                                        self::email_send($mailto, $noreplyaddress, $subject, $plaintext, $html1);
-                                        $emailcount++;
+                                        if (self::email_send($mailto, $noreplyaddress, $subject, $plaintext, $html1)) {
+                                            $sentcount++;
+                                        } else {
+                                            $failedcount++;
+                                        }
                                     }
                                 }
                                 $mailtime += microtime(true) - $innerbefore;
@@ -165,7 +169,8 @@ class news_email extends \core\task\scheduled_task {
                     }
 
                 }
-                self::debug("DEBUG: Sent $emailcount emails, skipped $groupskips subscribers due to group restrictions.");
+                self::debug("DEBUG: $sentcount emails sent, $failedcount emails failed to send, " .
+                        "$groupskips subscribers skipped due to group restrictions.");
             }
             self::add_list_times($listtimes, $list);
             if (time() > $endafter) {
@@ -274,8 +279,9 @@ class news_email extends \core\task\scheduled_task {
      * @param string $subject Subject line
      * @param string $text Text of email
      * @param string $html HTML of email or '' if plaintext only
+     * @return bool Returns true if mail was sent OK and false if there was an error.
      */
-    private static function email_send(object $to, $from, string $subject, string $text, string $html): void {
+    private static function email_send(object $to, $from, string $subject, string $text, string $html): bool {
         if (self::DEBUG_VIEW_EMAILS) {
             print "<div style='margin:4px; border:1px solid blue; padding:4px;'>";
             print "<h3>Email sent</h3>";
@@ -288,8 +294,8 @@ class news_email extends \core\task\scheduled_task {
             print "<pre style='border-top: 1px solid blue; padding-top: 4px; margin-top:4px;'>";
             print htmlspecialchars($text);
             print "</pre></div>";
-            return;
+            return false;
         }
-        email_to_user($to, $from, $subject, $text, $html, '', '');
+        return email_to_user($to, $from, $subject, $text, $html, '', '');
     }
 }
