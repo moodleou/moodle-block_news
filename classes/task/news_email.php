@@ -78,7 +78,7 @@ class news_email extends \core\task\scheduled_task {
         $listtimes = [];
         $endafter = time() + get_config('block_news', 'cronlimit');
         while (true) {
-            $list = new mail_list(true);
+            $list = new mail_list();
             if ($list->is_finished()) {
                 mtrace('No more news posts to send.');
                 self::add_list_times($listtimes, $list);
@@ -86,11 +86,12 @@ class news_email extends \core\task\scheduled_task {
             }
             while ($list->next_news($news, $blockcontext, $course)) {
                 mtrace($course->shortname . ' - ' . $news->get_title() . ' (blockinstanceid ' . $news->get_blockinstanceid() .
-                    '): ', '');
+                    '): ');
                 gc_collect_cycles();
                 $PAGE = new \moodle_page();
                 $PAGE->set_course($course);
                 $emailcount = 0;
+                $groupskips = 0;
                 try {
                     $langusers = [];
                     $innerbefore = microtime(true);
@@ -134,12 +135,16 @@ class news_email extends \core\task\scheduled_task {
                         foreach ($langusers as $lang => $tzusers) {
                             foreach ($tzusers as $timezone => $typeusers) {
                                 foreach ($typeusers as $emailtype => $users) {
+                                    self::debug("DEBUG: Subscribers for lang [$lang] " .
+                                            "tz [$timezone] type [$emailtype]: " .
+                                            count($users));
                                     foreach ($users as $mailto) {
                                         $main = '';
                                         // Handle group restriction.
                                         if ($groupexist) {
                                             if (!isset($mailto->membergroupids) ||
                                                 empty(array_intersect($bnm->get_groupids(), $mailto->membergroupids))) {
+                                                $groupskips++;
                                                 continue;
                                             }
                                         }
@@ -150,7 +155,6 @@ class news_email extends \core\task\scheduled_task {
                                         $buildemailtime += microtime(true) - $innerbefore;
                                         self::email_send($mailto, $noreplyaddress, $subject, $plaintext, $html1);
                                         $emailcount++;
-
                                     }
                                 }
                                 $mailtime += microtime(true) - $innerbefore;
@@ -161,11 +165,7 @@ class news_email extends \core\task\scheduled_task {
                     }
 
                 }
-
-                if (self::debug()) {
-                    mtrace(", sent " . $emailcount .
-                        " emails");
-                }
+                self::debug("DEBUG: Sent $emailcount emails, skipped $groupskips subscribers due to group restrictions.");
             }
             self::add_list_times($listtimes, $list);
             if (time() > $endafter) {
@@ -214,7 +214,7 @@ class news_email extends \core\task\scheduled_task {
     public static function debug(string $text = '', string $lf = "\n"): bool {
         static $checked = false, $debug;
         if (!$checked) {
-            $debug = debugging('', DEBUG_DEVELOPER);
+            $debug = get_config('block_news', 'extralogging');
         }
         if (!$debug) {
             return false;
