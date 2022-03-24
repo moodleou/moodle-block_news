@@ -161,6 +161,6 @@ Feature: Test News area in mobile
     And I log in as "student1"
     And I press "Course 1" near "Course overview" in the app
     And I press "Search" in the app
-    And I set the field "Enter your search query here" to "news 1"
+    And I set the field "Enter search query here" to "news 1"
     When I press "Search C1" in the app
     Then I should find "news 1" in the app
