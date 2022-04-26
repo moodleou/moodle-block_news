@@ -92,9 +92,6 @@ class block_news_edit_message_form extends moodleform {
         $mform->addElement('hidden', 'mode');
         $mform->setType('mode', PARAM_RAW);
 
-        // Fileset header.
-        $mform->addElement('header', 'displayinfo', null);
-
         if ( $this->displaytype == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS ) {
             $messagetype = array(message::MESSAGETYPE_NEWS => get_string('newsitem', 'block_news'),
                     message::MESSAGETYPE_EVENT => get_string('event', 'block_news'));
