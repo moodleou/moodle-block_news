@@ -22,15 +22,14 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace block_news\tests;
+namespace block_news;
 
 defined('MOODLE_INTERNAL') || die();
 
 use block_news\local\external\get_courseid_from_messageid;
-use block_news\message;
-use block_news\system;
 
-class mobile extends \advanced_testcase {
+class mobile_test extends \advanced_testcase {
+    use \local_oumobileapp\app_version_provider;
 
     private $courses = [];
     private $blocks = [];
@@ -90,14 +89,18 @@ class mobile extends \advanced_testcase {
 
     /**
      * Test that the news tab is enabled on courses with a news block.
+     *
+     * @dataProvider app_version_provider
+     * @param array[] $args Array of possible arguments for different app versions
      */
-    public function test_news_init() {
+    public function test_news_init(array $args): void {
         $this->courses['course2'] = $this->getDataGenerator()->create_course();
         $user = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($user->id, $this->courses['course2']->id, 'student');
+        $args['userid'] = $user->id;
 
         // User does not have any courses because they only belong to course2 which has no news.
-        $result = \block_news\output\mobile::news_init(['userid' => $user->id]);
+        $result = \block_news\output\mobile::news_init($args);
         $this->assertNotContains($this->courses['course1']->id, $result['restrict']['courses']);
         $this->assertNotContains($this->courses['course2']->id, $result['restrict']['courses']);
 
@@ -105,7 +108,7 @@ class mobile extends \advanced_testcase {
         $this->getDataGenerator()->enrol_user($user->id, $this->courses['course1']->id, 'student');
 
         // User now has 1 course with news (course1).
-        $result = \block_news\output\mobile::news_init(['userid' => $user->id]);
+        $result = \block_news\output\mobile::news_init($args);
         $this->assertContains($this->courses['course1']->id, $result['restrict']['courses']);
         $this->assertNotContains($this->courses['course2']->id, $result['restrict']['courses']);
     }
