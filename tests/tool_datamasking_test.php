@@ -24,13 +24,10 @@ namespace block_news;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class tool_datamasking_test extends \advanced_testcase {
+    use \tool_datamasking\phpunit_clear_statics;
 
     protected function setUp(): void {
         \tool_datamasking\testing_utils::load_mapping_table_fixtures();
-    }
-
-    protected function tearDown(): void {
-        \tool_datamasking\mapping_tables::reset();
     }
 
     /**
