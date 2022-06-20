@@ -97,6 +97,10 @@
             })
         }
     };
+
+    window.initPageURL('news', t.CONTENT_OTHERDATA.pageurl);
+    t.openInBrowser = window.openInBrowser;
+
     if (t.CONTENT_OTHERDATA.targetMessage) {
         t.jumpToNews(t.CONTENT_OTHERDATA.targetMessage, 1);
     } else {

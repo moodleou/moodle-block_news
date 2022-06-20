@@ -58,6 +58,9 @@
         });
     };
 
+    window.initPageURL('events', t.CONTENT_OTHERDATA.pageurl);
+    t.openInBrowser = window.openInBrowser;
+
     t.CoreUtilsProvider.blockNewsUtils.pageInit(t);
 
 })(this);
