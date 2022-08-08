@@ -195,7 +195,7 @@ Feature: Basic usage of news block
     Then I should not see "ANNE" in the ".block_news_message" "css_element"
 
     # On main page either.
-    When I follow "C1"
+    When I am on "Course 1" course homepage
     Then I should not see "ANNE" in the "(new News block)" "block"
 
   @javascript

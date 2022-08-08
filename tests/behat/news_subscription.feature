@@ -16,27 +16,24 @@ Feature: News subscription
       | user    | course | role           |
       | teacher | C1     | editingteacher |
       | student | C1     | student        |
-    And I log in as "admin"
-    And I am on "Course 1" course homepage
+    And I am on the "Course 1" course page logged in as "teacher"
     And I turn editing mode on
     And I add the "News" block
     And I log out
 
   Scenario: Subscription options should appear for those who have permission to add a message
-    And I log in as "teacher"
-    And I am on "Course 1" course homepage
-    And I follow "News"
+    And I am on the "Course 1" course page logged in as "teacher"
+    And I click on "News" "link" in the "//div[@class='oustudyplan-headerstripe']/ul/li[2]" "xpath_element"
     Then "View subscribers" "button" should be visible
     And I log out
     And I log in as "student"
     And I am on "Course 1" course homepage
-    And I follow "News"
+    And I click on "News" "link" in the "//div[@class='oustudyplan-headerstripe']/ul/li[2]" "xpath_element"
     Then "View subscribers" "button" should not exist
 
   Scenario: Check user Subscribe and Unsubscribe
-    And I log in as "teacher"
-    And I am on "Course 1" course homepage
-    And I follow "News"
+    And I am on the "Course 1" course page logged in as "teacher"
+    And I click on "News" "link" in the "//div[@class='oustudyplan-headerstripe']/ul/li[2]" "xpath_element"
     And I press "Subscribe to news"
     Then "Unsubscribe" "button" should be visible
     And I press "Unsubscribe"
@@ -45,13 +42,13 @@ Feature: News subscription
   Scenario: Manage subscribers of news block
     # Subscribe some users.
     And I am on the "Course 1" course page logged in as "student"
-    And I follow "News"
+    And I click on "News" "link" in the "//div[@class='oustudyplan-headerstripe']/ul/li[2]" "xpath_element"
     And I press "Subscribe to news"
     Then "Unsubscribe" "button" should be visible
     And I log out
 
     And I am on the "Course 1" course page logged in as "teacher"
-    And I follow "News"
+    And I click on "News" "link" in the "//div[@class='oustudyplan-headerstripe']/ul/li[2]" "xpath_element"
     And I press "Subscribe to news"
     Then "Unsubscribe" "button" should be visible
     And I press "View subscribers"

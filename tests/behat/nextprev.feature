@@ -16,8 +16,7 @@ Feature: Next/Previous message navigation
       | user     | course | role           |
       | teacher1 | C1     | editingteacher |
       | student1 | C1     | student        |
-    And I log in as "teacher1"
-    And I am on "Course 1" course homepage
+    And I am on the "Course 1" "course" page logged in as teacher1
     And I turn editing mode on
     And I add the "News" block
 
@@ -73,7 +72,7 @@ Feature: Next/Previous message navigation
     Then I should see "news 1"
     And "Previous" "link" should not exist
     And "Next" "link" should exist
-    When I follow "C1"
+    When I am on "Course 1" course homepage
     And I click on "event 3" "link" in the ".block_news_event" "css_element"
     And I should see "event 3"
     And "Previous" "link" should exist
