@@ -290,11 +290,11 @@ class subscription {
      *   email and display them).
      */
     public function get_subscribers(): array {
-        global $DB, $CFG;
+        global $DB;
 
         $userfields = \core_user\fields::for_identity($this->get_context(), true);
         $basicuserfields = \core_user\fields::for_name()
-            ->including('id', 'username', 'emailstop', 'deleted', 'auth', 'timezone', 'lang', 'maildisplay', 'mailformat');
+            ->including('id', 'username', 'email', 'emailstop', 'deleted', 'auth', 'timezone', 'lang', 'maildisplay', 'mailformat');
         $basicuserssql = $basicuserfields->get_sql('u', false, 'u_', '', false)->selects;
 
         [

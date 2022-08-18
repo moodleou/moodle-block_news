@@ -146,6 +146,8 @@ $string['verbosecron_info'] = 'If you turn this option on, all feeds being retri
 $string['settingshideauthor'] = 'Hide author';
 $string['settingshideauthor_info'] = 'Set default value for the hide author option when posting news.';
 $string['separateintoeventsandnewsitems'] = 'Separate into events and news items';
+$string['extralogging'] = 'Extra logging';
+$string['extralogging_info'] = 'If you turn this option on, extra debugging information will be output in the logs.';
 
 // Edit.
 $string['imagedesc'] = 'Image description';

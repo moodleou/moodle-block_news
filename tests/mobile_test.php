@@ -22,14 +22,14 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace block_news\tests;
+namespace block_news;
 
 defined('MOODLE_INTERNAL') || die();
 
-use block_news\message;
-use block_news\system;
+use block_news\local\external\get_courseid_from_messageid;
 
-class mobile extends \advanced_testcase {
+class mobile_test extends \advanced_testcase {
+    use \local_oumobileapp\app_version_provider;
 
     private $courses = [];
     private $blocks = [];
@@ -89,14 +89,18 @@ class mobile extends \advanced_testcase {
 
     /**
      * Test that the news tab is enabled on courses with a news block.
+     *
+     * @dataProvider app_version_provider
+     * @param array[] $args Array of possible arguments for different app versions
      */
-    public function test_news_init() {
+    public function test_news_init(array $args): void {
         $this->courses['course2'] = $this->getDataGenerator()->create_course();
         $user = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($user->id, $this->courses['course2']->id, 'student');
+        $args['userid'] = $user->id;
 
         // User does not have any courses because they only belong to course2 which has no news.
-        $result = \block_news\output\mobile::news_init(['userid' => $user->id]);
+        $result = \block_news\output\mobile::news_init($args);
         $this->assertNotContains($this->courses['course1']->id, $result['restrict']['courses']);
         $this->assertNotContains($this->courses['course2']->id, $result['restrict']['courses']);
 
@@ -104,7 +108,7 @@ class mobile extends \advanced_testcase {
         $this->getDataGenerator()->enrol_user($user->id, $this->courses['course1']->id, 'student');
 
         // User now has 1 course with news (course1).
-        $result = \block_news\output\mobile::news_init(['userid' => $user->id]);
+        $result = \block_news\output\mobile::news_init($args);
         $this->assertContains($this->courses['course1']->id, $result['restrict']['courses']);
         $this->assertNotContains($this->courses['course2']->id, $result['restrict']['courses']);
     }
@@ -555,5 +559,24 @@ class mobile extends \advanced_testcase {
         $this->assertCount(1, $result['messages']);
         $this->assertEquals($message1id, $result['messages'][0]->id);
 
+    }
+    public function test_get_courseid_from_messageid() {
+        global $COURSE;
+
+        $user = $this->getDataGenerator()->create_user();
+
+        $this->setUser($user->id);
+
+        $COURSE->id = $this->courses['course1']->id;
+
+        // Create 2 news messages in news blocks. Add message to group.
+        $message1 = (object) ['title' => 'message1'];
+        $message1id = $this->generator->create_block_new_message($this->blocks['block1'], $message1, []);
+        $message2 = (object) ['title' => 'message2'];
+        $message2id = $this->generator->create_block_new_message($this->blocks['block1'], $message2, []);
+        $result = get_courseid_from_messageid::get_courseid_from_messageid($message1id);
+        $this->assertEquals($result['courseid'], $this->courses['course1']->id);
+        $result2 = get_courseid_from_messageid::get_courseid_from_messageid($message2id);
+        $this->assertEquals($result2['courseid'], $this->courses['course1']->id);
     }
 }

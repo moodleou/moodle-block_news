@@ -26,6 +26,7 @@ namespace block_news;
 class tool_datamasking implements \tool_datamasking\plugin {
     public function build_plan(\tool_datamasking\plan $plan): void {
         $plan->table('block_news_feeds')->add((new feed_url_mask())->set_negative_tags(
-                [\tool_datamasking\tool_datamasking::TAG_SKIP_ID_MAPPING]));
+                [\tool_datamasking\tool_datamasking::TAG_SKIP_ID_MAPPING])->
+                set_solo_tags([\tool_datamasking\tool_datamasking::TAG_SOLO_ID_MAPPING]));
     }
 }

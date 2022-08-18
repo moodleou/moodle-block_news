@@ -32,5 +32,13 @@ $functions = [
         'type' => 'read',
         'capabilities' => '',
         'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE, 'local_mobile']
-    ]
+    ],
+    'block_news_get_courseid_from_messageid' => [
+        'classname'   => 'block_news\local\external\get_courseid_from_messageid',
+        'methodname'  => 'get_courseid_from_messageid',
+        'description' => 'Get courseid from message id',
+        'type'        => 'read',
+        'capabilities' => '',
+        'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE, 'local_mobile']
+    ],
 ];

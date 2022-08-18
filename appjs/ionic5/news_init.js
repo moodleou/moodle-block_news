@@ -41,15 +41,6 @@
          * @param {CoreCompileFakeHTMLComponent} page Must define a loadMoreMessages function.
          */
         pageInit: function(page) {
-            // Fix content size so that infinite scroll works.
-            // This is ugly, hopefully there will be a proper way to do this once MOBILE-2770 is done.
-            var views = page.NavController._views;
-            views.forEach(function(view) {
-                if (view.id === "CoreCourseSectionPage") {
-                    view._cntDir.resize();
-                }
-            });
-
             window.setTimeout(function() {
                 var fakeInfiniteScroll = {
                     disabled: false,
@@ -68,4 +59,44 @@
             }, 0);
         }
     };
+
+    /* Register a link handler to open blocks/news/message links anywhere in the app. */
+    class AddonBlockNewsLinkToPageHandler extends t.CoreContentLinksHandlerBase {
+        constructor() {
+            super();
+            this.pattern = new RegExp("\/blocks\/news\/message\\.php\\?m=(\\d+)");
+            this.name = "AddonBlockNewsLinkToPageHandler";
+            this.priority = 0;
+        }
+        getActions(siteIds, url, params) {
+            var action = {
+                action: function(siteId) {
+                    t.CoreSitesProvider.getSite(siteId).then(function(site) {
+                        site.read('block_news_get_courseid_from_messageid', {messageid: parseInt(params.m, 10)}).then(function(result) {
+                            if (result) {
+                                var args = {
+                                    contextlevel: result.contextLevel,
+                                    instanceid: result.instanceid,
+                                    courseid: result.courseid,
+                                    messageid: result.messageid
+                                };
+                                var hash = t.Md5.hashAsciiStr(JSON.stringify(args));
+                                var pageParams = {
+                                    title: result.title,
+                                    args,
+                                    initResult: {},
+                                    component: 'block_news',
+                                    method: 'news_page'
+                                };
+                                t.CoreNavigatorService.navigateToSitePath('siteplugins/content/block_news/news_page/' + hash, { params: pageParams });
+                            }
+                        });
+                    });
+                }
+            };
+            return [action];
+        }
+    };
+    t.CoreContentLinksDelegate.registerHandler(new AddonBlockNewsLinkToPageHandler());
+
 })(this);

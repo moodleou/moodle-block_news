@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/news/db" VERSION="20201106" COMMENT="XMLDB file for Moodle blocks/news"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+<XMLDB PATH="blocks/news/db" VERSION="20211202" COMMENT="XMLDB file for Moodle blocks/news"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
     <TABLE NAME="block_news" COMMENT="main settings for each block instance">
@@ -72,6 +72,7 @@
       <INDEXES>
         <INDEX NAME="blockinstanceid_ix" UNIQUE="false" FIELDS="blockinstanceid"/>
         <INDEX NAME="mailstate" UNIQUE="false" FIELDS="mailstate"/>
+        <INDEX NAME="timemodified" UNIQUE="false" FIELDS="timemodified"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="block_news_message_groups" COMMENT="Group restrictions for messages">

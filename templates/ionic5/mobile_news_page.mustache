@@ -15,7 +15,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template block_news/mobile_news_page
+    @template block_news/ionic5/mobile_news_page
 
     List of news messages
 
@@ -34,10 +34,9 @@
 
 }}
 {{=<% %>=}}
-<core-navbar-buttons>
+<core-navbar-buttons slot="end">
     <core-context-menu>
-        <core-context-menu-item [priority]="900" [content]="'core.openinbrowser' | translate" iconAction="open" autoLogin="no"
-            [href]="CONTENT_OTHERDATA.pageurl">
+        <core-context-menu-item [priority]="900" [content]="'core.openinbrowser' | translate" (action)="openInBrowser()" iconAction="open">
         </core-context-menu-item>
     </core-context-menu>
 </core-navbar-buttons>
@@ -47,10 +46,12 @@
         {{ 'plugin.block_news.nonewsyet' | translate }}
     </ion-card-content>
 </ion-card>
-<ion-card *ngFor="let message of CONTENT_OTHERDATA.messages" class="block-news-message">
+<ion-card *ngFor="let message of CONTENT_OTHERDATA.messages" class="block-news-message" id="block-news-message-id-{{message.id}}">
     <ion-item>
-        <p class="author">{{message.messagedate}}<ng-container *ngIf="author"> by {{message.author}}</ng-container></p>
-        <h2 class="title">{{message.title}}</h2>
+        <ion-label>
+            <p class="author">{{message.messagedate}}<ng-container *ngIf="author"> by {{message.author}}</ng-container></p>
+            <h2 class="title">{{message.title}}</h2>
+        </ion-label>
     </ion-item>
     <img *ngIf="message.imageurl" core-external-content [alt]="message.imagedesc" [src]="message.imageurl" class="block-news-message-image"
          [width]="message.imagewidth" [height]="message.imageheight" />
@@ -63,11 +64,13 @@
                 <h3>{{ 'plugin.block_news.msgedithlpattach' | translate }}</h3>
                 <ion-list>
                     <ion-item *ngFor="let attachment of message.attachments">
-                        <img core-external-content [src]="attachment.iconsrc" [alt]="attachment.iconalt"
-                                class="block-news-attachment-icon"/>
-                        <a core-link core-external-content [capture]="true" [href]="attachment.url">
-                            {{attachment.filename}}
-                        </a>
+                        <ion-label>
+                            <img core-external-content [src]="attachment.iconsrc" [alt]="attachment.iconalt"
+                                 class="block-news-attachment-icon"/>
+                            <a core-link core-external-content [capture]="true" [href]="attachment.url">
+                                {{attachment.filename}}
+                            </a>
+                        </ion-label>
                     </ion-item>
                 </ion-list>
             </ng-container>

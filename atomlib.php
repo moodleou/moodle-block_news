@@ -222,7 +222,7 @@ function atom_end_tag($tag, $level=0, $endline=true) {
  * @param $attributes
  * @return string
  */
-function atom_full_tag($tag, $level=0, $endline=true, $content, $attributes=null) {
+function atom_full_tag($tag, $level, $endline, $content, $attributes = null) {
     $st = atom_start_tag($tag, $level, $endline, $attributes);
     if ($content === false) {
         $st = preg_replace('~>$~', ' />', $st);

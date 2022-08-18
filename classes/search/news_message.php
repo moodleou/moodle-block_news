@@ -98,7 +98,8 @@ class news_message extends \core_search\base_block {
 
         $context = \context::instance_by_id($document->get('contextid'));
 
-        $files = $fs->get_area_files($context->id, 'block_news', 'message');
+        $files = $fs->get_area_files($context->id, 'block_news', 'message',
+                false, 'itemid, filepath, filename', false);
         foreach ($files as $file) {
             $document->add_stored_file($file);
         }
