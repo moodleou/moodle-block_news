@@ -820,7 +820,13 @@ class system {
         $DB->update_record('block_news_feeds', $bnf);
 
         // Get the feed items.
-        $fia = @$this->get_simplepie($fbrec->feedurl);
+        try {
+            $fia = @$this->get_simplepie($fbrec->feedurl);
+        } catch (\Throwable $e) {
+            // For errors that aren't caught by simplepie, create a fake simplepie result with
+            // error text that gets used by the next code.
+            $fia = [0 => (object)['errortext' => get_class($e) . ': ' . $e->getMessage()]];
+        }
 
         if (isset($fia[0]->errortext)) {
             $bnf->feederror = \core_text::substr($fia[0]->errortext, 0, 255);
@@ -1121,32 +1127,42 @@ class system {
             return $fia;
         }
 
-        if (PHPUNIT_TEST && !empty($CFG->block_news_simplepie_feed)) {
-            $feed = new \moodle_simplepie();
-            $file = new \SimplePie_File($CFG->block_news_simplepie_feed);
-            $feed->set_file($file);
-            $feed->init();
-        } else {
-            $feed = new \moodle_simplepie($feedurl, 10);
-        }
+        // The feed init can cause output to error logs, which we really don't want, so let's
+        // break it. See SimplePie Misc.php line 180.
+        $errorlog = ini_get('error_log');
+        try {
+            // This should fail because on Unix it will do nothing and on Windows it won't be
+            // writable.
+            ini_set('error_log', '/dev/null');
 
-        if (isset($CFG->block_rss_client_timeout)) {
-            $feed->set_cache_duration($CFG->block_rss_client_timeout * 60);
-        }
+            if (PHPUNIT_TEST && !empty($CFG->block_news_simplepie_feed)) {
+                $feed = new \moodle_simplepie();
+                $feed->set_raw_data(file_get_contents($CFG->block_news_simplepie_feed));
+                $feed->init();
+            } else {
+                $feed = new \moodle_simplepie($feedurl, 10);
+            }
 
-        if ($feed->error()) {
-            $err = new \stdClass();
-            $err->errortext = $feed->error();
-            $fia[] = $err;
-            return $fia;
-        }
+            if (isset($CFG->block_rss_client_timeout)) {
+                $feed->set_cache_duration($CFG->block_rss_client_timeout * 60);
+            }
 
-        if (isset($CFG->maxitemsperfeed) && is_numeric($CFG->maxitemsperfeed)) {
-            $maxitems = $CFG->maxitemsperfeed;
-        } else {
-            $maxitems = 0; // All.
+            if ($feed->error()) {
+                $err = new \stdClass();
+                $err->errortext = $feed->error();
+                $fia[] = $err;
+                return $fia;
+            }
+
+            if (isset($CFG->maxitemsperfeed) && is_numeric($CFG->maxitemsperfeed)) {
+                $maxitems = $CFG->maxitemsperfeed;
+            } else {
+                $maxitems = 0; // All.
+            }
+            $feeditems = $feed->get_items(0, $maxitems); // Offset, length (0=all).
+        } finally {
+            ini_set('error_log', $errorlog);
         }
-        $feeditems = $feed->get_items(0, $maxitems); // Offset, length (0=all).
 
         $fia = array();
         foreach ($feeditems as $item) {

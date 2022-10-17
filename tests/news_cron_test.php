@@ -72,7 +72,9 @@ class news_cron_test extends \advanced_testcase {
         $news = subscription::get_from_bi($this->blockinstance->id);
         $news->subscribe($this->adminid);
         $sink = $this->redirectEmails();
+        ob_start();
         \block_news\task\news_email::email_normal();
+        ob_end_clean();
 
         $messages = $sink->get_messages();
 
@@ -96,7 +98,9 @@ class news_cron_test extends \advanced_testcase {
         $news->subscribe($this->adminid);
         $news->subscribe($this->user->id);
         $sink = $this->redirectEmails();
+        ob_start();
         \block_news\task\news_email::email_normal();
+        ob_end_clean();
         $messages = $sink->get_messages();
         // Check 1 email sent because only admin user in group.
         $this->assertEquals(1, count($messages));
@@ -116,7 +120,9 @@ class news_cron_test extends \advanced_testcase {
         $news = subscription::get_from_bi($this->blockinstance->id);
         $news->subscribe($this->adminid);
         $sink = $this->redirectEmails();
+        ob_start();
         \block_news\task\news_email::email_normal();
+        ob_end_clean();
         $messages = $sink->get_messages();
 
         // Check 0 email sent.

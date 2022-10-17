@@ -14,18 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * PHPUnit tests for new news feed functions.
- *
- * @package block_news
- * @copyright 2014 The Open University
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-defined('MOODLE_INTERNAL') || die();
-require_once(__DIR__ . '/../lib.php');
-
-use \block_news\system;
+namespace block_news;
 
 /**
  * PHPUnit tests for new news feed functions.
@@ -34,7 +23,7 @@ use \block_news\system;
  * @copyright 2014 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class block_news_newsfeed_testcase extends advanced_testcase {
+class newsfeed_test extends \advanced_testcase {
 
     private $groupings = [];
     private $groups = [];
@@ -79,14 +68,14 @@ class block_news_newsfeed_testcase extends advanced_testcase {
         $nblock2 = $generator->create_instance(array(), array('courseid' => $course->id));
 
         // Create the block_positions record for news block nblock1.
-        $record = new stdClass();
+        $record = new \stdClass();
         $record->blockinstanceid = $nblock1->id;
         // This block is displayed below nblock2.
         $record->weight = 1;
         $generator->create_block_positions_record($record, $course->id);
 
         // Create the block_positions record for news block nblock2.
-        $record = new stdClass();
+        $record = new \stdClass();
         $record->blockinstanceid = $nblock2->id;
         // This block is displayed above nblock1.
         $record->weight = 0;
@@ -237,7 +226,7 @@ EOT;
         $this->assertStringContainsString('Event message includes', $msg);
         $this->assertEquals('', $imgurl);
         $this->assertEquals('', $imgdesc);
-        $this->assertEquals(block_news\message::MESSAGETYPE_EVENT, $type);
+        $this->assertEquals(message::MESSAGETYPE_EVENT, $type);
         $this->assertEquals('Milton Keynes', $loc);
         $this->assertEquals('1506812411', $start);
         $this->assertEquals('1507312411', $end);
@@ -246,7 +235,7 @@ EOT;
     /**
      * Tests that feed caching (and specifically uncaching when a new post is added) works.
      *
-     * @throws coding_exception
+     * @throws \coding_exception
      */
     public function test_cache_clearing() {
         $this->resetAfterTest(true);
@@ -446,5 +435,51 @@ EOT;
         $task->execute();
         ob_end_clean();
         $this->assertEquals(0, $DB->get_field('block_news_feeds', 'errorcount', []));
+    }
+
+    /**
+     * When updating feeds, if a response XML is completely blank, checks that it doesn't crash out.
+     */
+    public function test_update_feed_blank_xml() {
+        global $CFG, $DB;
+        $this->resetAfterTest(true);
+
+        // Create a course.
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+
+        // Create a news block.
+        $newsgenerator = $generator->get_plugin_generator('block_news');
+        $block = $newsgenerator->create_instance([], ['courseid' => $course->id]);
+
+        // Unit testing hack to request feed from a file.
+        $CFG->block_news_simplepie_feed = __DIR__ . '/fixtures/remote_rss_1.xml';
+
+        // Set the block to use a feed.
+        $blocksettings = system::get_block_settings($block->id);
+        $blocksettings->save_feed_urls('https://frogs.example.org/');
+
+        // Check it has error count 0 and 4 messages.
+        $this->assertEquals(0, $DB->get_field('block_news_feeds', 'errorcount', []));
+        $messages = $blocksettings->get_messages_all(true);
+        $this->assertCount(4, $messages);
+
+        // Now what if the feed becomes completely blank.
+        $CFG->block_news_simplepie_feed = __DIR__ . '/fixtures/empty_rss.xml';
+        $DB->set_field('block_news_feeds', 'feedupdated', 1);
+        $task = new \block_news\task\process_feeds();
+        ob_start();
+        $task->execute();
+        ob_end_clean();
+
+        // Error count now 1, no change to messages.
+        $this->assertEquals(1, $DB->get_field('block_news_feeds', 'errorcount', []));
+        $messages = $blocksettings->get_messages_all(true);
+        $this->assertCount(4, $messages);
+
+        // Error message should match. This isn't the same as the live error message because
+        // SimplePie runs different code when getting data from a URL vs the PHPunit fixture (sigh).
+        $this->assertStringContainsString('Empty body.',
+                $DB->get_field('block_news_feeds', 'feederror', []));
     }
 }
