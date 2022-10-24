@@ -72,7 +72,7 @@ Feature: Next/Previous message navigation
     Then I should see "news 1"
     And "Previous" "link" should not exist
     And "Next" "link" should exist
-    When I am on "Course 1" course homepage
+    When I am on the "Course 1" "Course" page
     And I click on "event 3" "link" in the ".block_news_event" "css_element"
     And I should see "event 3"
     And "Previous" "link" should exist

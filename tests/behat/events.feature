@@ -14,8 +14,7 @@ Feature: Display events in news block
     And the following "course enrolments" exist:
       | user   | course | role    |
       | ukuser | C1     | student |
-    And I log in as "admin"
-    And I am on "Course 1" course homepage
+    And I am on the "Course 1" "Course" page logged in as "admin"
     And I turn editing mode on
     And I add the "News" block
     And the news block for course "C1" is in news and events mode
@@ -131,10 +130,8 @@ Feature: Display events in news block
     Given the following news messages exist on course "C1":
       | title    | message           | messagetype | messagedate | eventstart |
       | message1 | Lorem ipsum dolor | 2           | 1483228800  | 2145888000 |
-    And I log out
     # View the event as a user in the UK (8 hours behind).
-    And I log in as "ukuser"
-    And I am on "Course 1" course homepage
+    And I am on the "Course 1" "Course" page logged in as "ukuser"
     Then I should see "01" in the ".block_news_event time" "css_element"
     And I should see "Jan" in the ".block_news_event time" "css_element"
     And I should see "message1" in the "News and events" "block"

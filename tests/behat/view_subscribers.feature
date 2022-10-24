@@ -18,17 +18,16 @@ Feature: View subscribers
       | showuseridentity | username,email,phone1,profile_field_oucu,profile_field_staffid|
     And I am using the OSEP theme
     And I log in as "admin" (in the OSEP theme)
-    And I am on "Course 1" course homepage
+    And I am on the "Course 1" "Course" page
     And I turn editing mode on in the OSEP theme
     And I set the field "Add a block" to "News"
     And I log out (in the OSEP theme)
-    And I log in as "student100"
-    And I am on "Course 1" course homepage
+    And I am on the "Course 1" "Course" page logged in as "student100"
     And I follow "News"
     And I press "Subscribe to news"
     Then I log out (in the OSEP theme)
     And I log in as "admin" (in the OSEP theme)
-    And I am on "Course 1" course homepage
+    And I am on the "Course 1" "Course" page
     And I follow "News"
     And I press "View subscribers"
     And I should see "Username"

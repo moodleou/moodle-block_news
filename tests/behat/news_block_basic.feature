@@ -19,8 +19,7 @@ Feature: Basic usage of news block
 
   Scenario: Basic usage of news block
     # Add news block.
-    When I log in as "teacher1"
-    And I am on "Course 1" course homepage
+    When I am on the "Course 1" "Course" page logged in as "teacher1"
     And I turn editing mode on
     And I add the "News" block
     Then I should see "(new News block)"
@@ -31,19 +30,17 @@ Feature: Basic usage of news block
       | Title | My first message  |
       | Text  | Some message text |
     And I press "Save changes"
+    And I wait until the page is ready
     Then I should see "My first message"
     And I should see "Some message text"
 
     # Check student can view it.
-    When I log out
-    And I log in as "student1"
-    And I am on "Course 1" course homepage
+    When I am on the "Course 1" "Course" page logged in as "student1"
     Then I should see "My first message"
 
   Scenario: Test post and view multiple messages, summaries
     # Add block.
-    Given I log in as "teacher1"
-    And I am on "Course 1" course homepage
+    Given I am on the "Course 1" "Course" page logged in as "teacher1"
     And I turn editing mode on
     And I add the "News" block
 
@@ -53,11 +50,13 @@ Feature: Basic usage of news block
       | Title | Short message |
       | Text  | Message1 text |
     And I press "Save changes"
+    And I wait until the page is ready
     And I click on "Add" "link" in the "(new News block)" "block"
     And I set the following fields to these values:
       | Title | Medium message                                                                                                                        |
       | Text  | Message2 text is longer and contains over 100 characters but will get cut off on the front page at some point before the word JACKPOT |
     And I press "Save changes"
+    And I wait until the page is ready
 
     # Check the contents and the summarising.
     Then I should see "Message1"
@@ -70,6 +69,7 @@ Feature: Basic usage of news block
       | Title | Third message |
       | Text  | Message3 text |
     And I press "Save changes"
+    And I wait until the page is ready
     Then I should see "Message3"
     And I should not see "Message1"
 
@@ -117,21 +117,19 @@ Feature: Basic usage of news block
       | Title | Fourth message |
       | Text  | Message4 text  |
     And I press "Save changes"
+    And I wait until the page is ready
     Then I should see "All messages"
     And I should see "Fourth message"
 
     # Go back in as a student and check the hide part worked.
-    When I log out
-    And I log in as "student1"
-    And I am on "Course 1" course homepage
+    When I am on the "Course 1" "Course" page logged in as "student1"
     Then I should see "Fourth message"
     And I should not see "Third message"
     And I should see "Medium message"
 
   Scenario: Test block options
     # Add block.
-    Given I log in as "teacher1"
-    And I am on "Course 1" course homepage
+    Given I am on the "Course 1" "Course" page logged in as "teacher1"
     And I turn editing mode on
     And I add the "News" block
 
@@ -144,6 +142,7 @@ Feature: Basic usage of news block
       | Summary       | Short               |
       | Hide titles   | Yes                 |
     And I press "Save changes"
+    And I wait until the page is ready
     Then I should see "Breaking!"
 
     # Add 2 messages.
@@ -152,6 +151,7 @@ Feature: Basic usage of news block
       | Title | Message 1      |
       | Text  | Message 1 text |
     And I press "Save changes"
+    And I wait until the page is ready
     Then I should see "Message 1"
 
     When I click on "Add" "link" in the "Breaking!" "block"
@@ -159,6 +159,7 @@ Feature: Basic usage of news block
       | Title | Message 2                                                         |
       | Text  | Message 2 text is longer than 40 characters. Hidden text: JACKPOT |
     And I press "Save changes"
+    And I wait until the page is ready
     Then I should see "Message 2"
 
     # Check: only showing latest message.
@@ -170,8 +171,7 @@ Feature: Basic usage of news block
   @javascript
   Scenario: Test author name option
     # Add block.
-    Given I log in as "teacher1"
-    And I am on "Course 1" course homepage
+    Given I am on the "Course 1" "Course" page logged in as "teacher1"
     And I turn editing mode on
     And I add the "News" block
 
@@ -181,6 +181,7 @@ Feature: Basic usage of news block
       | Title | Message 1      |
       | Text  | Message 1 text |
     And I press "Save changes"
+    And I wait until the page is ready
     Then I should see "ANNE" in the "(new News block)" "block"
 
     # In view all.
@@ -192,6 +193,7 @@ Feature: Basic usage of news block
     When I click on "Edit" "link"
     And I set the field "Hide author" to "Yes"
     And I press "Save changes"
+    And I wait until the page is ready
     Then I should not see "ANNE" in the ".block_news_message" "css_element"
 
     # On main page either.
@@ -200,7 +202,7 @@ Feature: Basic usage of news block
 
   @javascript
   Scenario: Test post, view and delete news on TOSL theme
-    Given I log in as "admin"
+    Given I am logged in as "admin"
     And the server is set up as The Open Science Lab
     And I log out of The Open Science Lab
     And I log in to The Open Science Lab as "admin"
@@ -212,6 +214,7 @@ Feature: Basic usage of news block
       | Title | Short message |
       | Text  | Message1 text |
     And I press "Save changes"
+    And I wait until the page is ready
     When I click on "View all" "link" in the "(new News block)" "block"
     And I click on "Delete Short message" "link"
     Then I should see "Confirm deletion"

@@ -16,8 +16,7 @@ Feature: News and Events view all page
       | user     | course | role           |
       | teacher1 | C1     | editingteacher |
       | student1 | C1     | student        |
-    And I log in as "teacher1"
-    And I am on "Course 1" course homepage
+    And I am on the "Course 1" "Course" page logged in as "teacher1"
     And I turn editing mode on
     And I add the "News" block
     And the news block for course "C1" is in news and events mode

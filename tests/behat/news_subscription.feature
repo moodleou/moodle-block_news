@@ -25,9 +25,7 @@ Feature: News subscription
     And I am on the "Course 1" course page logged in as "teacher"
     And I click on "News" "link" in the "//div[@class='oustudyplan-headerstripe']/ul/li[2]" "xpath_element"
     Then "View subscribers" "button" should be visible
-    And I log out
-    And I log in as "student"
-    And I am on "Course 1" course homepage
+    And I am on the "Course 1" "Course" page logged in as "student"
     And I click on "News" "link" in the "//div[@class='oustudyplan-headerstripe']/ul/li[2]" "xpath_element"
     Then "View subscribers" "button" should not exist
 

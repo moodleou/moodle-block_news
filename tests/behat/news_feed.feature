@@ -18,8 +18,7 @@ Feature: Usage of news block feeds
       | teacher1 | C2     | editingteacher |
     And the following config values are set as admin:
       | enablerssfeeds | 1 |
-    And I log in as "teacher1"
-    And I am on "Course 1" course homepage
+    And I am on the "Course 1" "Course" page logged in as "teacher1"
     And I turn editing mode on
     And I add the "News" block
     And the news block for course "C1" is in news and events mode
@@ -44,7 +43,7 @@ Feature: Usage of news block feeds
     And the "href" attribute of "View original message" "link" should contain "blocks/news/message.php?m=575003"
 
   Scenario: Import a feed from another course - events not enabled - message image included
-    Given I am on "Course 2" course homepage
+    Given I am on the "Course 2" "Course" page
     And I add the "News" block
     Then I should not see "Message 1"
     And I configure the "(new News block)" block
@@ -60,16 +59,14 @@ Feature: Usage of news block feeds
     And the following "course enrolments" exist:
       | user     | course | role    |
       | student1 | C2     | student |
-    And I log out
-    And I log in as "student1"
-    And I am on "Course 2" course homepage
+    And I am on the "Course 2" "Course" page logged in as "student1"
     Then I should see "Message 1" in the "(new News block)" "block"
     And I should see image "thumbnail.jpg" in news message "Message 1"
     And I click on "Message 1" "link"
     And I should see "attachment.txt" in the "div.news-message-attachments" "css_element"
 
   Scenario: Import a feed from another course - events enabled - detail included
-    Given I am on "Course 2" course homepage
+    Given I am on the "Course 2" "Course" page
     And I add the "News" block
     And the news block for course "C2" is in news and events mode
     Then I should not see "Message 1"

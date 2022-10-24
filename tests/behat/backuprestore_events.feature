@@ -15,8 +15,7 @@ Feature: Backup/Restore news and events block
     And the following "course enrolments" exist:
       | user   | course | role    |
       | ukuser | C1     | student |
-    And I log in as "admin"
-    And I am on "Course 1" course homepage
+    And I am on the "Course 1" "Course" page logged in as "admin"
     And I turn editing mode on
     And I add the "News" block
     And the news block for course "C1" is in news and events mode
@@ -46,7 +45,7 @@ Feature: Backup/Restore news and events block
     And I restore "test_backup.mbz" backup into a new course using this options:
       | Schema | Course name       | Course 2 |
       | Schema | Course short name | C2       |
-    And I am on "Course 2" course homepage
+    And I am on the "Course 2" "Course" page
     Then I should see "news2" in the "News and events" "block"
     And I should see "news3" in the "News and events" "block"
     And I should not see "news1" in the "News and events" "block"
@@ -72,7 +71,7 @@ Feature: Backup/Restore news and events block
     And I should see "Ev3 locator"
 
   Scenario: Test sort order when rollforward news and event with false data.
-    And I am on "Course 5" course homepage
+    And I am on the "Course 5" "Course" page
     And I add the "News" block
     And the news block for course "B747-14K" is in news and events mode
     And I reload the page
@@ -96,7 +95,7 @@ Feature: Backup/Restore news and events block
     #And I navigate to "Reports" in current page administration
     #And I click on "Roll forward" "link"
     And I am using the OU theme
-    And I am on "Course 5" course homepage
+    And I am on the "Course 5" "Course" page
     And I expand "Reports" node
     And I click on "Roll forward" "link"
     # Set up options.
