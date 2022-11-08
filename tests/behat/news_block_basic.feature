@@ -154,6 +154,7 @@ Feature: Basic usage of news block
     And I wait until the page is ready
     Then I should see "Message 1"
 
+    And I wait "2" seconds
     When I click on "Add" "link" in the "Breaking!" "block"
     And I set the following fields to these values:
       | Title | Message 2                                                         |
