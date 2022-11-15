@@ -203,9 +203,9 @@ Feature: Basic usage of news block
   @javascript
   Scenario: Test post, view and delete news on TOSL theme
     Given I am logged in as "admin"
-    And the server is set up as The Open Science Lab
-    And I log out of The Open Science Lab
-    And I log in to The Open Science Lab as "admin"
+    And the server is set up as the science labs
+    And I log out of the science labs
+    And I log in to the science labs as "admin"
 
     # Add an news block.
     When I click on "Turn editing on" "link"
