@@ -112,6 +112,7 @@ Feature: Basic usage of news block
     Then "show" "link" should exist in the ".block_news_message" "css_element"
 
     # Add another message
+    And I wait "2" seconds
     When I press "Add a new message"
     And I set the following fields to these values:
       | Title | Fourth message |
