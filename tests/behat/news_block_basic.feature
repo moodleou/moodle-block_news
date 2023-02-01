@@ -50,13 +50,13 @@ Feature: Basic usage of news block
       | Title | Short message |
       | Text  | Message1 text |
     And I press "Save changes"
-    And I wait until the page is ready
+    And I wait "1" seconds
     And I click on "Add" "link" in the "(new News block)" "block"
     And I set the following fields to these values:
       | Title | Medium message                                                                                                                        |
       | Text  | Message2 text is longer and contains over 100 characters but will get cut off on the front page at some point before the word JACKPOT |
     And I press "Save changes"
-    And I wait until the page is ready
+    And I wait "1" seconds
 
     # Check the contents and the summarising.
     Then I should see "Message1"
@@ -69,7 +69,7 @@ Feature: Basic usage of news block
       | Title | Third message |
       | Text  | Message3 text |
     And I press "Save changes"
-    And I wait until the page is ready
+    And I wait "1" seconds
     Then I should see "Message3"
     And I should not see "Message1"
 
@@ -112,13 +112,11 @@ Feature: Basic usage of news block
     Then "show" "link" should exist in the ".block_news_message" "css_element"
 
     # Add another message
-    And I wait "2" seconds
     When I press "Add a new message"
     And I set the following fields to these values:
       | Title | Fourth message |
       | Text  | Message4 text  |
     And I press "Save changes"
-    And I wait until the page is ready
     Then I should see "All messages"
     And I should see "Fourth message"
 
