@@ -186,6 +186,10 @@ body.ionic5.moodleapp-4 .block-news-message .block-news-message-text .collapsibl
 body.ionic5.moodleapp-4 ion-item-divider.block-news-events-heading {
     border-bottom: 1px solid #dedede;
     background-color: #f5f5f5;
+    margin: auto;
+    width: calc(100% - 22px);
+    border-radius: 10px;
+    min-height: 43px;
 }
 
 body.ionic5.moodleapp-4.dark ion-item-divider.block-news-events-heading {
