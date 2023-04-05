@@ -2,7 +2,7 @@
 .block .content .block_news_eventlist > h3,
 .block .content .block-news-editheading,
 .format-ousubject .block_news h3.news-heading {
-    color: #38254c;
+    color: var(--ou-digital-core-brand-blue-alternative-90pc);
     font-weight: normal;
     font-size: 2.14285em;
     margin-top: 0px;
