@@ -386,7 +386,7 @@ class system {
                     // But include events that have an end date that have not yet passed.
                     $sql .= 'AND COALESCE(eventend, eventstart) >= ? ';
                 }
-                $date = new \DateTime(null, \core_date::get_server_timezone_object());
+                $date = new \DateTime('now', \core_date::get_server_timezone_object());
                 $date->setTime(0, 0);
                 $params[] = $date->getTimestamp();
             }
