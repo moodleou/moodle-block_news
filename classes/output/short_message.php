@@ -131,9 +131,9 @@ class short_message extends renderable_message implements \templatable {
 
     public function export_for_template(\renderer_base $output) {
         if ($this->messagetype == message::MESSAGETYPE_EVENT) {
-            $this->eventday = strftime('%d', $this->eventstart);
-            $this->eventmonth = strftime('%b', $this->eventstart);
-            $this->eventdatetime = strftime($this->eventdatetimeformat, $this->eventstart);
+            $this->eventday = \core_date::strftime('%d', $this->eventstart);
+            $this->eventmonth = \core_date::strftime('%b', $this->eventstart);
+            $this->eventdatetime = \core_date::strftime($this->eventdatetimeformat, $this->eventstart);
         } else {
             if (isset($this->thumbinfo)) {
                 $this->thumbwidth = $this->thumbinfo['width'];

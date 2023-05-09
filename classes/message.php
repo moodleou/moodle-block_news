@@ -270,7 +270,7 @@ class message {
      * @return bool Whether this message is an all-day event.
      */
     public function get_alldayevent() {
-        $eventstart = new \DateTime(null, \core_date::get_server_timezone_object());
+        $eventstart = new \DateTime('now', \core_date::get_server_timezone_object());
         $eventstart->setTimestamp($this->eventstart);
         if (empty($this->eventend) && $eventstart->format('Hi') == '0000') {
             return true;
