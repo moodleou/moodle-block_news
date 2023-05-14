@@ -59,14 +59,11 @@ class news_message extends \core_search\base_block {
                 array_merge($contextparams, [CONTEXT_BLOCK, CONTEXT_COURSE, $modifiedfrom]));
     }
 
-    public function get_document($record, $options = array()) {
+    public function get_document($record, $options = []) {
 
         // Create empty document.
         $doc = \core_search\document_factory::instance($record->id,
                 $this->componentname, $this->areaname);
-
-        // Get stdclass object with data from DB.
-        $data = unserialize(base64_decode($record->configdata));
 
         // Get content.
         $content = content_to_text($record->message, $record->messageformat);

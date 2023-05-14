@@ -181,9 +181,9 @@ class full_message extends renderable_message implements \templatable {
         $this->formattedmessage = format_text($messagewithfiles, $this->messageformat);
         if ($this->messagetype == message::MESSAGETYPE_EVENT) {
             $this->isnews = false;
-            $this->eventday = \core_date::strftime('%d', $this->eventstart);
-            $this->eventmonth = \core_date::strftime('%b', $this->eventstart);
-            $this->eventdatetime = \core_date::strftime($this->eventdatetimeformat, $this->eventstart);
+            $this->eventday = \core_date::strftime('%d', (int) $this->eventstart);
+            $this->eventmonth = \core_date::strftime('%b', (int) $this->eventstart);
+            $this->eventdatetime = \core_date::strftime($this->eventdatetimeformat, (int) $this->eventstart);
             $this->classes .= ' block_news_event ';
             $fullnextlabel = 'rendereventnext';
             $fullprevlabel = 'rendereventprev';

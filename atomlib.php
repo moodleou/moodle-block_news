@@ -228,7 +228,7 @@ function atom_full_tag($tag, $level, $endline, $content, $attributes = null) {
         $st = preg_replace('~>$~', ' />', $st);
         return $st;
     }
-    $co = preg_replace("/\r\n|\r/", "\n", $content);
+    $co = preg_replace("/\r\n|\r/", "\n", $content ?? '');
     $et = atom_end_tag($tag, 0, true);
 
     return $st.$co.$et;
