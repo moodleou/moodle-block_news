@@ -1448,11 +1448,11 @@ class system {
             $it->content .= \html_writer::div(get_string('event', 'block_news'), 'block_news-event-type');
             $it->content .= \html_writer::div($bnm->get_eventlocation(), 'block_news-event-location');
             $it->content .= \html_writer::div(
-                    \core_date::strftime(get_string('dateformatlong', 'block_news'), $bnm->get_eventstart()),
+                    \core_date::strftime(get_string('dateformatlong', 'block_news'), (int) $bnm->get_eventstart()),
                     'block_news-event-start');
             if ($bnm->get_eventend()) {
                 $it->content .= \html_writer::div(
-                        \core_date::strftime(get_string('dateformatlong', 'block_news'), $bnm->get_eventend()),
+                        \core_date::strftime(get_string('dateformatlong', 'block_news'), (int) $bnm->get_eventend()),
                         'block_news-event-end');
             }
         }

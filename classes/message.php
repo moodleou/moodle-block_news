@@ -271,7 +271,7 @@ class message {
      */
     public function get_alldayevent() {
         $eventstart = new \DateTime('now', \core_date::get_server_timezone_object());
-        $eventstart->setTimestamp($this->eventstart);
+        $eventstart->setTimestamp((int) $this->eventstart);
         if (empty($this->eventend) && $eventstart->format('Hi') == '0000') {
             return true;
         } else {
