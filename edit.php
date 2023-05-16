@@ -59,7 +59,7 @@ if ($id) {
 $PAGE->set_url($url);
 
 if (empty($blockinstanceid)) {
-    print_error('errorinvalidblockinstanceid', 'block_news');
+    throw new moodle_exception('errorinvalidblockinstanceid', 'block_news');
 }
 $bns = system::get_block_settings($blockinstanceid);
 

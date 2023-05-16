@@ -43,7 +43,7 @@ $groupids = $DB->get_fieldset_select('block_news_message_groups', 'groupid', 'me
 $bnm = new message($mrec, $groupids);
 
 if (empty($blockinstanceid)) {
-    print_error('errorinvalidblockinstanceid', 'block_news');
+    throw new moodle_exception('errorinvalidblockinstanceid', 'block_news');
 }
 
 $bns = system::get_block_settings($blockinstanceid);
@@ -69,7 +69,7 @@ if ($bns->get_groupingsupport() == $bns::RESTRICTBYGROUP) {
 
         // Check that at least one group the message is visible to is accessible to the user.
         if (empty(array_intersect($messagegroups, $allowedgroups))) {
-            print_error('errormessageaccessrestricted', 'block_news');
+            throw new moodle_exception('errormessageaccessrestricted', 'block_news');
         }
     }
 }

@@ -628,7 +628,7 @@ class system {
             $groupids = $DB->get_fieldset_select('block_news_message_groups', 'groupid', 'messageid = ?', [$mrec->id]);
             return new message($mrec, $groupids);
         } else {
-            print_error('errornomsgfound', 'block_news', $id);
+            throw new \moodle_exception('errornomsgfound', 'block_news', $id);
         }
 
     }
@@ -678,7 +678,7 @@ class system {
                 $i++;
             }
         } else {
-            print_error('errornomsgfound', 'block_news', '', $bnm->get_id());
+            throw new \moodle_exception('errornomsgfound', 'block_news', '', $bnm->get_id());
         }
 
         $off = array_search($bnm->get_id(), $mida);
@@ -1194,7 +1194,7 @@ class system {
 
         // Get value from system config_plugins table.
         if (!$updatetime = get_config('block_news', 'block_news_updatetime')) {
-            print_error('errornoupdatetime', 'block_news');
+            throw new \moodle_exception('errornoupdatetime', 'block_news');
         }
 
         // Get a list of all feeds to update, sorted by URL, and in order of last update
@@ -1298,7 +1298,7 @@ class system {
         // And save it.
         check_dir_exists(dirname($fn), true, true); // Creates all required paths if absent.
         if (($ret = @file_put_contents($fn, $feedxml)) === false) {
-            print_error('errorwritefile', 'block_news');
+            throw new \moodle_exception('errorwritefile', 'block_news');
         }
         return $feedxml;
     }
@@ -1313,7 +1313,7 @@ class system {
         global $CFG;
 
         if (!$csemod = block_news_get_course_mod_info($this->blockinstanceid)) {
-            print_error('errornocsemodinfo', 'block_news');
+            throw new \moodle_exception('errornocsemodinfo', 'block_news');
         }
 
         $feedtitle = $csemod->cseshortname . ' - ';

@@ -38,15 +38,15 @@ $forcedownload = optional_param('forcedownload', 0, PARAM_BOOL);
 
 // Relative path must start with '/'.
 if (!$relativepath) {
-    print_error('invalidargorconf');
+    throw new moodle_exception('invalidargorconf');
 } else if ($relativepath[0] != '/') {
-    print_error('pathdoesnotstartslash');
+    throw new moodle_exception('pathdoesnotstartslash');
 }
 
 // Extract relative path components.
 $args = explode('/', ltrim($relativepath, '/'));
 if (count($args) < 4) {
-    print_error('invalidarguments');
+    throw new moodle_exception('invalidarguments');
 }
 $contextid = (int)array_shift($args);
 $component = clean_param(array_shift($args), PARAM_COMPONENT);

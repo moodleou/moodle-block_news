@@ -138,7 +138,7 @@ class full_message extends renderable_message implements \templatable {
                 $this->prevurl = null;
                 $this->nexturl = null;
             } else {
-                print_error('errorinvalidmode', 'block_news', $mode);
+                throw new \moodle_exception('errorinvalidmode', 'block_news', $mode);
             }
         }
 
