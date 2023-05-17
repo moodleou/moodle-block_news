@@ -254,9 +254,9 @@ class message {
      */
     public function get_eventstart_local() {
         global $USER;
-        $eventdate = new \DateTime(null, \core_date::get_server_timezone_object());
+        $eventdate = new \DateTime('now', \core_date::get_server_timezone_object());
         $eventdate->setTimestamp($this->eventstart);
-        $localdate = new \DateTime(null, \core_date::get_user_timezone_object($USER));
+        $localdate = new \DateTime('now', \core_date::get_user_timezone_object($USER));
         $localdate->setDate($eventdate->format('Y'), $eventdate->format('m'), $eventdate->format('d'));
         $localdate->setTime(0, 0);
         return $localdate->getTimestamp();
@@ -501,7 +501,7 @@ class message {
      */
     private static function set_alldayevent($data) {
         if (!empty($data->messagetype) && $data->messagetype == self::MESSAGETYPE_EVENT && $data->alldayevent) {
-            $eventstart = new \DateTime(null, \core_date::get_server_timezone_object());
+            $eventstart = new \DateTime('now', \core_date::get_server_timezone_object());
             $eventstart->setTimestamp($data->eventstart);
             $eventstart->setTime(0, 0);
             $data->eventstart = $eventstart->getTimestamp();
