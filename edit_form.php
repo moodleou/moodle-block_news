@@ -30,13 +30,14 @@ if (!defined('MOODLE_INTERNAL')) {
 }
 
 use block_news\system;
+use format_ousubject\ousubject_block_edit_form;
 
 /**
  * block edit form definition
  * @package blocks
  * @subpackage news
  */
-class block_news_edit_form extends block_edit_form {
+class block_news_edit_form extends ousubject_block_edit_form {
     // Define option value for grouping support by group.
     const OPTIONVALUEBYGROUP = 2;
 
