@@ -22,8 +22,6 @@ use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
 
-require_once($CFG->libdir . '/externallib.php');
-
 /**
  * Block news services implementation to get courseid from messageid.
  *
