@@ -17,6 +17,10 @@
 /**
  * Form for editing HTML block instance configuration (with block_news.php).
  *
+ * TODO This is a hideous copy of the normal edit form, for use on ousubject
+ * sites only. It's a total mess. We need to change ousubject to use the normal
+ * forms.
+ *
  * @package    blocks
  * @subpackage news
  * @copyright 2011 The Open University
@@ -30,15 +34,35 @@ if (!defined('MOODLE_INTERNAL')) {
 }
 
 use block_news\system;
+use format_ousubject\ousubject_block_edit_form;
 
 /**
  * block edit form definition
  * @package blocks
  * @subpackage news
  */
-class block_news_edit_form extends block_edit_form {
+class block_news_ousubject_edit_form extends ousubject_block_edit_form {
     // Define option value for grouping support by group.
     const OPTIONVALUEBYGROUP = 2;
+
+    private $attributes;
+
+    /**
+     * Overridden constructor to support ajaxformdata and attributes.
+     *
+     * @param mixed|null $actionurl
+     * @param mixed|null $block
+     * @param string $page
+     * @param array|null $ajaxformdata
+     * @param array $attributes
+     */
+    public function __construct($actionurl, $block, $page, array $ajaxformdata = null, array $attributes = []) {
+        // Store attributes to be set in specific_definition() below.
+        $this->attributes = $attributes;
+        parent::__construct($actionurl, $block, $page);
+        $this->_ajaxformdata = $ajaxformdata;
+        $this->_process_submission('');
+    }
 
     /**
      * standard config form function
@@ -46,6 +70,8 @@ class block_news_edit_form extends block_edit_form {
      * received in block_news::instance_config_save()
      */
     protected function specific_definition($mform) {
+        // Set attributes before we add any elements.
+        $mform->updateAttributes($this->attributes);
         $bns = $this->block->bns;
         $urlstxt = '';
 
