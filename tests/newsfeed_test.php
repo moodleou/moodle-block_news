@@ -146,7 +146,7 @@ class newsfeed_test extends \advanced_testcase {
         $bns = system::get_block_settings($block->id);
         $bns->save((object) ['groupingsupport' => system::RESTRICTBYGROUP]);
         // We need a user enrolled on the course.
-        $user1 = $this->generator->create_user(['username' => 'abc1', 'auth' => 'sams']);
+        $user1 = $this->generator->create_user(['username' => 'abc1', 'auth' => 'nologin']);
         $this->generator->enrol_user($user1->id, $course->id);
         $this->create_groupings($course, $user1);
         $newsgenerator->create_block_new_message($block, ['title' => 'Group1 Message', 'timemodified' => time() - 8],
@@ -252,9 +252,9 @@ EOT;
         $bns->save((object) ['groupingsupport' => system::RESTRICTBYGROUP]);
 
         // We need users enrolled on the course.
-        $user1 = $generator->create_user(['username' => 'abc1', 'auth' => 'sams']);
+        $user1 = $generator->create_user(['username' => 'abc1', 'auth' => 'nologin']);
         $generator->enrol_user($user1->id, $course->id);
-        $user2 = $generator->create_user(['username' => 'abc2', 'auth' => 'sams']);
+        $user2 = $generator->create_user(['username' => 'abc2', 'auth' => 'nologin']);
         $generator->enrol_user($user2->id, $course->id);
 
         // Get feed for both blocks (the second, for both users) and ensure they are all empty.
