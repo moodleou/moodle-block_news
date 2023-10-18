@@ -84,7 +84,6 @@
                                 var pageParams = {
                                     title: result.title,
                                     args,
-                                    initResult: {},
                                     component: 'block_news',
                                     method: 'news_page'
                                 };
