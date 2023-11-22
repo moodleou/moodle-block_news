@@ -36,6 +36,8 @@ use block_news\message;
 abstract class renderable_message implements \renderable {
     /** @var string Title of message */
     public $title;
+    /** @var string Tag used for message */
+    public $tag;
     /** @var string Additional CSS classes for message wrapper */
     public $classes;
     /** @var string URL to view the whole message */
@@ -58,6 +60,8 @@ abstract class renderable_message implements \renderable {
     public $thumbinfo;
     /** @var \moodle_url The URL of the thumbnail image */
     public $thumburl;
+    /** @var string Description of the thumbnail image */
+    public $thumbdesc;
     /** @var string The message text with formatting and filtering applied */
     public $formattedmessage;
     /** @var int The width of the thumbnail image in pixels */
