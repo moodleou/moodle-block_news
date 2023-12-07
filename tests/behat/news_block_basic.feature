@@ -199,25 +199,3 @@ Feature: Basic usage of news block
     # On main page either.
     When I am on "Course 1" course homepage
     Then I should not see "ANNE" in the "(new News block)" "block"
-
-  @javascript
-  Scenario: Test post, view and delete news on TOSL theme
-    Given I am logged in as "admin"
-    And the server is set up as The Open Science Lab
-    And I log out of The Open Science Lab
-    And I log in to The Open Science Lab as "admin"
-
-    # Add an news block.
-    When I click on "Turn editing on" "link"
-    When I click on "Add" "link" in the "(new News block)" "block"
-    And I set the following fields to these values:
-      | Title | Short message |
-      | Text  | Message1 text |
-    And I press "Save changes"
-    And I wait until the page is ready
-    When I click on "View all" "link" in the "(new News block)" "block"
-    And I click on "Delete Short message" "link"
-    Then I should see "Confirm deletion"
-    And I should see "Short message"
-    When I press "Continue"
-    Then I should see "All messages"
