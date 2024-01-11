@@ -16,6 +16,9 @@
 
 namespace block_news;
 
+global $CFG;
+require_once($CFG->dirroot . '/blocks/news/tests/search_engine_advance_testcase.php');
+
 /**
  * PHPUnit news subscription tests.
  *
@@ -23,9 +26,10 @@ namespace block_news;
  * @copyright 2021 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class news_cron_test extends \advanced_testcase {
+class news_cron_test extends search_engine_advance_testcase {
     /** @var object News block instance */
     private $blockinstance;
+
     /** @var \block_news_generator Data generator */
     private $generator;
 
@@ -61,6 +65,7 @@ class news_cron_test extends \advanced_testcase {
         $this->getDataGenerator()->enrol_user($this->user->id, $course->id);
         $this->getDataGenerator()->enrol_user($this->adminid, $course->id);
 
+        $this->newsmessageareaid = \core_search\manager::generate_areaid('block_news', 'news_message');
     }
 
     public function test_news_email_normal(): void {
@@ -177,5 +182,95 @@ class news_cron_test extends \advanced_testcase {
         $this->assertTrue($list->next_message($message));
         $this->assertEquals($mid1, $message->id);
         $this->assertFalse($list->next_news($news, $blockcontext, $course));
+    }
+
+    /**
+     * Tests the scenario when the RSS update then automatically deleted from the database by an adhoc task.
+     */
+    public function test_delete_index_after_update_feed(): void {
+        global $DB, $CFG;
+
+        $this->resetAfterTest();
+        if (!$this->solr_setup()) {
+            $this->markTestSkipped();
+        }
+        $this->setAdminUser();
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+        // Create a news block.
+        $newsgenerator = $generator->get_plugin_generator('block_news');
+        $block = $newsgenerator->create_instance([], ['courseid' => $course->id]);
+
+        // Unit testing hack to request feed from a file.
+        $CFG->block_news_simplepie_feed = __DIR__ . '/fixtures/remote_rss_1.xml';
+
+        // Set the block to use a feed.
+        $blocksettings = system::get_block_settings($block->id);
+        $blocksettings->save_feed_urls('https://frogs.example.org/');
+
+        // We have 4 messages at first.
+        $messages = $blocksettings->get_messages_all(true);
+        $this->assertCount(4, $messages);
+        $this->assertEquals('Frogs 2', $messages[0]->get_title());
+        $this->assertEquals('Frogs 3', $messages[1]->get_title());
+        $this->assertEquals('Frogs 1', $messages[2]->get_title());
+        $this->assertEquals('Frogs 4', $messages[3]->get_title());
+        $this->waitForSecond();
+        $this->assertTrue($this->search->index());
+
+        // Check 4 messages are in the index.
+        $this->assert_raw_solr_query_result('content:"frogs"', ['Frogs 1', 'Frogs 2', 'Frogs 3', 'Frogs 4']);
+
+        // Update new feed with 2 messages.
+        $CFG->block_news_simplepie_feed = __DIR__ . '/fixtures/remote_rss_3.xml';
+        $DB->set_field('block_news_feeds', 'feedupdated', 1);
+        $task = new \block_news\task\process_feeds();
+        ob_start();
+        $task->execute();
+        ob_end_clean();
+
+        // Now we have 2 messages after update feed.
+        $messagesafter = $blocksettings->get_messages_all(true);
+        $this->assertCount(2, $messagesafter);
+        $this->assertEquals('Frogs 5', $messagesafter[0]->get_title());
+        $this->assertEquals('Frogs 6', $messagesafter[1]->get_title());
+
+        $this->waitForSecond();
+        $this->search->index();
+
+        // There are 6 items in search index: 4 old items (need to be cleared) and 2 new items.
+        $this->assert_raw_solr_query_result('content:"frogs"', ['Frogs 1', 'Frogs 2', 'Frogs 3', 'Frogs 4', 'Frogs 5', 'Frogs 6']);
+
+        // There should be an adhoc task runs.
+        $this->expectOutputString("Deleted 4 old news messages search data entries\n");
+        // Run search cleanup adhoc task.
+        $this->runAdhocTasks();
+        // 4 old messages index is cleared.
+        $this->assert_raw_solr_query_result('content:"frogs"', ['Frogs 5', 'Frogs 6']);
+
+        // Update feed but disable search clean up.
+        $CFG->block_news_simplepie_feed = __DIR__ . '/fixtures/remote_rss_1.xml';
+        $DB->set_field('block_news_feeds', 'feedupdated', 2);
+
+        $CFG->block_news_disablesearchcleanup = 1;
+        $task = new \block_news\task\process_feeds();
+        ob_start();
+        $task->execute();
+        ob_end_clean();
+
+        $messagesafter = $blocksettings->get_messages_all(true);
+        // Now we have 4 messages after update feed.
+        $this->assertCount(4, $messagesafter);
+        $this->assertEquals('Frogs 2', $messages[0]->get_title());
+        $this->assertEquals('Frogs 3', $messages[1]->get_title());
+        $this->assertEquals('Frogs 1', $messages[2]->get_title());
+        $this->assertEquals('Frogs 4', $messages[3]->get_title());
+
+        $this->waitForSecond();
+        $this->search->index();
+        $this->runAdhocTasks();
+        // There still contain 2 old messages Frogs 5 and Frogs 6.
+        $this->assert_raw_solr_query_result('content:"frogs"', ['Frogs 1', 'Frogs 2', 'Frogs 3', 'Frogs 4', 'Frogs 5', 'Frogs 6']);
     }
 }

@@ -24,8 +24,6 @@
 
 namespace block_news\task;
 
-defined('MOODLE_INTERNAL') || die();
-
 use block_news\system;
 
 class process_feeds extends \core\task\scheduled_task {
@@ -56,7 +54,8 @@ class process_feeds extends \core\task\scheduled_task {
         if (!count($fbrecs)) {
             return;
         }
-
+        // Store the ID of deleted messages to track their index.
+        $deletemessageids = [];
         mtrace('Processing feeds...');
         $beginning = microtime(true);
         $done = 0;
@@ -73,7 +72,10 @@ class process_feeds extends \core\task\scheduled_task {
 
             // Update feed.
             $starttime = microtime(true);
-            $bns->update_feed($fbrec);
+            $returndata = $bns->update_feed($fbrec);
+            if ($returndata) {
+                $deletemessageids = array_merge($deletemessageids, $returndata);
+            }
             $now = microtime(true);
             $done++;
 
@@ -89,7 +91,10 @@ class process_feeds extends \core\task\scheduled_task {
                 break;
             }
         }
-
+        if (!empty($deletemessageids)) {
+            // Delete the index of deleted messages.
+            \block_news\task\search_cleanup::trigger($deletemessageids);
+        }
         mtrace($done . ' processed in ' . round($now - $beginning) . 's');
     }
 }

@@ -26,7 +26,10 @@ namespace block_news;
 
 defined('MOODLE_INTERNAL') || die();
 
-class message_testcase extends \advanced_testcase {
+global $CFG;
+require_once($CFG->dirroot . '/blocks/news/tests/search_engine_advance_testcase.php');
+
+class message_test extends search_engine_advance_testcase {
 
     /** @var object News block instance */
     private $blockinstance;
@@ -119,6 +122,59 @@ class message_testcase extends \advanced_testcase {
         $this->assertTrue(count($results2) == 2);
         $this->assertEquals($yesterdayended, $results2[0]->get_id());
         $this->assertEquals($yesterday, $results2[1]->get_id());
+    }
+
+    /**
+     * Tests the scenario when delete a message then automatically deleted from the database by an adhoc task.
+     */
+    public function test_delete_index_after_delete_message(): void {
+        global $DB, $CFG;
+
+        $this->resetAfterTest();
+        if (!$this->solr_setup()) {
+            $this->markTestSkipped();
+        }
+        $this->setAdminUser();
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+        // Create a news block.
+        $newsgenerator = $generator->get_plugin_generator('block_news');
+        $block = $newsgenerator->create_instance([], ['courseid' => $course->id]);
+
+        // Unit testing hack to request feed from a file.
+        $CFG->block_news_simplepie_feed = __DIR__ . '/fixtures/remote_rss_3.xml';
+
+        // Set the block to use a feed.
+        $blocksettings = system::get_block_settings($block->id);
+        $blocksettings->save_feed_urls('https://frogs.example.org/');
+        $messages = $blocksettings->get_messages_all(true);
+        $this->assertCount(2, $messages);
+        $this->assertEquals('Frogs 5', $messages[0]->get_title());
+        $this->assertEquals('Frogs 6', $messages[1]->get_title());
+
+        $this->waitForSecond();
+        $this->assertTrue($this->search->index());
+
+        // Check the message is in the index.
+        $this->assert_raw_solr_query_result('content:"frogs"', ['Frogs 5', 'Frogs 6']);
+
+        // Delete a message.
+        $messages[0]->delete();
+
+        $messagesafter = $blocksettings->get_messages_all(true);
+        // There is only 1 message left.
+        $this->assertCount(1, $messagesafter);
+        $this->assertEquals('Frogs 6', $messagesafter[0]->get_title());
+
+        // But the message Frogs 5 is still in the index.
+        $this->assert_raw_solr_query_result('content:"frogs"', ['Frogs 5', 'Frogs 6']);
+        // There should be an adhoc task runs.
+        $this->expectOutputString("Deleted 1 old news messages search data entries\n");
+        // Run search cleanup adhoc task.
+        $this->runAdhocTasks();
+        // The old index is deleted.
+        $this->assert_raw_solr_query_result('content:"frogs"', ['Frogs 6']);
     }
 }
 
