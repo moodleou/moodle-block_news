@@ -1738,4 +1738,18 @@ class system {
         return $groupids;
     }
 
-} // End class.
+    /**
+     * Gets a key salt used for unsubscribe URLs (could also be used for other things).
+     *
+     * @return string Salt (usually 15 characters text)
+     */
+    public static function get_key_salt(): string {
+        $salt = get_config('block_news', 'keysalt');
+        if (!$salt) {
+            // If the salt does not exist, automatically set it first time.
+            $salt = random_string();
+            set_config('keysalt', $salt, 'block_news');
+        }
+        return $salt;
+    }
+}

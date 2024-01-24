@@ -30,6 +30,9 @@ $courseid = optional_param('course', 0, PARAM_INT);
 $bi = optional_param('bi', 0, PARAM_INT);
 $back = optional_param('back', '', PARAM_ALPHA);
 
+$userid = optional_param('user', 0, PARAM_INT);
+$key = optional_param('key', '', PARAM_RAW);
+
 $pageparams = array();
 if ($bi) {
     $pageparams['bi'] = $bi;
@@ -43,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $requestingsubscribe = '';
 }
 $subscribeoptions = ($requestingsubscribe ? 1 : 0) + ($requestingunsubscribe ? 1 : 0);
-if ($subscribeoptions != 1) {
+if ($subscribeoptions != 1 && !$key) {
     throw new moodle_exception('error_subscribeparams', 'block_news');
 }
 
@@ -51,6 +54,29 @@ $confirmtext = get_string(
     $requestingsubscribe ? 'subscribe_already' : 'unsubscribe_already', 'block_news');
 if ($bi) {
     $news = \block_news\subscription::get_from_bi($bi);
+
+    // Handle one-click subscribe specifically.
+    if ($key) {
+        // Check key is valid.
+        if (!$userid || $key !== $news->get_unsubscribe_key($userid)) {
+            throw new \moodle_exception('error_subscribeparams', 'block_news');
+        }
+
+        // Check we actually are subscribed, if not then do nothing.
+        $subscriptioninfo = $news->get_subscription_info($userid);
+        if ($subscriptioninfo->subscribed) {
+            $news->unsubscribe($userid);
+            $info = 'actually unsubscribed';
+        } else {
+            $info = 'already not subscribed';
+        }
+
+        // Indicate successful, and exit.
+        header('Content-Type: text/plain; charset=UTF-8');
+        echo 'Unsubscribe OK (' . $info . ')';
+        exit;
+    }
+
     $subscriptioninfo = $news->get_subscription_info();
     if ($subscriptioninfo->subscribed) {
         $subscribed = \block_news\subscription::FULLY_SUBSCRIBED;

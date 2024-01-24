@@ -389,7 +389,7 @@ class subscription {
             'moodle/site:viewfullnames', \context_block::instance($this->bi)));
     }
 
-    /** @return Title of news */
+    /** @return string Title of news */
     public function get_title(): string {
         return $this->newsfields->title;
     }
@@ -637,8 +637,33 @@ class subscription {
     /**
      * Gets ID of block instance
      *
+     * @return int Block instance id
      */
     public function get_blockinstanceid(): int {
         return $this->bi;
+    }
+
+    /**
+     * Gets the unsubscribe link for a user.
+     *
+     * @param int $userid User id
+     * @return string Link URL
+     */
+    public function get_unsubscribe_link(int $userid): string {
+        return (new \moodle_url('/blocks/news/subscribe.php', [
+            'bi' => $this->bi,
+            'user' => $userid,
+            'key' => $this->get_unsubscribe_key($userid),
+        ]))->out(false);
+    }
+
+    /**
+     * Gets the unsubscribe key for a user on this news block.
+     *
+     * @param int $userid User id
+     * @return string Key text
+     */
+    public function get_unsubscribe_key(int $userid): string {
+        return hash('sha256', system::get_key_salt() . $userid . ':' . $this->bi);
     }
 }

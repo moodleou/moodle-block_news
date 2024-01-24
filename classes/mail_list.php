@@ -257,11 +257,11 @@ class mail_list {
     /**
      * Obtains the next news from the list.
      *
-     * @param stdClass &$news News (out variable)
+     * @param subscription|null &$news News (out variable)
      * @param object &$blockcontext Context block
      * @param object &$course Course object (out variable)
      */
-    public function next_news(&$news, &$blockcontext, &$course) {
+    public function next_news(?subscription &$news, &$blockcontext, &$course) {
         global $DB;
 
         if ($this->is_finished()) {
