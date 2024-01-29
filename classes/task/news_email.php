@@ -93,6 +93,14 @@ class news_email extends \core\task\scheduled_task {
                 $sentcount = 0;
                 $failedcount = 0;
                 $groupskips = 0;
+
+                // Standard headers for news emails.
+                $headers = [
+                    'List-Id: "' . str_replace('"', "'", strip_tags($news->get_title())) . '" ' .
+                        generate_email_messageid('block_news' . $news->get_blockinstanceid()),
+                    'List-Unsubscribe-Post: List-Unsubscribe=One-Click',
+                ];
+
                 try {
                     $langusers = [];
                     $innerbefore = microtime(true);
@@ -119,7 +127,6 @@ class news_email extends \core\task\scheduled_task {
                     $langusers[$lang][$subscriber->timezone][$subscriber->emailtype][$subscriber->id] = $subscriber;
                 }
 
-                $noreplyaddress = $CFG->noreplyaddress;
                 $blockinstanceid = $news->get_blockinstanceid();
                 $bns = system::get_block_settings($blockinstanceid);
                 $images = $bns->get_images();
@@ -154,7 +161,12 @@ class news_email extends \core\task\scheduled_task {
                                         $main .= $out;
                                         $news->build_email($subject, $plaintext, $html1, $emailtype & 1, $lang, $main);
                                         $buildemailtime += microtime(true) - $innerbefore;
-                                        if (self::email_send($mailto, $noreplyaddress, $subject, $plaintext, $html1)) {
+
+                                        // Get unsubscribe url and record headers.
+                                        $headers[99] = 'List-Unsubscribe: <' . $news->get_unsubscribe_link($mailto->id) . '>';
+                                        $from = \core_user::get_noreply_user();
+                                        $from->customheaders = $headers;
+                                        if (self::email_send($mailto, $from, $subject, $plaintext, $html1)) {
                                             $sentcount++;
                                         } else {
                                             $failedcount++;
@@ -287,6 +299,7 @@ class news_email extends \core\task\scheduled_task {
             print "<h3>Email sent</h3>";
             print "<ul><li>From: <strong>" . (is_object($from) ? $from->email : $from) .
                 "</strong></li>";
+            print "<li>Headers:<pre>" . implode("\n", $from->customheaders ?? []) . "</pre></li>";
             print "<li>To: <strong>$to->email</strong></li>";
             print "<li>Subject: <strong>" . htmlspecialchars($subject) .
                 "</strong></li></ul>";

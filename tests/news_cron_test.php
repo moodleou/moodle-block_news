@@ -32,10 +32,10 @@ class news_cron_test extends \advanced_testcase {
     protected $adminid;
     protected $adminemail;
 
-    /** @var stdClass $group1 */
+    /** @var \stdClass|null $group1 */
     protected $group = null;
 
-    /** @var stdClass $user */
+    /** @var \stdClass|null $user */
     protected $user = null;
 
     public function setUp(): void {
@@ -80,6 +80,36 @@ class news_cron_test extends \advanced_testcase {
 
         // Check 1 email sent.
         $this->assertEquals(1, count($messages));
+    }
+
+    /**
+     * Tests, when sending a normal email, that correct headers are included.
+     */
+    public function test_news_email_normal_headers(): void {
+        $this->generator->create_block_news_record(
+            $this->blockinstance,
+            (object) ['displaytype' => system::DISPLAY_DEFAULT, 'title' => 'Bulletin']);
+        $this->generator->create_block_new_message($this->blockinstance,
+            (object) ['image' => '/blocks/news/tests/fixtures/kitten1.jpg', 'userid' => $this->adminid]);
+        $news = subscription::get_from_bi($this->blockinstance->id);
+        $news->subscribe($this->adminid);
+        $sink = $this->redirectEmails();
+        ob_start();
+        \block_news\task\news_email::email_normal();
+        ob_end_clean();
+
+        $messages = $sink->get_messages();
+
+        // Check headers.
+        $this->assertEquals(1, count($messages));
+        $this->assertEquals(\core_user::get_noreply_user()->email, $messages[0]->from);
+        $this->assertStringContainsString('List-Id: "Bulletin" <block_news' .
+            $this->blockinstance->id . '/moodle@www.example.com>', $messages[0]->header);
+        $this->assertMatchesRegularExpression('~List-Unsubscribe: <.*?/blocks/news/subscribe.php\?bi=' .
+            $this->blockinstance->id . '&user=' . $this->adminid . '&key=' .
+            $news->get_unsubscribe_key($this->adminid) . '>~', $messages[0]->header);
+        $this->assertStringContainsString('List-Unsubscribe-Post: List-Unsubscribe=One-Click',
+            $messages[0]->header);
     }
 
     public function test_email_message_with_group_restriction(): void {
