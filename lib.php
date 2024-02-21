@@ -83,7 +83,7 @@ function block_news_pluginfile($course, $birecordorcm, $context, $filearea, $arg
  * @param int $displaytype The block's displaytype (block_news\system::DISPLAY_* constant)
  * @return StdClass Course/Module identity information (useful for Form redirect logic)
  */
-function block_news_init_page($blockinstanceid, $title, $displaytype = system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
+function block_news_init_page($blockinstanceid, $title, $displaytype = system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS, $islogin = true) {
     global $PAGE, $CFG;
 
     $csemod = block_news_get_course_mod_info($blockinstanceid);
@@ -101,7 +101,9 @@ function block_news_init_page($blockinstanceid, $title, $displaytype = system::D
     $CFG->block_news_blockcontext = context_block::instance($blockinstanceid);
     $coursecontext = context_course::instance($csemod->course->id);
     $PAGE->set_context($coursecontext);
-    require_course_login($csemod->course);
+    if ($islogin) {
+        require_course_login($csemod->course);
+    }
 
     if (empty($title)) {
         $title = get_string('pluginname', 'block_news');
