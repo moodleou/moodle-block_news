@@ -57,7 +57,7 @@ $confirmtext = get_string(
 if ($bi) {
     $news = \block_news\subscription::get_from_bi($bi);
 
-    $subscriptioninfo = $news->get_subscription_info();
+    $subscriptioninfo = $news->get_subscription_info($userid);
     if ($subscriptioninfo->subscribed) {
         $subscribed = \block_news\subscription::FULLY_SUBSCRIBED;
     } else {
@@ -85,8 +85,6 @@ if ($bi) {
         if (!$userid || $key !== $news->get_unsubscribe_key($userid)) {
             throw new \moodle_exception('error_subscribeparams', 'block_news');
         }
-        // Check we actually are subscribed, if not then do nothing.
-        $subscriptioninfo = $news->get_subscription_info($userid);
         if ($subscriptioninfo->subscribed) {
             $news->unsubscribe($userid);
         }
