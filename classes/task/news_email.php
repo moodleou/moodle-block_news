@@ -159,7 +159,7 @@ class news_email extends \core\task\scheduled_task {
                                         $out = $news->render_main_section($bnm, $bns, $images, $files, $output,
                                             $blockcontext, $emailtype);
                                         $main .= $out;
-                                        $news->build_email($subject, $plaintext, $html1, $emailtype & 1, $lang, $main);
+                                        $news->build_email($subject, $plaintext, $html1, $emailtype & 1, $lang, $main, $mailto->id);
                                         $buildemailtime += microtime(true) - $innerbefore;
 
                                         // Get unsubscribe url and record headers.

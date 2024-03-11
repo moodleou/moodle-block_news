@@ -431,10 +431,12 @@ class subscription {
      * @param bool $ishtml True if in HTML mode
      * @param string $lang Language of receiving user
      * @param string $main main email message
+     * @param $userid user id
+     * @throws \coding_exception
      */
 
     public function build_email(&$subject, &$text, &$html,
-        $ishtml, $lang, $main) {
+        $ishtml, $lang, $main, $userid) {
         global $CFG, $USER;
         $oldlang = $USER->lang;
         $USER->lang = $lang;
@@ -462,8 +464,7 @@ class subscription {
             $this->get_link_params(self::PARAM_PLAIN) . "\n";
         $html .= "<hr size='1' noshade='noshade' />" .
             "<div class='news-email-unsubscribe'>" .
-            "<a href='$CFG->wwwroot/blocks/news/subscribe.php?" .
-            $this->get_link_params(self::PARAM_HTML) . "'>" .
+            "<a href='" . $this->get_unsubscribe_link($userid) . "'>" .
             get_string('unsubscribe', 'block_news') . '</a></div>';
         $html .= '</body>';
 

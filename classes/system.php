@@ -753,6 +753,18 @@ class system {
         $frecs = $DB->get_records('block_news_feeds',
                 array('blockinstanceid' => $this->blockinstanceid));
 
+        // Store message IDs.
+        $oldmessageids = [];
+        $mapping = [];
+        [$sql, $params] = $DB->get_in_or_equal(array_keys($frecs), SQL_PARAMS_NAMED, 'param', true, 0);
+        $sql = "SELECT id, newsfeedid
+                  FROM {block_news_messages} bnm
+                 WHERE bnm.newsfeedid {$sql}";
+        $rs = $DB->get_recordset_sql($sql, $params);
+        foreach ($rs as $result) {
+            $mapping[$result->newsfeedid][] = $result->id;
+        }
+
         foreach ($frecs as $frec) {
             $idx = array_search($frec->feedurl, $feeds); // Needle, haystack.
             if ($idx !== false) {
@@ -762,13 +774,19 @@ class system {
             } else {
                 // An existing feed is not in requested list - remove.
                 $DB->delete_records('block_news_feeds', array('id' => $frec->id));
+                if (array_key_exists($frec->id, $mapping)) {
+                    // The key exists, so push its values to $oldmessageids
+                    $oldmessageids = array_merge($oldmessageids, $mapping[$frec->id]);
+                }
                 $DB->delete_records('block_news_messages', array('newsfeedid' => $frec->id));
 
                 // Also clear cache.
                 $this->uncache_block_feed();
             }
         }
-
+        if (!empty($oldmessageids)) {
+            \block_news\task\search_cleanup::trigger($oldmessageids);
+        }
         // Handle the new ones.
         foreach ($feeds as $feed) {
             $frec = new \stdClass();
@@ -805,8 +823,9 @@ class system {
      * Updates a feed for a block
      *
      * @param \stdClass $fbrec block_news_feeds
+     * @return array|null Delete messages ids: null if error or exception.
      */
-    public function update_feed($fbrec) {
+    public function update_feed($fbrec): ?array {
         global $DB, $CFG;
 
         // Do whole process in a transaction.
@@ -833,13 +852,13 @@ class system {
             $bnf->errorcount++;
             $DB->update_record('block_news_feeds', $bnf);
             $transaction->allow_commit();
-            return;
+            return null;
         }
         // Else OK.
 
         // See if feed is different from the last time we did an update.
         $hash = sha1(serialize($fia));
-
+        $deletemessageids = [];
         if ($hash != $bnf->currenthash) {
             // Get existing records.
             $existing = $DB->get_records('block_news_messages', ['newsfeedid' => $bnf->id]);
@@ -941,6 +960,10 @@ class system {
 
             // Delete all the existing messages we didn't reuse.
             $DB->delete_records_list('block_news_messages', 'id', array_keys($existing));
+            // Keep a track of the IDs of deleted messages to delete search index data later.
+            foreach ($existing as $item) {
+                $deletemessageids[] = $item->id;
+            }
 
             // Write new hash.
             $bnf->currenthash = $hash;
@@ -951,6 +974,7 @@ class system {
 
         $transaction->allow_commit(); // Seal up.
         // Transactions are automatically rolled back if there is an error.
+        return $deletemessageids;
     }
 
     /**

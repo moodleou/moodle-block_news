@@ -183,6 +183,14 @@ body.ionic5.moodleapp-4 .block-news-message .block-news-message-text .collapsibl
     display: none;
 }
 
+body.ionic5.moodleapp-4 .block-news-message ion-icon[name="open-outline"] {
+    color: #1d2125;
+}
+
+body.ionic5.moodleapp-4.dark .block-news-message ion-icon[name="open-outline"] {
+    color: #ffffff;
+}
+
 body.ionic5.moodleapp-4 ion-item-divider.block-news-events-heading {
     border-bottom: 1px solid #dedede;
     background-color: #f5f5f5;

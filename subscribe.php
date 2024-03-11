@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+global $PAGE;
 
 /**
  * This script handles requests to subscribe/unsubscribe from a news.
@@ -24,6 +25,7 @@
  * @copyright 2021 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+use block_news\system;
 require_once('../../config.php');
 require_once('lib.php');
 $courseid = optional_param('course', 0, PARAM_INT);
@@ -55,29 +57,7 @@ $confirmtext = get_string(
 if ($bi) {
     $news = \block_news\subscription::get_from_bi($bi);
 
-    // Handle one-click subscribe specifically.
-    if ($key) {
-        // Check key is valid.
-        if (!$userid || $key !== $news->get_unsubscribe_key($userid)) {
-            throw new \moodle_exception('error_subscribeparams', 'block_news');
-        }
-
-        // Check we actually are subscribed, if not then do nothing.
-        $subscriptioninfo = $news->get_subscription_info($userid);
-        if ($subscriptioninfo->subscribed) {
-            $news->unsubscribe($userid);
-            $info = 'actually unsubscribed';
-        } else {
-            $info = 'already not subscribed';
-        }
-
-        // Indicate successful, and exit.
-        header('Content-Type: text/plain; charset=UTF-8');
-        echo 'Unsubscribe OK (' . $info . ')';
-        exit;
-    }
-
-    $subscriptioninfo = $news->get_subscription_info();
+    $subscriptioninfo = $news->get_subscription_info($userid);
     if ($subscriptioninfo->subscribed) {
         $subscribed = \block_news\subscription::FULLY_SUBSCRIBED;
     } else {
@@ -98,7 +78,21 @@ if ($back == 'view') {
 
 if ($bi) {
     $backurl = $news->get_url(\block_news\subscription::PARAM_HTML);
-    $output = block_news_init_page($bi, null);
+
+    // Handle one-click subscribe specifically.
+    if ($key) {
+        // Check key is valid.
+        if (!$userid || $key !== $news->get_unsubscribe_key($userid)) {
+            throw new \moodle_exception('error_subscribeparams', 'block_news');
+        }
+        if ($subscriptioninfo->subscribed) {
+            $news->unsubscribe($userid);
+        }
+        $output = block_news_init_page($bi, null, system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS, false);
+    } else {
+        $output = block_news_init_page($bi, null);
+    }
+
     $urlparams = ['bi' => $bi];
     $PAGE->set_url('/blocks/news/subscribers.php', $urlparams);
     $output = $PAGE->get_renderer('block_news');
