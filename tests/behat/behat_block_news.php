@@ -110,6 +110,18 @@ class behat_block_news extends behat_base {
     }
 
     /**
+     * Set the feedurls setting to a fixture file, using the wwwroot URLs.
+     *
+     * @When /^I set the news block feedurls field to mod fixture file "([^"]+)"$/
+     * @param string $filename XML file in blocks/news/tests/fixtures
+     */
+    public function i_set_the_news_block_feedurls_field_to_mod_fixture_file($filename) {
+        global $CFG;
+        $url = $CFG->wwwroot . '/mod/feed/tests/fixtures/' . $filename;
+        $this->execute("behat_forms::i_set_the_field_to", ['config_feedurls', $url]);
+    }
+
+    /**
      * Set the feedurls setting to another local course's feed.
      *
      * @When /^I set the news block feedurls field to another course "([^"]+)" feed$/

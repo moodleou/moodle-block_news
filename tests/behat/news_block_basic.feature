@@ -126,6 +126,7 @@ Feature: Basic usage of news block
     And I should not see "Third message"
     And I should see "Medium message"
 
+  @javascript
   Scenario: Test block options
     # Add block.
     Given I am on the "Course 1" "Course" page logged in as "teacher1"
