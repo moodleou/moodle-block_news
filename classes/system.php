@@ -345,7 +345,7 @@ class system {
                 list($sql, $params) = $DB->get_in_or_equal($groups);
             } else {
                 // User has no groups so cannot see group restricted messages.
-                $output['sql'] = 'AND g.id IS NULL ';
+                $output['sql'] = ' AND g.id IS NULL ';
             }
         } else {
             list($insql, $params) = $DB->get_in_or_equal($groupingids);
@@ -540,7 +540,7 @@ class system {
         if ($type != message::MESSAGETYPE_EVENT && $order == 'eventstart ASC, messagedate DESC') {
             $order = 'messagedate DESC';
         }
-        $orderby = 'ORDER BY ' . $order;
+        $orderby = ' ORDER BY ' . $order;
         $limitfrom = 0;
         $limitnum = 0;
         if (!is_null($pagenumber) && !is_null($pagesize)) {
