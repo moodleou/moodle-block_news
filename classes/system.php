@@ -380,11 +380,11 @@ class system {
             if ($type == message::MESSAGETYPE_EVENT) {
                 if ($pastevents) {
                     // Show events that have already happened.
-                    $sql .= 'AND COALESCE(eventend, eventstart) < ? ';
+                    $sql .= ' AND COALESCE(eventend, eventstart) < ? ';
                 } else {
                     // Automatically exclude events that happened before midnight this morning (according to server time).
                     // But include events that have an end date that have not yet passed.
-                    $sql .= 'AND COALESCE(eventend, eventstart) >= ? ';
+                    $sql .= ' AND COALESCE(eventend, eventstart) >= ? ';
                 }
                 $date = new \DateTime('now', \core_date::get_server_timezone_object());
                 $date->setTime(0, 0);
