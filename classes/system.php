@@ -507,7 +507,7 @@ class system {
                  AND messagedate <= ?'
                 . $groups['sql']
                 . $restricttype['sql'] .
-                'ORDER BY ' . $order . '
+                ' ORDER BY ' . $order . '
                  LIMIT ' . $max;
 
         $params = array($this->blockinstanceid, time());
@@ -662,10 +662,10 @@ class system {
                   FROM {block_news_messages} m
              LEFT JOIN {block_news_message_groups} g ON m.id = g.messageid
                  WHERE blockinstanceid = ?
-                   AND messagetype = ?'
+                   AND messagetype = ? '
                 . $groups['sql']
                 . $sqlvh
-                . 'ORDER BY messagedate ASC';
+                . ' ORDER BY messagedate ASC';
 
         $params = array($this->blockinstanceid, $bnm->get_messagetype());
         $params = array_merge($params, $groups['params'], $paramsvh);
