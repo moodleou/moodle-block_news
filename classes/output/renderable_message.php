@@ -114,8 +114,8 @@ abstract class renderable_message implements \renderable {
     public $actions;
     /** @var bool True if $actions isn't empty */
     public $hasactions;
-    /** @var bool True if we need to generate web service URLs for images and attachments */
-    protected $webserviceurls;
+    /** @var string The token for the web service */
+    protected string $wstoken;
 
 
     /**

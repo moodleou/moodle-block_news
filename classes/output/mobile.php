@@ -133,11 +133,12 @@ class mobile {
         $renderer = $PAGE->get_renderer('block_news');
         $messagedata = [];
         if ($messages) {
+            $wstoken = required_param('wstoken', PARAM_ALPHANUM);
             $images = $bns->get_images();
             $files = $bns->get_files();
             foreach ($messages as $message) {
                 $msgwidget = new full_message($message, null, null, $bns, 'all',
-                    $images, true, $files);
+                    $images, $wstoken, $files);
                 $msgwidget->id = $message->get_id();
                 $messagedata[] = $msgwidget->export_for_template($renderer);
             }

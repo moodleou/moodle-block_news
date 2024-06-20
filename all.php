@@ -75,7 +75,7 @@ if ($bns->get_displaytype() == system::DISPLAY_DEFAULT) {
         $files = $bns->get_files();
         foreach ($bnms as $bnm) {
             $SESSION->news_block_views[$bnm->get_id()] = true;
-            $msgwidget = new full_message($bnm, null, null, $bns, 'all', $images, false, $files);
+            $msgwidget = new full_message($bnm, null, null, $bns, 'all', $images, '', $files);
             echo $output->render($msgwidget);
         }
     }

@@ -174,7 +174,7 @@ if ($action == 'delete' && !$confirm) {
 
     $image = $bns->get_images('messageimage', $bnm->get_id());
     $file = $bns->get_files('attachment', $bnm->get_id());
-    $msgwidget = new full_message($bnm, $pn->previd, $pn->nextid, $bns, 'one', $image, false, $file);
+    $msgwidget = new full_message($bnm, $pn->previd, $pn->nextid, $bns, 'one', $image, '', $file);
 
     $page = new view_page($msgwidget);
     echo $OUTPUT->header();

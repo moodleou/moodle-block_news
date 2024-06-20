@@ -483,7 +483,7 @@ class subscription {
         $article = '';
         $attatch = '';
 
-        $message = new full_message($bnm, null, null, $bns, 'all', $images, false, $files);
+        $message = new full_message($bnm, null, null, $bns, 'all', $images, '', $files);
         $context = $message->export_for_template($output);
         if ($context->isnews) {
             $byau = ($context->author) ? ' by ' . $context->author : '';
