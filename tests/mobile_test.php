@@ -85,6 +85,8 @@ class mobile_test extends \advanced_testcase {
             'blockinstanceid' => $this->blocks['block1']->id
         ];
         $this->generator->create_block_positions_record($position, $this->courses['course1']->id);
+        // Set a fake token.
+        $_POST['wstoken'] = 'testtoken';
     }
 
     /**
