@@ -6,18 +6,19 @@ Feature: Backup/Restore news and events block
 
   Background:
     Given the following "courses" exist:
-      | fullname | shortname | startdate  |
-      | Course 1 | C1        |            |
-      | Course 5 | B747-14K  | 1412899200 |
+      | fullname | shortname | startdate  | format      |
+      | Course 1 | C1        |            | oustudyplan |
+      | Course 5 | B747-14K  | 1412899200 | oustudyplan |
     And the following "users" exist:
       | username | timezone      |
       | ukuser   | Europe/London |
     And the following "course enrolments" exist:
       | user   | course | role    |
       | ukuser | C1     | student |
+    And I am using the OSEP theme
     And I am on the "Course 1" "Course" page logged in as "admin"
-    And I turn editing mode on
-    And I add the "News" block
+    And I turn editing mode on in the OSEP theme
+    And I select "News" from the "bui_addblock" singleselect
     And the news block for course "C1" is in news and events mode
     And I reload the page
 
@@ -56,8 +57,7 @@ Feature: Backup/Restore news and events block
     And I should not see "event3" in the "News and events" "block"
 
     When I follow "View all news and events"
-    Then I should see "News and events: All messages"
-    And I should see "News"
+    Then I should see "News"
     And I should see "Upcoming events"
     And I should see "Past events"
     And I should see "news3"
@@ -72,7 +72,7 @@ Feature: Backup/Restore news and events block
 
   Scenario: Test sort order when rollforward news and event with false data.
     And I am on the "Course 5" "Course" page
-    And I add the "News" block
+    And I select "News" from the "bui_addblock" singleselect
     And the news block for course "B747-14K" is in news and events mode
     And I reload the page
     # Add the false data for news item.
@@ -94,7 +94,6 @@ Feature: Backup/Restore news and events block
     And I should see "news1" in the "(//*[@class='block_news_msg'])[4]" "xpath_element"
     #And I navigate to "Reports" in current page administration
     #And I click on "Roll forward" "link"
-    And I am using the OU theme
     And I am on the "Course 5" "Course" page
     And I expand "Reports" node
     And I click on "Roll forward" "link"
@@ -113,7 +112,6 @@ Feature: Backup/Restore news and events block
     # Look at new course.
     And I press "Continue"
     When I follow "View all news and events"
-    Then I should see "News and events: All messages"
     # The sort order still correct after roll forward.
     Then I should see "news4" in the "(//*[@class='block_news_msg'])[1]" "xpath_element"
     And I should see "news3" in the "(//*[@class='block_news_msg'])[2]" "xpath_element"
