@@ -41,6 +41,8 @@ Feature: Backup/Restore news and events block
 
     # Without reload, Backup step fails
     And I reload the page
+    Given the following config values are set as admin:
+      | enableasyncbackup | 0 |
     When I backup "Course 1" course using this options:
       | Confirmation | Filename | test_backup.mbz |
     And I restore "test_backup.mbz" backup into a new course using this options:
