@@ -96,9 +96,7 @@ Feature: Backup/Restore news and events block
     And I should see "news1" in the "(//*[@class='block_news_msg'])[4]" "xpath_element"
     #And I navigate to "Reports" in current page administration
     #And I click on "Roll forward" "link"
-    And I am on the "Course 5" "Course" page
-    And I expand "Reports" node
-    And I click on "Roll forward" "link"
+    When I am on the "Course 5" "report_rollforward > Report" page
     # Set up options.
     When I set the following fields to these values:
       | New presentation code | 15K     |
