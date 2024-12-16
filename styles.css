@@ -50,15 +50,15 @@
     margin: 10px 0 5px 0;
 }
 
-.block_news #block_news_addmsg,
-.block_news #block_news_viewall,
-.block_news #block_news_rss {
+.block_news .block_news_addmsg,
+.block_news .block_news_viewall,
+.block_news .block_news_rss {
     margin: 0 10px;
     display: inline;
     font-weight: bold;
 }
 
-.osep-courseformat-oustudyplan .block_news #block_news_addmsg {
+.osep-courseformat-oustudyplan .block_news .block_news_addmsg {
     display: block;
 }
 

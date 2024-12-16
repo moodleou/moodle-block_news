@@ -76,7 +76,7 @@ class block_news extends block_base {
 
         // Show Add if permittted.
         if (has_capability('block/news:add', $blockcontext)) {
-            $this->content->footer .= $output->container_start(null, 'block_news_addmsg');
+            $this->content->footer .= $output->container_start('block_news_addmsg');
             $this->content->footer .= $output->render_add($blockinstanceid);
             $this->content->footer .= $output->container_end();
             $canaddnews = 'blocknewscanadd';// Extra class added on some links if edit permission.
@@ -170,7 +170,9 @@ class block_news extends block_base {
             }
             $this->content->text .= $output->close_news_block_custom_wrapper();
             // Main footer.
-            $this->content->footer .= $output->container_start($canaddnews, 'block_news_viewall');
+            $this->content->footer .= $output->container_start(
+                $canaddnews ? $canaddnews . ' block_news_viewall' : 'block_news_viewall',
+            );
             $this->content->footer .= $output->render_view_all($blockinstanceid, $this->bns->get_viewall_label());
             $this->content->footer .= $output->container_end();
         } else {
@@ -182,7 +184,7 @@ class block_news extends block_base {
             $this->content->text .= $output->container(
                     get_string('msgblocknonews', 'block_news'), null, 'msgblocknonews');
             if (has_capability('block/news:viewhidden', $blockcontext)) {
-                $this->content->footer .= $output->container_start(null, 'block_news_viewall');
+                $this->content->footer .= $output->container_start('block_news_viewall');
                 $this->content->footer .= $output->render_view_all($blockinstanceid, $this->bns->get_viewall_label());
                 $this->content->footer .= $output->container_end();
             }
@@ -190,7 +192,9 @@ class block_news extends block_base {
 
         // If feeds allowed on site, display icon.
         if (isset($CFG->enablerssfeeds) && $CFG->enablerssfeeds) {
-            $this->content->footer .= $output->container_start($canaddnews, 'block_news_rss');
+            $this->content->footer .= $output->container_start(
+                $canaddnews ? $canaddnews . ' block_news_rss' : 'block_news_rss',
+            );
             $pi = new pix_icon('i/rss', 'RSS');
             $this->content->footer .= $output->action_icon(
                     $this->bns->get_feed_url(), $pi, null, ['title' => 'RSS']);
