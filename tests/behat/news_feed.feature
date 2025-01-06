@@ -28,8 +28,8 @@ Feature: Usage of news block feeds
     And I reload the page
     # Requires a second go or the empty image causes an issue.
     And the following news messages exist on course "C1":
-      | title   | message    | messagedate | messagetype | eventstart | eventend   | eventlocation |
-      | Event 1 | Event text | 1483228700  | event       | 1612086400 | 1735689600 | Milton Keynes |
+      | title   | message    | messagedate | messagetype | eventstart | eventend             | eventlocation |
+      | Event 1 | Event text | 1483228700  | event       | 1612086400 | ##2050-01-01 08:00## | Milton Keynes |
     And I reload the page
 
   Scenario: Add a feed in the news block settings
@@ -77,7 +77,7 @@ Feature: Usage of news block feeds
     And I should see image "thumbnail.jpg" in news message "Message 1"
     And I should see "Event 1"
     And I should see "Milton Keynes"
-    And I should see "Sunday, 31 January 2021, 5:46 PM to Wednesday, 1 January 2025, 8:00 AM"
+    And I should see "Sunday, 31 January 2021, 5:46 PM to Saturday, 1 January 2050, 8:00 AM"
 
   Scenario: Check author in the feed
     Given I configure the "News and events" block
