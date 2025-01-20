@@ -51,7 +51,7 @@ class backup_news_block_structure_step extends backup_block_structure_step {
 
         $instance = new backup_nested_element('instance', array('id'), array(
             'blockinstanceid', 'title', 'nummessages', 'summarylength',
-            'hidetitles', 'hidelinks', 'groupingsupport', 'displaytype', 'cstartdate'));
+            'hidetitles', 'hidelinks', 'hideimages', 'groupingsupport', 'displaytype', 'cstartdate'));
 
         $messages = new backup_nested_element('messages');
 

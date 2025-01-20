@@ -253,7 +253,7 @@ class subscription {
      */
     public static function select_block_news_fields($alias): string {
         return self::select_fields(['id', 'blockinstanceid', 'title', 'nummessages',
-            'summarylength', 'hidetitles', 'hidelinks', 'groupingsupport',
+            'summarylength', 'hidetitles', 'hidelinks', 'hideimages', 'groupingsupport',
             'displaytype'], $alias);
     }
 

@@ -71,7 +71,11 @@ if ($bns->get_displaytype() == system::DISPLAY_DEFAULT) {
     if ($bnms == null) {
         echo $OUTPUT->container(get_string('msgblocknonews', 'block_news'), 'block_news_nonews');
     } else {
-        $images = $bns->get_images();
+        if ($bns->get_hideimages()) {
+            $images = [];
+        } else {
+            $images = $bns->get_images();
+        }
         $files = $bns->get_files();
         foreach ($bnms as $bnm) {
             $SESSION->news_block_views[$bnm->get_id()] = true;

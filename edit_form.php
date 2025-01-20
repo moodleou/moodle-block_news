@@ -15,10 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Form for editing HTML block instance configuration (with block_news.php).
+ * Form for editing news block instance configuration (with block_news.php).
  *
- * @package    blocks
- * @subpackage news
+ * @package block_news
  * @copyright 2011 The Open University
  * @author Jon Sharp <jonathans@catalyst-eu.net>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -103,6 +102,11 @@ class block_news_edit_form extends block_edit_form {
             $mform->addElement('selectyesno', 'config_hidelinks',
                 get_string('confighidelinks', 'block_news'));
             $mform->setDefault('config_hidelinks', $bns->get_hidelinks());
+
+            $mform->addElement('selectyesno', 'config_hideimages',
+                get_string('confighideimages', 'block_news'));
+            $mform->setDefault('config_hideimages', $bns->get_hideimages());
+            $mform->addHelpButton('config_hideimages', 'confighideimages', 'block_news');
 
             $choicesgrouping = [
                 '0' => get_string('configgroupingoptionnotenable', 'block_news'),

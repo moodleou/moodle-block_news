@@ -48,8 +48,13 @@ class view_all_page implements \renderable, \templatable {
      */
     public function __construct(system $bns, array $news, array $upcomingevents, array $pastevents) {
         $summarylength = $bns->get_summarylength();
-        $thumbnails = $bns->get_images('thumbnail');
-        $images = $bns->get_images();
+        if ($bns->get_hideimages()) {
+            $thumbnails = [];
+            $images = [];
+        } else {
+            $thumbnails = $bns->get_images('thumbnail');
+            $images = $bns->get_images();
+        }
         foreach ($news as $newsmessage) {
             $this->news[] = new short_message($newsmessage, $bns, $summarylength, 0, $thumbnails, $images, 'all');
         }

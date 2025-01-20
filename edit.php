@@ -106,7 +106,6 @@ if ($bns->get_groupingsupport() == $bns::RESTRICTBYGROUP) {
 }
 $customdata['displaytype'] = $bns->get_displaytype();
 
-
 // Edit message form.
 $mform = new block_news_edit_message_form($customdata);
 

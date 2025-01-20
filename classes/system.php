@@ -88,6 +88,9 @@ class system {
     protected $username;
     protected $displaytype = self::DISPLAY_DEFAULT;
 
+    /** @var bool True if hiding images from short views */
+    protected bool $hideimages;
+
     /**
      * Construct object
      *
@@ -101,6 +104,7 @@ class system {
         $this->summarylength = $bn->summarylength;
         $this->hidetitles = $bn->hidetitles;
         $this->hidelinks = $bn->hidelinks;
+        $this->hideimages = $bn->hideimages;
         $this->groupingsupport = $bn->groupingsupport;
         $this->displaytype = $bn->displaytype;
     }
@@ -127,6 +131,7 @@ class system {
             $bn->summarylength = 100;
             $bn->hidetitles = 0;
             $bn->hidelinks = 0;
+            $bn->hideimages = 0;
             $bn->groupingsupport = 0;
             $bn->username = '';
             $bn->displaytype = self::DISPLAY_DEFAULT;
@@ -136,6 +141,24 @@ class system {
 
         return new system($bn);
 
+    }
+
+    /**
+     * Gets all settings from the block_news table as an object.
+     *
+     * @return \stdClass Object version of settings
+     */
+    public function get_settings_as_object(): \stdClass {
+        return (object)[
+            'title' => $this->title,
+            'nummessages' => $this->nummessages,
+            'summarylength' => $this->summarylength,
+            'hidetitles' => $this->hidetitles,
+            'hidelinks' => $this->hidelinks,
+            'hideimages' => $this->hideimages,
+            'groupingsupport' => $this->groupingsupport,
+            'displaytype' => $this->displaytype,
+        ];
     }
 
     /**
@@ -208,6 +231,15 @@ class system {
      */
     public function get_hidelinks() {
         return $this->hidelinks;
+    }
+
+    /**
+     * Checks whether images should be hidden from short messages (in block / view all).
+     *
+     * @return bool True if images are hidden in those situations
+     */
+    public function get_hideimages(): bool {
+        return $this->hideimages;
     }
 
     /**

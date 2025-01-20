@@ -25,6 +25,8 @@
 // No MOODLE_INTERNAL check.
 
 use Behat\Gherkin\Node\TableNode;
+use Behat\Mink\Exception\ExpectationException;
+
 require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
 
 /**
@@ -62,19 +64,29 @@ class behat_block_news extends behat_base {
     /**
      * Check that the message with the given title contains an image with the given name.
      *
-     * @Then /^I should see image "([^"]+)" in news message "([^"]+)"$/
+     * @Then /^I should (not )?see image "([^"]+)" in news message "([^"]+)"$/
      *
+     * @param string $not Text 'not' if specified, else blank
      * @param string $imagename The filename of the image
      * @param string $messagetitle The title of the message
      */
-    public function i_should_see_image_in_news_message($imagename, $messagetitle) {
+    public function i_should_see_image_in_news_message(string $not, string $imagename, string $messagetitle) {
         if ($imagename === 'thumbnail.jpg') {
             $titlecontainer = "span[contains(@class, 'block_news_msg_title')][contains(text(), '$messagetitle')]/../../../";
         } else {
             $titlecontainer = "*[contains(@class, 'title')][contains(text(), '$messagetitle')]/following-sibling::";
         }
         $xpath = "//" . $titlecontainer . "div[contains(@class, 'messageimage')]/img[contains(@src, '$imagename')]";
-        $this->find('xpath', $xpath);
+        if ($not) {
+            try {
+                $this->find('xpath', $xpath);
+                throw new ExpectationException('Found image present', $this->getSession());
+            } catch (ExpectationException $e) {
+                return;
+            }
+        } else {
+            $this->find('xpath', $xpath);
+        }
     }
 
     /**
@@ -143,7 +155,7 @@ class behat_block_news extends behat_base {
      *
      * @param string $nodeelement Node to scroll
      * @throws \Behat\Mink\Exception\DriverException
-     * @throws \Behat\Mink\Exception\ExpectationException
+     * @throws ExpectationException
      * @throws \Behat\Mink\Exception\UnsupportedDriverActionException
      */
     public function i_trigger_the_news_block_infinite_scroll($nodeelement) {
@@ -167,7 +179,7 @@ class behat_block_news extends behat_base {
      *
      * @param string $nodeelement Node to scroll
      * @throws \Behat\Mink\Exception\DriverException
-     * @throws \Behat\Mink\Exception\ExpectationException
+     * @throws ExpectationException
      * @throws \Behat\Mink\Exception\UnsupportedDriverActionException
      */
     public function i_trigger_the_block_news_infinite_scroll($nodeelement) {
@@ -184,4 +196,3 @@ class behat_block_news extends behat_base {
         $this->getSession()->getDriver()->executeScript($js);
     }
 }
-

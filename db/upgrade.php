@@ -369,6 +369,21 @@ function xmldb_block_news_upgrade($oldversion) {
         // News savepoint reached.
         upgrade_block_savepoint(true, 2021120200, 'news');
     }
+
+    if ($oldversion < 2025012000) {
+        // Define field hideimages to be added to block_news.
+        $table = new xmldb_table('block_news');
+        $field = new xmldb_field('hideimages', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null,
+            '0', 'hidelinks');
+
+        // Conditionally launch add field hideimages.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_block_savepoint(true, 2025012000, 'news');
+    }
+
     return $result;
 
 }

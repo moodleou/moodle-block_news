@@ -40,3 +40,30 @@ Feature: Display images in posts
     And I should see "message2"
     And I should see image "thumbnail.jpg" in news message "message1"
     And I should see image "thumbnail.jpg" in news message "message2"
+
+  @javascript
+  Scenario: If images are turned off, images only show in single view
+    # Set images off.
+    When I open the "News and events" blocks action menu
+    And I follow "Configure News and events block"
+    And I set the field "Hide images" to "Yes"
+    And I press "Save changes"
+    # Confirm images not shown.
+    Then I should not see image "thumbnail.jpg" in news message "message1"
+    And I should not see image "thumbnail.jpg" in news message "message2"
+
+    # Reopen configuration and confirm the setting was saved.
+    When I open the "News and events" blocks action menu
+    And I follow "Configure News and events block"
+    Then the field "Hide images" matches value "Yes"
+    And I click on "Cancel" "button" in the "Configure News and events block" "dialogue"
+
+    # Confirm the image does not display on all messages page.
+    When I follow "View all news and events"
+    Then I should not see image "thumbnail.jpg" in news message "message1"
+    And I should not see image "thumbnail.jpg" in news message "message2"
+
+    # Confirm the full image still appears on single view page.
+    When I am on the "Course 1" "Course" page
+    And I click on "message2" "link" in the ".block_news_msg" "css_element"
+    Then I should see image "kitten2.jpg" in news message "message2"

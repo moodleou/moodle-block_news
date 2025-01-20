@@ -31,7 +31,8 @@ defined('MOODLE_INTERNAL') || die;
  */
 class block_news extends block_base {
 
-    public $bns = '';
+    /** @var system System object */
+    public system $bns;
 
     public function init() {
         $this->title = get_string('pluginname', 'block_news');
@@ -112,8 +113,13 @@ class block_news extends block_base {
 
             $newmsg = false;
 
-            $thumbnails = $this->bns->get_images('thumbnail');
-            $images = $this->bns->get_images();
+            if (!$this->bns->get_hideimages()) {
+                $thumbnails = $this->bns->get_images('thumbnail');
+                $images = $this->bns->get_images();
+            } else {
+                $thumbnails = [];
+                $images = [];
+            }
 
             if (empty($msgs)) {
                 $this->content->text .= get_string('nonewsyet', 'block_news');
