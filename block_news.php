@@ -18,8 +18,6 @@ use block_news\system;
 use block_news\message;
 use block_news\output\short_message;
 
-defined('MOODLE_INTERNAL') || die;
-
 /**
  * News block main class.
  *
@@ -57,7 +55,7 @@ class block_news extends block_base {
      * Display block content
      */
     public function get_content() {
-        global $CFG, $PAGE, $COURSE, $USER, $SESSION;
+        global $CFG, $COURSE, $USER, $SESSION;
 
         if ($this->content !== null) {
             return $this->content;
@@ -68,7 +66,7 @@ class block_news extends block_base {
 
         $this->content = new stdClass;
 
-        $output = $PAGE->get_renderer('block_news'); // Looks for class xxx_renderer.
+        $output = $this->page->get_renderer('block_news'); // Looks for class xxx_renderer.
         $this->content->footer = '';
 
         $context = context_course::instance($this->page->course->id);
@@ -195,7 +193,7 @@ class block_news extends block_base {
             $this->content->footer .= $output->container_start($canaddnews, 'block_news_rss');
             $pi = new pix_icon('i/rss', 'RSS');
             $this->content->footer .= $output->action_icon(
-                    $this->bns->get_feed_url(), $pi, null, array('title' => 'RSS'));
+                    $this->bns->get_feed_url(), $pi, null, ['title' => 'RSS']);
             $this->content->footer .= $output->container_end();
         }
 
@@ -237,7 +235,7 @@ class block_news extends block_base {
         $config->title = $data->title;
         $config->id = $this->instance->id;
         $DB->set_field('block_instances', 'configdata', base64_encode(serialize($config)),
-                        array('id' => $this->instance->id));
+            ['id' => $this->instance->id]);
     }
 
     public function instance_create() {
@@ -255,6 +253,6 @@ class block_news extends block_base {
      *  limit contexts from which block can be created
      */
     public function applicable_formats() {
-        return array('course' => true, 'mod' => true, 'my' => true);
+        return ['course' => true, 'mod' => true, 'my' => true];
     }
 }

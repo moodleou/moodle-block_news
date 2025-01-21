@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+use block_news\system;
+
 /**
  * Form for editing news block instance configuration (with block_news.php).
  *
@@ -21,19 +23,6 @@
  * @copyright 2011 The Open University
  * @author Jon Sharp <jonathans@catalyst-eu.net>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-if (!defined('MOODLE_INTERNAL')) {
-    die('Direct access to this script is forbidden.');
-    // Must be included from a Moodle page.
-}
-
-use block_news\system;
-
-/**
- * block edit form definition
- * @package blocks
- * @subpackage news
  */
 class block_news_edit_form extends block_edit_form {
     // Define option value for grouping support by group.
@@ -70,7 +59,7 @@ class block_news_edit_form extends block_edit_form {
                 '2' => '2 most recent',
                 '3' => '3 most recent',
                 '4' => '4 most recent',
-                '5' => '5 most recent'
+                '5' => '5 most recent',
             ];
             $mform->addElement('select', 'config_nummessages',
                 get_string('confignummessages', 'block_news'), $choicesnm);
@@ -80,7 +69,7 @@ class block_news_edit_form extends block_edit_form {
                 '0' => 'None',
                 '40' => 'Short',
                 '100' => 'Medium',
-                '500' => 'Long'
+                '500' => 'Long',
             ];
             $mform->addElement('select', 'config_summarylength',
                 get_string('configsummarylength', 'block_news'), $choicessl);
@@ -110,7 +99,7 @@ class block_news_edit_form extends block_edit_form {
 
             $choicesgrouping = [
                 '0' => get_string('configgroupingoptionnotenable', 'block_news'),
-                self::OPTIONVALUEBYGROUP => get_string('configgroupingoptiongroup', 'block_news')
+                self::OPTIONVALUEBYGROUP => get_string('configgroupingoptiongroup', 'block_news'),
             ];
 
             $mform->addElement('select', 'config_groupingsupport',
@@ -125,7 +114,7 @@ class block_news_edit_form extends block_edit_form {
         }
     }
 
-    function definition() {
+    public function definition() {
         $mform =& $this->_form;
 
         $mform->addElement('hidden', 'blockid', $this->block->instance->id);
@@ -214,12 +203,14 @@ class block_news_edit_form extends block_edit_form {
 
             // Any other system context block, hide the page-contexts element,
             // it's always system-wide BUI_CONTEXTS_ENTIRE_SITE.
+            // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedIf
         } else if ($parentcontext->contextlevel == CONTEXT_SYSTEM) {
-
+            // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedIf
         } else if ($parentcontext->contextlevel == CONTEXT_COURSE) {
             // 0 means display on current context only, not child contexts
             // but if course managers select mod-* as pagetype patterns, block system will overwrite this option
             // to 1 (display on current context and child contexts).
+            // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedIf
         } else if ($parentcontext->contextlevel == CONTEXT_MODULE || $parentcontext->contextlevel == CONTEXT_USER) {
             // Module context doesn't have child contexts, so display in current context only.
         } else {

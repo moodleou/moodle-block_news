@@ -24,8 +24,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Define all the backup steps that wll be used by the backup_news_block_task
  */
@@ -44,33 +42,34 @@ class backup_news_block_structure_step extends backup_block_structure_step {
         $userinfo = $this->get_setting_value('users');
 
         // Get the block.
-        $block = $DB->get_record('block_instances', array('id' => $this->task->get_blockid()));
+        $block = $DB->get_record('block_instances', ['id' => $this->task->get_blockid()]);
 
         // Define each element.
-        $news = new backup_nested_element('news', array('id'), null);
+        $news = new backup_nested_element('news', ['id'], null);
 
-        $instance = new backup_nested_element('instance', array('id'), array(
+        $instance = new backup_nested_element('instance', ['id'], [
             'blockinstanceid', 'title', 'nummessages', 'summarylength',
-            'hidetitles', 'hidelinks', 'hideimages', 'groupingsupport', 'displaytype', 'cstartdate'));
+            'hidetitles', 'hidelinks', 'hideimages', 'groupingsupport', 'displaytype', 'cstartdate']);
 
         $messages = new backup_nested_element('messages');
 
-        $message = new backup_nested_element('message', array('id'), array(
+        $message = new backup_nested_element('message', ['id'], [
             'blockinstanceid', 'newsfeedid', 'title', 'link', 'message',
             'messageformat', 'messagedate', 'messagevisible', 'messagerepeat',
             'messagetype', 'hideauthor', 'userid', 'timemodified', 'eventstart',
-            'eventend', 'eventlocation', 'imagedesc', 'imagedescnotnecessary', 'currenthash'));
+            'eventend', 'eventlocation', 'imagedesc', 'imagedescnotnecessary', 'currenthash']);
 
         $messagegroups = new backup_nested_element('messagegroups');
 
-        $messagegroup = new backup_nested_element('messagegroup', array('id'), array(
-            'messageid', 'groupid'
-        ));
+        $messagegroup = new backup_nested_element('messagegroup', ['id'], [
+            'messageid',
+            'groupid',
+        ]);
 
         $feeds = new backup_nested_element('feeds');
 
-        $feed = new backup_nested_element('feed', array('id'), array(
-            'blockinstanceid', 'feedurl', 'currenthash', 'feedupdated', 'feederror'));
+        $feed = new backup_nested_element('feed', ['id'], [
+            'blockinstanceid', 'feedurl', 'currenthash', 'feedupdated', 'feederror']);
 
         $subscriptions = new backup_nested_element('subscriptions');
 
@@ -93,27 +92,27 @@ class backup_news_block_structure_step extends backup_block_structure_step {
         $subscriptions->add_child($subscription);
 
         // Define sources.
-        $news->set_source_array(array((object)array('id' => $this->task->get_blockid())));
+        $news->set_source_array([(object)['id' => $this->task->get_blockid()]]);
 
         $instance->set_source_sql("
             SELECT *
                 FROM {block_news}
-            WHERE blockinstanceid = ?", array(backup::VAR_PARENTID));
+            WHERE blockinstanceid = ?", [backup::VAR_PARENTID]);
 
         $message->set_source_sql("
             SELECT *
                 FROM {block_news_messages}
-            WHERE blockinstanceid = ?", array(backup::VAR_PARENTID));
+            WHERE blockinstanceid = ?", [backup::VAR_PARENTID]);
 
         $messagegroup->set_source_sql("
             SELECT *
               FROM {block_news_message_groups}
-             WHERE messageid = ?", array(backup::VAR_PARENTID));
+             WHERE messageid = ?", [backup::VAR_PARENTID]);
 
         $feed->set_source_sql("
             SELECT *
                 FROM {block_news_feeds}
-            WHERE blockinstanceid = ?", array(backup::VAR_PARENTID));
+            WHERE blockinstanceid = ?", [backup::VAR_PARENTID]);
 
         if ($userinfo) {
             $subscription->set_source_sql("

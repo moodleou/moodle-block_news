@@ -37,7 +37,7 @@ class subscription {
     const PARAM_HTML = 1;
     private $course, $bi, $newsfields;
     // Static subscription cache.
-    static $subscriptioninfo;
+    protected static $subscriptioninfo;
 
     /**
      * Initialises the subsription.
@@ -53,12 +53,12 @@ class subscription {
     }
 
     /**
-     * Creates a news object and all related data from a single block instance.
+     * Creates a subscription object and all related data from a single block instance.
      *
      * @param int $blockinstanceid BLock instance ID of news
-     * @return object News
+     * @return subscription Subscription
      */
-    public static function get_from_bi($blockinstanceid): object {
+    public static function get_from_bi($blockinstanceid): subscription {
         global $COURSE, $DB;
 
         $csemod = block_news_get_course_mod_info($blockinstanceid);
@@ -188,7 +188,7 @@ class subscription {
 
         $event = \block_news\event\subscription_created::create([
             'objectid' => $subrecord->blockinstanceid,
-            'context' => \context_block::instance($subrecord->blockinstanceid)
+            'context' => \context_block::instance($subrecord->blockinstanceid),
         ]);
         $event->trigger();
 
@@ -207,7 +207,7 @@ class subscription {
 
         $event = \block_news\event\subscription_deleted::create([
             'objectid' => $this->bi,
-            'context' => \context_block::instance($this->bi)
+            'context' => \context_block::instance($this->bi),
         ]);
         $event->trigger();
     }
@@ -307,7 +307,7 @@ class subscription {
         $users = [];
 
         $rs = $DB->get_recordset_sql($sql = "
-            SELECT 
+            SELECT
                     bns.*, bnm.blockinstanceid, messagegm.groupid AS membergroupid, up.value as newsmailformat,
                     " . $basicuserssql . "
                     " . $selects . "

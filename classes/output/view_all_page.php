@@ -14,6 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace block_news\output;
+
+use block_news\message;
+use block_news\system;
+
 /**
  * Output component for View All page.
  *
@@ -21,14 +26,6 @@
  * @copyright  2017 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-namespace block_news\output;
-
-use block_news\message;
-use block_news\system;
-
-defined('MOODLE_INTERNAL') || die();
-
 class view_all_page implements \renderable, \templatable {
 
     /** @var short_message[] */
@@ -78,7 +75,7 @@ class view_all_page implements \renderable, \templatable {
         $context = [
             'news' => [],
             'upcomingevents' => [],
-            'pastevents' => []
+            'pastevents' => [],
         ];
         foreach ($this->news as $news) {
             $context['news'][] = $news->export_for_template($output);

@@ -49,7 +49,7 @@ class backup_test extends \advanced_testcase {
             'hidelinks' => 1,
             'hideimages' => 1,
             'groupingsupport' => system::RESTRICTBYGROUP,
-            'displaytype' => system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS
+            'displaytype' => system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS,
         ]);
 
         // Do backup and restore.
