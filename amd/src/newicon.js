@@ -19,7 +19,6 @@
  * skip link text as well.
  *
  * @module block_news/newicon
- * @package block_news
  * @copyright 2019 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -36,7 +35,7 @@ define([], function() {
                 window['console'].log('Unable to move icon ' + instanceId + ' into place: missing block');
                 return;
             }
-            var title = block.querySelector('h5.card-title');
+            var title = block.querySelector('.card-title');
             var icon = block.querySelector('.block_news_unreadicon');
             if (!title || !icon) {
                 window['console'].log('Unable to move icon ' + instanceId + ' into place: missing title/icon');
