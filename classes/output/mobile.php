@@ -33,6 +33,10 @@ use block_news\system;
  * Ouput components to generate mobile app screens.
  */
 class mobile {
+    /** @var string  Folder of ionic5 app version */
+    const IONIC5_FOLDER = 'ionic5/';
+    /** @var string  Folder of ionic7 app version */
+    const IONIC7_FOLDER = 'ionic7/';
 
     /**
      * @var int There are no more pages of messages to load.
@@ -55,8 +59,7 @@ class mobile {
     public static function news_init(array $args) : array {
         global $DB, $CFG;
         $courses = enrol_get_users_courses($args['userid'], true);
-        $args = (object)$args;
-        $foldername = $args->appversioncode >= 3950 ? 'ionic5/' : 'ionic3/';
+        $foldername = self::mobile_get_folder_name($args);
 
         list($sqlin, $params) = $DB->get_in_or_equal(array_keys($courses));
         $sql = "SELECT DISTINCT con.instanceid
@@ -178,8 +181,8 @@ class mobile {
      */
     public static function news_page(array $args) {
         global $CFG, $OUTPUT, $PAGE;
+        $foldername = self::mobile_get_folder_name($args);
         $args = (object) $args;
-        $foldername = $args->appversioncode >= 3950 ? 'ionic5/' : 'ionic3/';
 
         $PAGE->set_course(get_course($args->courseid));
         $messagedata = self::get_messages($args->courseid);
@@ -213,7 +216,7 @@ class mobile {
     public static function events_page(array $args) {
         global $CFG, $OUTPUT, $PAGE;
         $PAGE->set_course(get_course($args['courseid']));
-        $foldername = $args['appversioncode'] >= 3950 ? 'ionic5/' : 'ionic3/';
+        $foldername = self::mobile_get_folder_name($args);
 
         $messagedata = self::get_messages($args['courseid'], message::MESSAGETYPE_EVENT);
         $html = $OUTPUT->render_from_template('block_news/' . $foldername . 'mobile_events_page', ['timestamp' => time()]);
@@ -235,5 +238,16 @@ class mobile {
                 'pastEvents' => '[]'
             ]
         ];
+    }
+
+    /**
+     * Get the latest folder name has the new files used for the newest app version.
+     *
+     * @param array $args Standard mobile web service arguments
+     * @return string Folder name
+     */
+    public static function mobile_get_folder_name(array $args): string {
+        $appversion = (int)substr($args['appversioncode'], 0, 3);
+        return $appversion >= 440 ? self::IONIC7_FOLDER : self::IONIC5_FOLDER;
     }
 }
