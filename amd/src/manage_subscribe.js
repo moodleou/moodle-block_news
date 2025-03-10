@@ -16,7 +16,7 @@
 /**
  * JavaScript to manage news's subscribers page.
  *
- * @package block_news
+ * @module block_news/manage_subscribe
  * @copyright 2021 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -78,12 +78,12 @@ export const manageSubscribe = function (stringSelectall, stringDeselectall) {
             all[i].checked = true;
         }
         update();
-    })
+    });
 
     deselectAll.addEventListener('click', () => {
         for (let i = 0; i < all.length; i++) {
             all[i].checked = false;
         }
         update();
-    })
+    });
 };

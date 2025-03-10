@@ -51,4 +51,13 @@ example, if you have a feed with messages A, B, and C, and it then changes to ha
 and D (where C* is a modified version of C), then messages B and C will be deleted, and C* and D
 added. This results in the minimal number of changes in the database.
 
+== Hide images ==
 
+News block settings include a 'Hide images' option. (This is forced to Yes for subject websites.)
+
+When enabled, images added to the 'Image' section when posting a news item do not appear in the
+block, or on the 'View all messages' page. (These are the cases when it would normally display
+a thumbnail version of the image.)
+
+The full-size 700x330 image does still appear when viewing a single news message, so you can still
+set the image when posting a news item.

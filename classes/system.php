@@ -24,10 +24,7 @@
 
 namespace block_news;
 
-if (!defined('MOODLE_INTERNAL')) {
-    die('Direct access to this script is forbidden.');
-    // It must be included from a Moodle page.
-}
+defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/blocks/news/atomlib.php');
 require_once($CFG->dirroot . '/blocks/news/lib.php');
@@ -88,6 +85,9 @@ class system {
     protected $username;
     protected $displaytype = self::DISPLAY_DEFAULT;
 
+    /** @var bool True if hiding images from short views */
+    protected bool $hideimages;
+
     /**
      * Construct object
      *
@@ -101,6 +101,7 @@ class system {
         $this->summarylength = $bn->summarylength;
         $this->hidetitles = $bn->hidetitles;
         $this->hidelinks = $bn->hidelinks;
+        $this->hideimages = $bn->hideimages;
         $this->groupingsupport = $bn->groupingsupport;
         $this->displaytype = $bn->displaytype;
     }
@@ -117,7 +118,7 @@ class system {
     public static function get_block_settings($blockinstanceid) {
         global $DB;
 
-        $bn = $DB->get_record('block_news', array('blockinstanceid' => $blockinstanceid));
+        $bn = $DB->get_record('block_news', ['blockinstanceid' => $blockinstanceid]);
 
         if (empty($bn)) {
             $bn = new \stdClass;
@@ -127,6 +128,7 @@ class system {
             $bn->summarylength = 100;
             $bn->hidetitles = 0;
             $bn->hidelinks = 0;
+            $bn->hideimages = 0;
             $bn->groupingsupport = 0;
             $bn->username = '';
             $bn->displaytype = self::DISPLAY_DEFAULT;
@@ -136,6 +138,24 @@ class system {
 
         return new system($bn);
 
+    }
+
+    /**
+     * Gets all settings from the block_news table as an object.
+     *
+     * @return \stdClass Object version of settings
+     */
+    public function get_settings_as_object(): \stdClass {
+        return (object)[
+            'title' => $this->title,
+            'nummessages' => $this->nummessages,
+            'summarylength' => $this->summarylength,
+            'hidetitles' => $this->hidetitles,
+            'hidelinks' => $this->hidelinks,
+            'hideimages' => $this->hideimages,
+            'groupingsupport' => $this->groupingsupport,
+            'displaytype' => $this->displaytype,
+        ];
     }
 
     /**
@@ -211,6 +231,15 @@ class system {
     }
 
     /**
+     * Checks whether images should be hidden from short messages (in block / view all).
+     *
+     * @return bool True if images are hidden in those situations
+     */
+    public function get_hideimages(): bool {
+        return $this->hideimages;
+    }
+
+    /**
      * Return whether grouping support is enabled.
      *
      * @return boolean Whether grouping support is enabled in block
@@ -270,7 +299,7 @@ class system {
             $g = groups_get_all_groups($courseid, $userid);
         }
 
-        $groups = array();
+        $groups = [];
         foreach ($g as $group) {
             $groups[] = $group->id;
         }
@@ -325,9 +354,9 @@ class system {
     public function get_group_sql($groupingids = []) {
         global $COURSE, $DB;
 
-        $output = array();
+        $output = [];
         $output['sql'] = '';
-        $output['params'] = array();
+        $output['params'] = [];
 
         // Return if config_groupingsupport is not group.
         if ($this->get_groupingsupport() != self::RESTRICTBYGROUP) {
@@ -416,7 +445,7 @@ class system {
      */
     public function update_from_db() {
         global $DB;
-        if ($data = $DB->get_record('block_news', array('id' => $this->id))) {
+        if ($data = $DB->get_record('block_news', ['id' => $this->id])) {
             foreach ($data as $key => $value) {
                 $this->$key = $value;
             }
@@ -478,11 +507,11 @@ class system {
      */
     public function delete() {
         global $DB;
-        $DB->delete_records('block_news', array('id' => $this->id));
+        $DB->delete_records('block_news', ['id' => $this->id]);
         $DB->delete_records('block_news_messages',
-                array('blockinstanceid' => $this->blockinstanceid));
+                ['blockinstanceid' => $this->blockinstanceid]);
         $DB->delete_records('block_news_feeds',
-                array('blockinstanceid' => $this->blockinstanceid));
+                ['blockinstanceid' => $this->blockinstanceid]);
     }
 
     /**
@@ -496,7 +525,7 @@ class system {
      */
     public function get_messages_limited($max, $type = null) {
         global $DB;
-        $bnms = array();
+        $bnms = [];
 
         $groups = $this->get_group_sql();
         $order = $type != message::MESSAGETYPE_EVENT ? 'messagedate DESC' : 'eventstart ASC, messagedate DESC';
@@ -510,7 +539,7 @@ class system {
                 ' ORDER BY ' . $order . '
                  LIMIT ' . $max;
 
-        $params = array($this->blockinstanceid, time());
+        $params = [$this->blockinstanceid, time()];
         $params = array_merge($params, $groups['params'], $restricttype['params']);
         $mrecs = $DB->get_records_sql($sql, $params);
         $groupids = $this->get_groupids_by_message(array_keys($mrecs));
@@ -536,7 +565,7 @@ class system {
     public function get_messages_all($viewhidden, $pagesize = null, $pagenumber = null, $type = null,
             $order = 'eventstart ASC, messagedate DESC', $pastevents = false) {
         global $DB;
-        $bnms = array();
+        $bnms = [];
         if ($type != message::MESSAGETYPE_EVENT && $order == 'eventstart ASC, messagedate DESC') {
             $order = 'messagedate DESC';
         }
@@ -558,7 +587,7 @@ class system {
                 . $groups['sql']
                 . $restricttype['sql']
                 . $orderby;
-        $params = array($this->blockinstanceid);
+        $params = [$this->blockinstanceid];
         $params = array_merge($params, $hidden['params'], $groups['params'], $restricttype['params']);
         $mrecs = $DB->get_records_sql($sql, $params, $limitfrom, $limitnum);
         $groupids = $this->get_groupids_by_message(array_keys($mrecs));
@@ -590,7 +619,7 @@ class system {
                 $hidden['sql'] .
                 $groups['sql'] .
                 $restricttype['sql'];
-        $params = array($this->blockinstanceid);
+        $params = [$this->blockinstanceid];
         $params = array_merge($params, $hidden['params'], $groups['params'], $restricttype['params']);
         return $DB->count_records_sql($sql, $params);
     }
@@ -611,7 +640,7 @@ class system {
                     'WHERE blockinstanceid = ?
                    AND {block_news_messages}.id = ?';
 
-            $params = array($this->blockinstanceid, $id);
+            $params = [$this->blockinstanceid, $id];
             $mrec = $DB->get_record_sql($sql, $params);
         } else {  // See past & present only and visible.
             $sql = self::get_message_sql_start() .
@@ -620,7 +649,7 @@ class system {
                    AND messagevisible = 1
                    AND messagedate <= ?';
 
-            $params = array($this->blockinstanceid, $id, time());
+            $params = [$this->blockinstanceid, $id, time()];
             $mrec = $DB->get_record_sql($sql, $params);
         }
 
@@ -649,11 +678,11 @@ class system {
         // the ids of the messages either side returned, or -1 if at end of list.
         if ($viewhidden) {  // No date limit, all visibilty.
             $sqlvh = '';
-            $paramsvh = array();
+            $paramsvh = [];
         } else {
             $sqlvh = '  AND messagevisible = 1
                          AND messagedate <= ' . time() . ' ';
-            $paramsvh = array($bnm->get_messagedate());
+            $paramsvh = [$bnm->get_messagedate()];
         }
 
         $groups = $this->get_group_sql();
@@ -667,7 +696,7 @@ class system {
                 . $sqlvh
                 . ' ORDER BY messagedate ASC';
 
-        $params = array($this->blockinstanceid, $bnm->get_messagetype());
+        $params = [$this->blockinstanceid, $bnm->get_messagetype()];
         $params = array_merge($params, $groups['params'], $paramsvh);
         $mrecs = $DB->get_records_sql($sql, $params);
         $pnid = -1;
@@ -747,11 +776,11 @@ class system {
     protected function set_feeds($feeds) {
         global $DB;
 
-        $frecs = array();
+        $frecs = [];
 
         // Get current feed records.
         $frecs = $DB->get_records('block_news_feeds',
-                array('blockinstanceid' => $this->blockinstanceid));
+                ['blockinstanceid' => $this->blockinstanceid]);
 
         // Store message IDs.
         $oldmessageids = [];
@@ -773,12 +802,12 @@ class system {
                 unset($feeds[$idx]);
             } else {
                 // An existing feed is not in requested list - remove.
-                $DB->delete_records('block_news_feeds', array('id' => $frec->id));
+                $DB->delete_records('block_news_feeds', ['id' => $frec->id]);
                 if (array_key_exists($frec->id, $mapping)) {
-                    // The key exists, so push its values to $oldmessageids
+                    // The key exists, so push its values to $oldmessageids.
                     $oldmessageids = array_merge($oldmessageids, $mapping[$frec->id]);
                 }
-                $DB->delete_records('block_news_messages', array('newsfeedid' => $frec->id));
+                $DB->delete_records('block_news_messages', ['newsfeedid' => $frec->id]);
 
                 // Also clear cache.
                 $this->uncache_block_feed();
@@ -812,9 +841,9 @@ class system {
     public function get_feeds() {
         global $DB;
 
-        $frecs = array();
+        $frecs = [];
         $bnfrecs = $DB->get_records('block_news_feeds',
-                array('blockinstanceid' => $this->blockinstanceid));
+                ['blockinstanceid' => $this->blockinstanceid]);
 
         return $bnfrecs;
     }
@@ -832,7 +861,7 @@ class system {
         $transaction = $DB->start_delegated_transaction();
 
         // Re-get record.
-        $bnf = $DB->get_record('block_news_feeds', array('id' => $fbrec->id));
+        $bnf = $DB->get_record('block_news_feeds', ['id' => $fbrec->id]);
 
         $bnf->feederror = '';
         $bnf->feedupdated = time();
@@ -1022,7 +1051,7 @@ class system {
         }
         $node = $xpath->query("//div[@class='block_news-extras']")[0];
         $node->parentNode->removeChild($node);
-        $message = str_replace(array('<html>', '</html>') , '' , $doc->saveHTML());
+        $message = str_replace(['<html>', '</html>'], '' , $doc->saveHTML());
         return [$message, $imgurl, $imgdesc, $attachments, $type, $location, $start, $end];
     }
 
@@ -1054,7 +1083,7 @@ class system {
                         'filearea'  => 'thumbnail',
                         'itemid'    => $id,
                         'filepath'  => '/',
-                        'filename'  => message::THUMBNAIL_JPG
+                        'filename'  => message::THUMBNAIL_JPG,
                 ];
                 $fs->convert_image($thumbnail, $imgfile, '340', null, true, null);
             }
@@ -1071,7 +1100,7 @@ class system {
                         'filearea' => 'messageimage',
                         'itemid' => $id,
                         'filepath' => '/',
-                        'filename' => $filename
+                        'filename' => $filename,
                 ];
                 $imgfile = $fs->create_file_from_pathname($newimginfo, $tmpfile);
                 unlink($tmpfile);
@@ -1081,7 +1110,7 @@ class system {
                         'filearea' => 'thumbnail',
                         'itemid' => $id,
                         'filepath' => '/',
-                        'filename' => message::THUMBNAIL_JPG
+                        'filename' => message::THUMBNAIL_JPG,
                 ];
                 $fs->convert_image($thumbnail, $imgfile, '340', null, true, null);
             }
@@ -1123,7 +1152,7 @@ class system {
                     'filearea' => 'attachment',
                     'itemid' => $id,
                     'filepath' => '/',
-                    'filename' => $filename
+                    'filename' => $filename,
                 ];
                 $file = $fs->create_file_from_pathname($newinfo, $tmpfile);
                 unlink($tmpfile);
@@ -1140,7 +1169,7 @@ class system {
     private function get_simplepie($feedurl) {
         global $CFG;
 
-        $fia = array();
+        $fia = [];
 
         require_once($CFG->libdir . '/simplepie/moodle_simplepie.php');
 
@@ -1188,7 +1217,7 @@ class system {
             ini_set('error_log', $errorlog);
         }
 
-        $fia = array();
+        $fia = [];
         foreach ($feeditems as $item) {
             $fi = new \stdClass();
             $fi->link = $item->get_link();
@@ -1239,7 +1268,7 @@ class system {
               ORDER BY tfeeds.lowestdate';
 
         $utime = time() - $updatetime;
-        return $DB->get_records_sql($sql, array($utime), 0, $max);
+        return $DB->get_records_sql($sql, [$utime], 0, $max);
     }
 
     /**
@@ -1303,7 +1332,7 @@ class system {
                     $user = $DB->get_record('user', ['username' => $username], 'id', MUST_EXIST);
                 }
                 $userid = $user->id;
-                $bni = $DB->get_record('block_instances', array('id' => $blockinstanceid));
+                $bni = $DB->get_record('block_instances', ['id' => $blockinstanceid]);
                 $context = \context::instance_by_id($bni->parentcontextid);
                 $courseid = $context->instanceid;
                 $bns->set_user_groupids($bns->get_groupids($userid, $courseid));
@@ -1391,7 +1420,7 @@ class system {
         $items = '';
         $c = 0;
         $onedayago = $now - DAYSECS;
-        $items = array();
+        $items = [];
         $images = $this->get_images();
         $files = $this->get_files();
         foreach ($bnms as $bnm) {
@@ -1457,8 +1486,8 @@ class system {
             $started = true;
             $it->content .= \html_writer::start_div('box messageimage');
             $image = $images[$bnm->get_id()];
-            $pathparts = array('/blocks/news/files.php', $context->id, 'block_news',
-                    'messageimage', $bnm->get_id(), $image->get_filename());
+            $pathparts = ['/blocks/news/files.php', $context->id, 'block_news',
+                    'messageimage', $bnm->get_id(), $image->get_filename()];
             $imageurl = new \moodle_url(implode('/', $pathparts));
             $it->content .= \html_writer::img($imageurl->out(), $bnm->get_imagedesc(), ['class' => 'block_news-main-msg-image']);
             $it->content .= \html_writer::end_div();
@@ -1496,14 +1525,14 @@ class system {
                 foreach ($files as $file) {
                     $it->content .= \html_writer::start_tag('li');
                     $filename = $file->get_filename();
-                    $pathparts = array('/blocks/news/files.php', $context->id, 'block_news',
-                            'attachment', $bnm->get_id(), $filename);
+                    $pathparts = ['/blocks/news/files.php', $context->id, 'block_news',
+                            'attachment', $bnm->get_id(), $filename];
                     $fileurl = new \moodle_url(implode('/', $pathparts));
                     $it->content .= \html_writer::link($fileurl->out(), $filename, ['class' => 'block_news-attachment']);
                     $it->content .= \html_writer::end_tag('li');
                     $attachment = (object) [
                             'filename' => $filename,
-                            'url' => $fileurl->out()
+                            'url' => $fileurl->out(),
                     ];
                     $attachments[] = $attachment;
                 }
@@ -1726,7 +1755,7 @@ class system {
      * @return array Error messages, keyed by field.
      */
     public static function validate_form($data) {
-        $errors = array();
+        $errors = [];
 
         // Now do feeds.
         // Convert from textarea to array.

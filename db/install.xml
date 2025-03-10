@@ -13,6 +13,7 @@
         <FIELD NAME="summarylength" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Length of summary in characters, or 0 if turned off"/>
         <FIELD NAME="hidetitles" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to hide message titles, 0 to show"/>
         <FIELD NAME="hidelinks" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to hide message links, 0 to show"/>
+        <FIELD NAME="hideimages" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to hide images from block and view all page, 0 to show"/>
         <FIELD NAME="groupingsupport" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to enable grouping support"/>
         <FIELD NAME="displaytype" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Default display or Separate into events and news items"/>
       </FIELDS>

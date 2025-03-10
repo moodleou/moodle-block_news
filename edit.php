@@ -25,7 +25,8 @@
 use block_news\system;
 use block_news\message;
 
-require_once(dirname(__FILE__) . '/../../config.php');
+// phpcs:ignore moodle.Files.RequireLogin.Missing
+require(dirname(__FILE__) . '/../../config.php');
 require_once($CFG->libdir.'/formslib.php');
 require_once('edit_message_form.php');
 require_once('lib.php');
@@ -41,19 +42,19 @@ if ($id) {
     $action = EDIT;
     $sql = system::get_message_sql_start() .
         'WHERE m.id = ?';
-    $mrec = $DB->get_record_sql($sql, array('id' => $id));
+    $mrec = $DB->get_record_sql($sql, ['id' => $id]);
 
     $blockinstanceid = $mrec->blockinstanceid;
     $groupids = $DB->get_fieldset_select('block_news_message_groups', 'groupid', 'messageid = ?', [$mrec->id]);
     $bnm = new message($mrec, $groupids);
     $title = get_string('editmessage', 'block_news') . ': ' . $bnm->get_title();
-    $url = new moodle_url('/blocks/news/edit.php', array('m' => $id));
+    $url = new moodle_url('/blocks/news/edit.php', ['m' => $id]);
     $publishstate = ($bnm->get_messagedate() > time() ? 'asd' : 'ap');
                                             // At specified date | already published.
 } else {
     $action = ADD;
     $title = get_string('addnewmessage', 'block_news');
-    $url = new moodle_url('/blocks/news/edit.php', array('bi' => $blockinstanceid));
+    $url = new moodle_url('/blocks/news/edit.php', ['bi' => $blockinstanceid]);
     $publishstate = '';
 }
 $PAGE->set_url($url);
@@ -105,7 +106,6 @@ if ($bns->get_groupingsupport() == $bns::RESTRICTBYGROUP) {
     $customdata['groupingsupportbygroup'] = 1;
 }
 $customdata['displaytype'] = $bns->get_displaytype();
-
 
 // Edit message form.
 $mform = new block_news_edit_message_form($customdata);
@@ -187,13 +187,14 @@ if ($formdata = $mform->get_data()) {
                 if ($thumbnailexist) {
                     $thumbnailexist->delete();
                 }
-                $info = array(
-                        'contextid' => $blockcontext->id,
-                        'component' => 'block_news',
-                        'filearea' => 'thumbnail',
-                        'itemid' => $id,
-                        'filepath' => '/',
-                        'filename' => message::THUMBNAIL_JPG);
+                $info = [
+                    'contextid' => $blockcontext->id,
+                    'component' => 'block_news',
+                    'filearea' => 'thumbnail',
+                    'itemid' => $id,
+                    'filepath' => '/',
+                    'filename' => message::THUMBNAIL_JPG,
+                ];
                 $fs->create_file_from_pathname($info, $fullpath);
             }
             unlink($fullpath);
@@ -204,7 +205,7 @@ if ($formdata = $mform->get_data()) {
 }
 
 // Else create and display the form.
-$toform = array();
+$toform = [];
 $toform['bi'] = $blockinstanceid;
 $toform['m'] = empty($id) ? null : $id;
 $toform['mode'] = $mode;
@@ -212,7 +213,7 @@ $toform['mode'] = $mode;
 if ($action == EDIT) {
     $toform['title'] = $bnm->get_title();
     $toform['messagevisible'] = $bnm->get_messagevisible();
-    // Publish values: 0 => 'Immediately', 1 => 'At specified date', 2 => 'Already published'.
+    // Publish values: 0 = Immediately, 1 = At specified date, 2 = Already published.
     $toform['publish'] = ($bnm->get_messagedate() > time() ? 1 : 2);
     $toform['messagetype'] = $bnm->get_messagetype();
     $toform['messagedate'] = $bnm->get_messagedate();
@@ -257,11 +258,13 @@ $toform['attachments'] = $draftitemid;
 
 $draftideditor = file_get_submitted_draft_itemid('message');
 $currenttext = file_prepare_draft_area($draftideditor, $blockcontext->id, 'block_news',
-    'message', empty($id) ? null : $id, array('subdirs' => 0),
+    'message', empty($id) ? null : $id, ['subdirs' => 0],
     empty($messagetext) ? '' : $messagetext);
-$toform['message'] = array('text' => $currenttext,
+$toform['message'] = [
+    'text' => $currenttext,
     'format' => empty($messageformat) ? editors_get_preferred_format() : $messageformat,
-    'itemid' => $draftideditor);
+    'itemid' => $draftideditor,
+];
 
 // Set data.
 $mform->set_data($toform);
