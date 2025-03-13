@@ -244,6 +244,7 @@
 
 .block_news_unreadicon {
     display: none;
+    filter: grayscale(1) brightness(200);
 }
 
 @media (max-width: 767px) {
