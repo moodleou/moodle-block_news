@@ -252,7 +252,7 @@
         display: none;
     }
     .arrow_link.block-news-mobile-nextprev {
-        display: inline;
+        display: inline-block;
     }
     #page-blocks-news-edit #fitem_id_groupids,
     #page-blocks-news-edit #fitem_id_grouping {
