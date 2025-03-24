@@ -277,10 +277,10 @@ class block_news_renderer extends plugin_renderer_base {
         $outsubmit = '';
         if ($subscribed == subscription::FULLY_SUBSCRIBED) {
             $outsubmit .= '<input type="submit" name="submitunsubscribe" value="' .
-                get_string('unsubscribeshort', 'block_news') . '" />';
+                get_string('unsubscribeshort', 'block_news') . '" class="osep-smallbutton" />';
         } else {
             $outsubmit .= '<input type="submit" name="submitsubscribe" value="' .
-                get_string('subscribetonews', 'block_news') . '" />';
+                get_string('subscribetonews', 'block_news') . '" class="osep-smallbutton" />';
         }
 
         return $outsubmit;
