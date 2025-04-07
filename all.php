@@ -59,10 +59,14 @@ $PAGE->set_heading($csemod->csefullname);
 
 $output->pre_header($bns);
 
+// Render the message page header before outputting the Moodle header, in case it needs to do
+// something that affects output of actual header.
+$headerhtml = $output->render_message_page_header($bns, $title, (isset($CFG->enablerssfeeds) && $CFG->enablerssfeeds),
+    has_capability('block/news:add', $blockcontext), $subscription);
+
 echo $OUTPUT->header();
 
-echo $output->render_message_page_header($bns, $title, (isset($CFG->enablerssfeeds) && $CFG->enablerssfeeds),
-        has_capability('block/news:add', $blockcontext), $subscription);
+echo $headerhtml;
 
 // Get the messages.
 $viewhidden = has_capability('block/news:viewhidden', $blockcontext);

@@ -52,7 +52,7 @@ $newstitle = $bns->get_title();
 $isprison = class_exists('\auth_prison\util') && \auth_prison\util::is_prison_vle();
 $newstitle = $isprison && $bns->get_displaytype() == system::DISPLAY_DEFAULT ?
         get_string('pluginname', 'block_news') : $newstitle;
-$csemod = block_news_init_page($blockinstanceid, $newstitle);
+$csemod = block_news_init_page($blockinstanceid, $newstitle, $bns->get_displaytype());
 
 if ($bns->get_groupingsupport() == $bns::RESTRICTBYGROUP) {
     $messagegroups = $bnm->get_groupids();
@@ -191,4 +191,3 @@ function block_news_output_hdr($title, $bns = null) {
     echo $OUTPUT->header();
     echo $r->render_message_page_header($bns, $title, false, false);
 }
-

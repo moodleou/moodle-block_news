@@ -108,7 +108,9 @@ function block_news_init_page($blockinstanceid, $title, $displaytype = system::D
     if (empty($title)) {
         $title = get_string('pluginname', 'block_news');
     }
-    $PAGE->navbar->add($title,
+
+    $renderer = $PAGE->get_renderer('block_news');
+    $PAGE->navbar->add($renderer->get_breadcrumb_title($blockinstanceid, $displaytype, $title),
             new moodle_url('/blocks/news/all.php', array('bi' => $blockinstanceid)));
 
     return $csemod;

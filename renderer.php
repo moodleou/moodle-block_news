@@ -346,4 +346,16 @@ class block_news_renderer extends plugin_renderer_base {
         return $news->display_subscribe_options();
     }
 
+    /**
+     * Return the breadcrumb title when news block is in breadcrumbs. Provided in case themes
+     * want to change the title in breadcrumbs.
+     *
+     * @param int $blockinstanceid Block instance id
+     * @param int $displaytype Display type
+     * @param string $title Block title
+     * @return string Title for use in breadcrumbs
+     */
+    public function get_breadcrumb_title(int $blockinstanceid, int $displaytype, string $title): string {
+        return $title;
+    }
 }

@@ -38,7 +38,7 @@ $title = $bns->get_title();
 $isprison = class_exists('\auth_prison\util') && \auth_prison\util::is_prison_vle();
 $title = $isprison && $bns->get_displaytype() == system::DISPLAY_DEFAULT || empty($title) ?
     get_string('pluginname', 'block_news') : $title;
-$csemod = block_news_init_page($bi, $title, 0);
+$csemod = block_news_init_page($bi, $title, $bns->get_displaytype());
 $output = $PAGE->get_renderer('block_news');
 $blockcontext = context_block::instance($bi);
 

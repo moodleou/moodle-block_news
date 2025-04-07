@@ -79,6 +79,8 @@ if ($back == 'view') {
 if ($bi) {
     $backurl = $news->get_url(\block_news\subscription::PARAM_HTML);
 
+    $bns = system::get_block_settings($bi);
+
     // Handle one-click subscribe specifically.
     if ($key) {
         // Check key is valid.
@@ -88,9 +90,10 @@ if ($bi) {
         if ($subscriptioninfo->subscribed) {
             $news->unsubscribe($userid);
         }
-        $output = block_news_init_page($bi, null, system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS, false);
+
+        $output = block_news_init_page($bi, null, $bns->get_displaytype(), false);
     } else {
-        $output = block_news_init_page($bi, null);
+        $output = block_news_init_page($bi, null, $bns->get_displaytype());
     }
 
     $urlparams = ['bi' => $bi];
