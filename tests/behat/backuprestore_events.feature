@@ -105,12 +105,11 @@ Feature: Backup/Restore news and events block
       | Year                  | 2015    |
       | Hour                  | 00      |
       | Minute                | 00      |
-    # We can't just say to press the button, or click on the button, because it
-    # ends up closing the fieldset (even though that isn't a button).
-    And I click on "//input[normalize-space(@value)='Roll forward']" "xpath_element"
-    Then "Continue" "button" should exist
+    And I press "id_submitbutton"
+    And I should see "Roll forward task has been queued and will run shortly"
+    And I run all adhoc tasks
     # Look at new course.
-    And I press "Continue"
+    And I press "Return to course"
     When I follow "View all news and events"
     # The sort order still correct after roll forward.
     Then I should see "news4" in the "(//*[@class='block_news_msg'])[1]" "xpath_element"
