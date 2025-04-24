@@ -79,7 +79,7 @@
             <div class="block_news_msg_author">{{author}}</div>
         {{/author}}
         <div class="block_news_msg_message">{{{formattedmessage}}}</div>
-        <div class="block_news_group_indication">{{{groupindication}}}</div>
+        {{#groupindication}}<div class="block_news_group_indication">{{{groupindication}}}</div>{{/groupindication}}
         {{#hasactions}}
             <div class="box editicons">
         {{/hasactions}}

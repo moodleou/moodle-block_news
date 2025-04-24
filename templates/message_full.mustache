@@ -155,7 +155,7 @@
             {{/notes}}
         </div>
     {{/hasnotes}}
-    <div class="block_news_group_indication">{{{groupindication}}}</div>
+    {{#groupindication}}<div class="block_news_group_indication">{{{groupindication}}}</div>{{/groupindication}}
 </article>
 {{#prevlink}}
     <div class="block-news-prevlink">{{{prevlink}}}{{{prevlinkmobile}}}</div>
