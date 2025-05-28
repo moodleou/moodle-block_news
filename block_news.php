@@ -105,10 +105,6 @@ class block_news extends block_base {
             }
             $this->content->text .= $output->container_start($msglistclasses);
 
-            if ($this->bns->get_displaytype() == system::DISPLAY_SEPARATE_INTO_EVENT_AND_NEWSITEMS) {
-                $this->content->text .= $output->heading(get_string('newsheading', 'block_news'), 3);
-            }
-
             $newmsg = false;
 
             if (!$this->bns->get_hideimages()) {
