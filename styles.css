@@ -147,6 +147,16 @@
     display: inline-block;
 }
 
+#page-blocks-news-all #block_news_rss_all .osep-smallbutton {
+    padding: 0 10px 1px;
+}
+
+@-moz-document url-prefix() {
+    #page-blocks-news-all #block_news_rss_all .osep-smallbutton .icon {
+        vertical-align: text-bottom;
+    }
+}
+
 .block_news_message .msghide {
     color: gray;
 }

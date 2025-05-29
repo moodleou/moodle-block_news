@@ -53,7 +53,6 @@ $urlparams = ['bi' => $blockinstanceid];
 $PAGE->set_url('/blocks/news/all.php', $urlparams);
 
 // Breadcrumb.
-$title .= ': ' . get_string('allmessages', 'block_news');
 $PAGE->set_title($csemod->cseshortname . ': ' . $title);
 $PAGE->set_heading($csemod->csefullname);
 

@@ -36,7 +36,6 @@ $string['pluginname'] = 'News';
 $string['defaultblocktitle'] = '(new News block)';
 $string['newsandeventsblocktitle'] = 'News and events';
 $string['addnewmessage'] = 'Add a new message';
-$string['allmessages'] = 'All messages';
 $string['editmessage'] = 'Edit message';
 $string['confirmdeletion'] = 'Confirm deletion of \'{$a}\'?';
 $string['dateformat'] = '%d %b %Y'; // See http://php.net/manual/en/function.strftime.php.

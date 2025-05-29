@@ -39,13 +39,10 @@ class view_page implements \renderable, \templatable {
      * Construct the view_page widget with the title ana message.
      *
      * @param full_message $message The message to display.
+     * @param string $title The title to display.
      */
-    public function __construct(full_message $message) {
-        if ($message->messagetype == message::MESSAGETYPE_NEWS) {
-            $this->title = get_string('news', 'block_news');
-        } else {
-            $this->title = get_string('events', 'block_news');
-        }
+    public function __construct(full_message $message, string $title) {
+        $this->title = $title;
         $this->message = $message;
     }
 

@@ -101,3 +101,29 @@ Feature: News and Events view all page
     And "Previous" "link" should exist
     And "Next" "link" should not exist
 
+    @javascript
+  Scenario: Default block view all should not show custom title
+    Given I open the "News and events" blocks action menu
+    And I follow "Configure News and events block"
+    And I set the following fields to these values:
+      | Block title | The default block |
+    And I press "Save changes"
+
+    And I add the "News" block
+    And I open the "(new News block)" blocks action menu
+    And I follow "Configure (new News block) block"
+    And I set the following fields to these values:
+      | Block title                         | The second block |
+      | Separate into events and news items | 1                |
+    And I press "Save changes"
+    And I reload the page
+
+    When I click on "View all news and events" "link" in the "The default block" "block"
+    Then I should not see "The default block" in the ".block-news-viewall-news h1" "css_element"
+    And I should see "News" in the ".block-news-viewall-news h1" "css_element"
+
+    And I am on the "Course 1" "Course" page
+    And I click on "View all news and events" "link" in the "The second block" "block"
+    And I should not see "News" in the ".block-news-viewall-news h1" "css_element"
+    And I should see "The second block" in the ".block-news-viewall-news h1" "css_element"
+

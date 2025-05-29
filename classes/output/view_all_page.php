@@ -34,6 +34,8 @@ class view_all_page implements \renderable, \templatable {
     public $upcomingevents = [];
     /** @var short_message[] */
     public $pastevents = [];
+    /** @var string Configured title for the block, used for the page heading. */
+    public $title;
 
     /**
      * Creates view_all_page object with the messages to display on the page.
@@ -44,7 +46,15 @@ class view_all_page implements \renderable, \templatable {
      * @param message[] $pastevents
      */
     public function __construct(system $bns, array $news, array $upcomingevents, array $pastevents) {
+        global $PAGE;
+
         $summarylength = $bns->get_summarylength();
+        $blocks = \format_oustudyplan\output\courseheader::find_relevant_blocks($PAGE->course);
+        // If this is the default news block, use the default title.
+        $this->title = (isset($blocks['news']) && $blocks['news'] === $bns->get_blockinstanceid())
+            ? get_string('newsheading', 'block_news')
+            : $bns->get_title();
+
         if ($bns->get_hideimages()) {
             $thumbnails = [];
             $images = [];
@@ -76,6 +86,7 @@ class view_all_page implements \renderable, \templatable {
             'news' => [],
             'upcomingevents' => [],
             'pastevents' => [],
+            'title' => $this->title,
         ];
         foreach ($this->news as $news) {
             $context['news'][] = $news->export_for_template($output);

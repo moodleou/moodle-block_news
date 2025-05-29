@@ -31,7 +31,6 @@ if (!defined('MOODLE_INTERNAL')) {
 
 // general
 $string['pluginname'] = 'Newyddion';
-$string['allmessages'] = 'Pob neges';
 $string['new'] = 'newydd';
 
 // message render
