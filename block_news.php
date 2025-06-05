@@ -99,9 +99,6 @@ class block_news extends block_base {
             $msglistclasses = 'block_news_msglist';
             if ($this->bns->get_displaytype() == system::DISPLAY_DEFAULT) {
                 $msglistclasses .= ' block_news_noeventlist';
-                if ($COURSE->format === 'ousubject') {
-                    $this->content->text .= $output->heading(get_string('newsheading', 'block_news'), 3, 'news-heading');
-                }
             }
             $this->content->text .= $output->container_start($msglistclasses);
 
@@ -173,10 +170,6 @@ class block_news extends block_base {
             $this->content->footer .= $output->container_end();
         } else {
             $this->content->text = '';
-            if ($this->bns->get_displaytype() == system::DISPLAY_DEFAULT &&
-                    $COURSE->format === 'ousubject') {
-                $this->content->text .= $output->heading(get_string('newsheading', 'block_news'), 3, 'news-heading');
-            }
             $this->content->text .= $output->container(
                     get_string('msgblocknonews', 'block_news'), null, 'msgblocknonews');
             if (has_capability('block/news:viewhidden', $blockcontext)) {
