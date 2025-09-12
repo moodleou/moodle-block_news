@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace block_news;
+
 /**
  * PHPUnit data generator tests.
  *
@@ -32,7 +34,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2014 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class block_news_generator_testcase extends advanced_testcase {
+class generator_test extends \advanced_testcase {
     public function test_generator() {
         global $DB;
 
@@ -53,7 +55,7 @@ class block_news_generator_testcase extends advanced_testcase {
 
         // Create a block_positions record.
         $blockpos = $DB->count_records('block_positions');
-        $record = new stdClass();
+        $record = new \stdClass();
         $record->blockinstanceid = $newsblock->id;
         $generator->create_block_positions_record($record, $course->id);
         // Check the table has one more record.

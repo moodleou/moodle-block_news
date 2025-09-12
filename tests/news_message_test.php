@@ -30,7 +30,7 @@ global $CFG;
 require_once($CFG->dirroot . '/blocks/news/classes/search/news_message.php');
 require_once($CFG->dirroot . '/search/tests/fixtures/testable_core_search.php');
 
-class news_message_testcase extends \advanced_testcase {
+class news_message_test extends \advanced_testcase {
 
     /**
      * Converts recordset to array, indexed numberically (0, 1, 2).

@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace block_news;
+
 /**
  * PHPUnit tests for new news group restriction support functions.
  *
@@ -34,7 +36,7 @@ global $CFG;
  * @copyright 2014 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class block_news_grouprestriction_testcase extends advanced_testcase {
+class newsgrouprestriction_test extends \advanced_testcase {
     /** @var stdClass $course */
     protected $course = null;
 
@@ -79,9 +81,9 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
         $nblock = $generator->create_instance(array(), array('courseid' => $this->course->id));
 
         // Create 2 news messages in news blocks.
-        $message1 = new stdClass();
+        $message1 = new \stdClass();
         $message1id = $generator->create_block_new_message($nblock, $message1);
-        $message2 = new stdClass();
+        $message2 = new \stdClass();
         $message2id = $generator->create_block_new_message($nblock, $message2);
 
         $bns = system::get_block_settings($nblock->id);
@@ -106,9 +108,9 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
         $nblock = $generator->create_instance(array(), array('courseid' => $this->course->id));
 
         // Create 2 news messages in news blocks. Add message to group.
-        $message1 = new stdClass();
+        $message1 = new \stdClass();
         $message1id = $generator->create_block_new_message($nblock, $message1, [$this->group1->id]);
-        $message2 = new stdClass();
+        $message2 = new \stdClass();
         $message2id = $generator->create_block_new_message($nblock, $message2, [$this->group2->id]);
 
         // Enable group support and call get_messages_limited function.
@@ -139,9 +141,9 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
         $nblock = $generator->create_instance(array(), array('courseid' => $this->course->id));
 
         // Create 2 news messages in news blocks.
-        $message1 = new stdClass();
+        $message1 = new \stdClass();
         $message1id = $generator->create_block_new_message($nblock, $message1);
-        $message2 = new stdClass();
+        $message2 = new \stdClass();
         $message2id = $generator->create_block_new_message($nblock, $message2);
 
         // Call get_message_all function.
@@ -168,9 +170,9 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
         $nblock = $generator->create_instance(array(), array('courseid' => $this->course->id));
 
         // Create 2 news messages in news blocks. Add message to group.
-        $message1 = new stdClass();
+        $message1 = new \stdClass();
         $message1id = $generator->create_block_new_message($nblock, $message1, [$this->group1->id]);
-        $message2 = new stdClass();
+        $message2 = new \stdClass();
         $message2id = $generator->create_block_new_message($nblock, $message2, [$this->group2->id]);
 
         // Enable group support and call get_messages_all function.
@@ -204,7 +206,7 @@ class block_news_grouprestriction_testcase extends advanced_testcase {
         $nblock = $generator->create_instance(array(), array('courseid' => $this->course->id));
 
         // Create 2 news messages in news blocks. Add message to group.
-        $message1 = new stdClass();
+        $message1 = new \stdClass();
         $message1id = $generator->create_block_new_message($nblock, $message1, [$this->group1->id, $this->group2->id]);
 
         $bns = system::get_block_settings($nblock->id);
