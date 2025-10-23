@@ -123,6 +123,12 @@ if ($subscription->can_view_subscribers()) {
     echo $output->render_view_subscriber($subscription);
 }
 
+$event = \block_news\event\page_viewed::create([
+    'other' => ['bid' => $blockinstanceid],
+    'context' => $blockcontext,
+]);
+$event->trigger();
+
 echo $output->render_news_subscribe_bottom($subscription);
 
 echo $OUTPUT->footer();

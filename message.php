@@ -179,6 +179,12 @@ if ($action == 'delete' && !$confirm) {
     $page = new view_page($msgwidget, $bns->get_title());
     echo $OUTPUT->header();
     echo $output->render($page);
+
+    $event = \block_news\event\message_viewed::create([
+        'other' => ['mid' => $id],
+        'context' => $blockcontext,
+    ]);
+    $event->trigger();
 }
 
 echo $OUTPUT->footer();

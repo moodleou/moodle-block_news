@@ -206,6 +206,8 @@ $string['news:viewhidden'] = 'View hidden and future messages';
 $string['eventmessage_created'] = 'Added news message';
 $string['eventmessage_updated'] = 'Edited news message';
 $string['eventmessage_deleted'] = 'Deleted news message';
+$string['eventmessage_viewed'] = 'News message viewed';
+$string['eventpage_viewed'] = 'News page viewed';
 
 // Scheduled tasks.
 $string['process_feeds_task'] = 'Refresh News block feeds';
