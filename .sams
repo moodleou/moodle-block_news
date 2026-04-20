@@ -1,9 +1,0 @@
-<Files feed.php>
-DISABLE_SAMS
-</Files>
-<Files files.php>
-DISABLE_SAMS
-</Files>
-<Files mobile.css>
-DISABLE_SAMS
-</Files>
