@@ -148,8 +148,8 @@ body.ionic5 ion-card.block-news-message h2 {
     color: #000000;
 }
 
-body.dark .block-news-message .item-label ion-label > p,
-body.dark .block-news-message .block-news-message-text .collapsible-toggle-text {
+html.dark .block-news-message .item-label ion-label > p,
+html.dark .block-news-message .block-news-message-text .collapsible-toggle-text {
     color: #ffffff;
 }
 
@@ -162,7 +162,7 @@ body.dark .block-news-message .block-news-message-text .collapsible-toggle-text 
     background: linear-gradient(to bottom, rgba(255, 255, 255, 0) calc(100% - 50px), white calc(100% - 15px));
 }
 
-body.dark .block-news-message .block-news-message-text .collapsible-item:before {
+html.dark .block-news-message .block-news-message-text .collapsible-item:before {
     background: linear-gradient(to bottom,rgba(255,255,255,0) calc(100% - 50px),#626262 calc(100% - 15px));
 }
 
@@ -187,7 +187,7 @@ body.dark .block-news-message .block-news-message-text .collapsible-item:before 
     color: #1d2125;
 }
 
-body.dark .block-news-message ion-icon[name="open-outline"] {
+html.dark .block-news-message ion-icon[name="open-outline"] {
     color: #ffffff;
 }
 
@@ -200,7 +200,7 @@ ion-item-divider.block-news-events-heading {
     min-height: 43px;
 }
 
-body.dark ion-item-divider.block-news-events-heading {
+html.dark ion-item-divider.block-news-events-heading {
     background-color: #414141;
     border-bottom: 1px solid #333333
 }
