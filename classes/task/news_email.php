@@ -268,8 +268,13 @@ class news_email extends \core\task\scheduled_task {
      */
     private static function email_filter_subscribers(subscription $news, array &$subscribers): void {
         foreach ($subscribers as $subscriber) {
-            if ($subscriber->emailstop || $subscriber->deleted ||
-                $subscriber->auth == 'nologin' || over_bounce_threshold($subscriber)) {
+            if (
+                $subscriber->emailstop ||
+                $subscriber->deleted ||
+                $subscriber->auth == 'nologin' ||
+                $subscriber->auth == 'oupendinguser' ||
+                over_bounce_threshold($subscriber)
+            ) {
                 unset($subscribers[$subscriber->id]);
                 continue;
             }
