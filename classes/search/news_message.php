@@ -38,7 +38,7 @@ defined('MOODLE_INTERNAL') || die();
  */
 class news_message extends \core_search\base_block {
 
-    public function get_document_recordset($modifiedfrom = 0, \context $context = null) {
+    public function get_document_recordset($modifiedfrom = 0, ?\context $context = null) {
         global $DB;
         // Get context restrictions.
         list ($contextjoin, $contextparams) = $this->get_context_restriction_sql($context, 'bi');

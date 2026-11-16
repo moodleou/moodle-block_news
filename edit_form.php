@@ -132,13 +132,19 @@ class block_news_edit_form extends block_edit_form {
         // Check if the user is on the ousubject theme, don't show the fields about where this block appears.
         if ($this->page->course->format === 'ousubject') {
             $mform->addElement('hidden', 'bui_pagetypepattern');
+            $mform->setType('bui_pagetypepattern', PARAM_TEXT);
             $mform->addElement('hidden', 'bui_subpagepattern');
+            $mform->setType('bui_subpagepattern', PARAM_TEXT);
             $mform->addElement('hidden', 'bui_defaultregion');
-            $mform->addElement('hidden', 'bui_subpagepattern');
+            $mform->setType('bui_defaultregion', PARAM_TEXT);
             $mform->addElement('hidden', 'bui_defaultweight');
+            $mform->setType('bui_defaultweight', PARAM_TEXT);
             $mform->addElement('hidden', 'bui_visible');
+            $mform->setType('bui_visible', PARAM_TEXT);
             $mform->addElement('hidden', 'bui_region');
+            $mform->setType('bui_region', PARAM_TEXT);
             $mform->addElement('hidden', 'bui_weight');
+            $mform->setType('bui_weight', PARAM_TEXT);
             return;
         }
 
